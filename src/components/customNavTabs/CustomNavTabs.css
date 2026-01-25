@@ -1,0 +1,35 @@
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.nav-tab {
+  flex: 1 1 30%;
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s, border-color 0.3s;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-tab.active {
+  color: #000000;
+  border-bottom-color: #000000;
+}
+
+.nav-tab-content {
+  margin-top: 20px;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}

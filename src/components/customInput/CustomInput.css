@@ -1,0 +1,112 @@
+.custominput-label,
+.form-check-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-check-radio label {
+  margin-right: 20px;
+} 
+
+.form-check-radio label input {
+  margin-right: 5px;
+}
+
+.form-check-radio label span {
+  align-items: center;
+  font-size: 15px;
+} 
+
+
+.custominput-inputFeild {
+  font-size: 15px;
+  /* height: 40px; */
+  height: 30px;
+  font-weight: 400;
+  border: none;
+  /* border: 1px solid transparent; */
+  border: 0.5px solid #00000033;
+  background-color: #eeeef1;
+  /* border-radius: 10px; */
+  border-radius: 1px;
+}
+
+.custominput-inputFeild.standard:focus {
+  border: none;
+  border-radius: 0;
+  outline: none;
+}
+
+.custominput-inputFeild.box:focus {
+  font-size: 15px;
+  font-weight: 400;
+  border-radius: 1px;
+  outline: none;
+}
+
+.required-asterisk {
+  color: red;
+  margin-left: 2px;
+}
+
+.dropdown-select-main {
+  padding: 3px;
+  border-radius: 1px;
+  height: 30px;
+  /* border: none;
+  background-color: #eeeef1; */
+  border: 0.5px solid #00000033;
+  background-color: #eeeef1;
+  cursor: pointer;
+  color: #1400fa;
+  font-size: 14px;
+  font-weight: 600;
+}
+.dropdown-select-main.disabled{
+  opacity: 0.5;
+  color: #00000033;
+}
+
+.dropdown-select-main:focus {
+  border: none;
+  outline: none;
+  border: 0.5px solid #00000033;
+  background-color: #eeeef1;
+}
+
+.custominput-inputFeildFlex {
+  font-size: 15px;
+  height: 30px;
+  font-weight: 400;
+  border: none;
+  /* border: 1px solid transparent;
+  background-color: #eeeef1; */
+  border: 0.5px solid #00000033;
+  background-color: #eeeef1;
+  border-radius: 1px;
+  min-width: 50px;
+  max-width: 100px;
+}
+
+.custominput-inputFeildFlex:focus {
+  border: none;
+  outline: none;
+  border: 0.5px solid #00000033;
+  background-color: #eeeef1;
+}
+
+@media (max-width: 500px) {
+  .custominput-inputFeildFlex {
+    font-size: 15px;
+    height: 30px;
+    font-weight: 400;
+    border: none;
+    /* border: 1px solid transparent;
+    background-color: #eeeef1; */
+    border: 0.5px solid #00000033;
+    background-color: #eeeef1;
+    border-radius: 1px;
+    min-width: 50%;
+    max-width: 50vw;
+  }
+}

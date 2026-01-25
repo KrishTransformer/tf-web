@@ -1,0 +1,459 @@
+
+.glbviewer {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background-color: #3a3a3a;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  min-width: 100%;
+}
+
+canvas {
+  /* margin-right: 290px; */
+  /* padding-right: 600px; */
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* margin-top: 200px;
+    margin-right: 100px; */
+  /* width : 550px !important;
+    height : 400px !important; */
+}
+
+/* .glbviewer-canvas-area {
+  position: relative;
+  width: 100%;
+  height: 100%;
+} */
+
+.controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.button-container,
+.button-view-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button {
+  width: 50px;
+  height: 40px;
+  border: none;
+  border-radius: 20px;
+  /* background: linear-gradient(135deg, #6a1b9a, #ab47bc); */
+  background: transparent;
+  color: #000000;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); */
+  position: relative;
+}
+.button:hover {
+  background: transparent;
+  transform: translateY(-3px);
+}
+.button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.button.disabled {
+  background: linear-gradient(135deg, #9A1360, #D81B60);
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+}
+
+/* Initially hide the view buttons */
+.button-view-container {
+  visibility: hidden;
+  opacity: 0;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+/* Show view buttons when hovering over the Views button or the parent container */
+.views-container:hover .button-view-container {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease, visibility 0s;
+}
+
+/* Ensure that the view buttons show properly */
+.button-view-container {
+  display: flex;
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.zoom-controls .button {
+  width: 80px;
+  height: 40px;
+  font-size: 15px;
+  margin-top: -20px;
+  border-radius: 50%;
+  background-color: #c6fe1f;
+  color: 080105;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.zoom-controls .button:hover {
+  background-color: #c6fe1f;
+}
+
+
+/* Control Instructions Section */
+.instructions {
+  position: absolute;
+  top: 50px;
+  right: 25px;
+  background-color: #c6fe1f;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  padding: 5px;
+  font-family: 'Arial', sans-serif;
+  z-index: 20;
+  width: 330px;
+  max-height: 300px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-in-out, transform 0.3s ease-out;
+  transform: translateY(-20px); /* Start slightly off-screen */
+}
+
+/* Instruction Title Styling */
+.instructions h3 {
+  color: #000000;
+  font-size: 18px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Instruction List Styling */
+.instructions ul {
+  list-style-type: none;
+  padding-left: 10px;
+  margin: 0;
+  font-size: 18px;
+  color: #000000;
+}
+
+.instructions li {
+  color: #000000;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Instruction Highlight Styling */
+.instructions li strong {
+  color: #000000;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+/* Control Instructions Button (styled) */
+#instructionsButton {
+  width: 180px;
+  height: 40px;
+  border: none;
+  border-radius: 20px;
+  background: #c6fe1f;
+  color: #000000;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+  margin-bottom: 0px;
+}
+
+/* Hover effect for instructions button */
+#instructionsButton:hover {
+  background: #c6fe1f;
+  transform: translateY(-3px);
+}
+
+/* Show instructions on hover */
+#instructionsButton:hover+#instructionsSection {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  /* Smooth movement to visible position */
+}
+
+/* Optional styling for the hover effect of the button */
+#instructionsButton:hover {
+  background: #c6fe1f;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+#homeButton {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  border-radius: 50%;
+  background-color: #c6fe1f;
+  position: relative;
+  margin-top: 0px;
+  transition: background-color 0.3s ease;
+
+
+  transition: transform 0.2s ease-in-out;
+}
+
+
+
+/* Hover effect for home button */
+#homeButton:hover {
+  background: #c6fe1f;
+  transform: translateY(-3px);
+}
+
+#homeButton i {
+  margin-right: 0px;
+  /* Space between the icon and text */
+}
+
+
+
+
+/* Add a dropdown arrow icon to the Views button */
+#viewsButton::after {
+  content: '\f0d7';
+  /* Font Awesome arrow down icon */
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  margin-left: 10px;
+}
+
+/* Loading Overlay */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  /* Slightly darker for a modern look */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #c6fe1f;
+  font-size: 20px;
+  font-family: 'Poppins', sans-serif;
+  z-index: 1000;
+}
+
+/* Bouncing Loader */
+.bouncing-loader {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.bouncing-loader div {
+  width: 12px;
+  height: 12px;
+  margin: 3px;
+  background-color: #c6fe1f;
+  border-radius: 50%;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.bouncing-loader div:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.bouncing-loader div:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-12px);
+  }
+}
+
+/* Loading Text Animation */
+.loading-text {
+  font-size: 22px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+/* Animated Dots */
+.dots::after {
+  content: " .";
+  animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: " .";
+  }
+
+  33% {
+    content: " ..";
+  }
+
+  66% {
+    content: " ...";
+  }
+
+  100% {
+    content: " .";
+  }
+}
+
+.custom-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  width: max-content;
+  background: #222;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 4px 10px;
+  position: absolute;
+  z-index: 20;
+  right: 110%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.button:hover .custom-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Parts Panel Styles */
+.parts-panel {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+}
+
+.parts-panel::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
+.parts-panel:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.parts-panel h4 {
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.parts-panel button {
+  transition: all 0.2s ease;
+}
+
+.parts-panel button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.parts-panel input[type="checkbox"] {
+  accent-color: #33b9ff;
+  transform: scale(1.1);
+}
+
+.parts-panel span {
+  transition: color 0.2s ease;
+}
+
+/* Scrollbar styling for parts panel */
+.parts-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.parts-panel::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.parts-panel::-webkit-scrollbar-thumb {
+  background: #c6fe1f;
+  border-radius: 3px;
+}
+
+.parts-panel::-webkit-scrollbar-thumb:hover {
+  background: #a8e01a;
+}
+
+/* Parts toggle button styles */
+.parts-toggle-btn {
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.parts-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Exploded view animation */
+@keyframes explode {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.1);
+  }
+}
+
+.exploded {
+  animation: explode 0.5s ease-out;
+}

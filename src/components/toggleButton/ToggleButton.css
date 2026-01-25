@@ -1,0 +1,19 @@
+.toggle-button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: fit-content;
+  margin: 10px 0;
+}
+
+.toggle-label-left,
+.toggle-label-right {
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  width: 10vw;
+}
+
+.active-label {
+  font-weight: bold;
+}

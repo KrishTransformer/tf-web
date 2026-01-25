@@ -1,0 +1,15 @@
+export const CLOCK = "Clock";
+export const CALENDER = "Calender";
+export const DASHBOARD = "Dashboard";
+export const CHART = "Reports";
+export const PROJECTS = "Projects";
+export const TEAM = "Team";
+export const CLIENT = "Client";
+export const TAGS = "Tags";
+export const SETTINGS = "Settings";
+export const DEFAULT_ICON_HEIGHT = 24;
+export const DEFAULT_ICON_WIDTH = 24;
+export const PERSIST_SERVICE = "PERSIST_SERVICE"
+export const CAD_SERVICE = "CAD_SERVICE"
+export const STORAGE_SERVICE = "STORAGE_SERVICE"
+export const CORE_SERVICE = "CORE_SERVICE";

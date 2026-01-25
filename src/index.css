@@ -1,0 +1,120 @@
+body {
+  margin: 0;
+  font-family: "Jost";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ebebeb !important;
+}
+
+:root {
+  --dark-charcoal: #1b1b1b;
+  --neon-green: #c6fe1f;
+  --soft-grey: #eeeef1;
+  --light-white: #ffffff;
+  --ink-blue: #007bff;
+  --label-blue:#1400FA;
+}
+
+a {
+  text-decoration: inherit !important;
+  color: inherit !important;
+}
+
+.material-toggle {
+  margin-bottom: 15px;
+}
+
+.toggle-buttons button {
+  padding: 10px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.toggle-buttons button.active {
+  background-color: var(--ink-blue);
+  color: white;
+}
+
+.tableTabs {
+  width: 100%;
+  table-layout: auto;
+}
+
+.tableTabs td {
+  padding: 2px 12px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.tableTabs td:first-child {
+  font-weight: 600;
+}
+
+.tableTabs td:last-child {
+  text-align: right;
+  font-weight: 450;
+}
+
+.tableTabsGeneral {
+  width: 100%;
+  table-layout: auto;
+}
+
+.tableTabsGeneral td {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 16px;
+}
+
+.tableTabsGeneral td:first-child {
+  font-weight: 600;
+}
+
+.tableTabsGeneral td:last-child {
+  text-align: right;
+  font-weight: 450;
+}
+
+.children-container{
+  flex-grow: 1;
+  transition: width 0.3s ease;
+  /* padding: 10px; */
+  width: 95vw;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+/* global.css */
+.MuiTable-root {
+  font-family: 'Jost' !important;
+}
+
+.MuiTableCell-root {
+  font-family: 'Jost' !important;
+}
+
+.MuiTypography-root {
+  font-family: 'Jost' !important;
+}
+
+table.core-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+}
+
+table.core-table th,
+table.core-table td {
+  border: 1px solid #EEEEF1;
+  padding: 8px;
+  text-align: center;
+}
+
+table.core-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+table.core-table tr:hover {
+  background-color: #f5f5f5;
+}

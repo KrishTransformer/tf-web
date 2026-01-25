@@ -1,0 +1,41 @@
+.labeled-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.labeled-input-field {
+  font-size: 15px;
+  height: 30px;
+  font-weight: 500;
+  border: none;
+  /* border: 1px solid transparent;
+  background-color: #eeeef1; */
+  border: 0.5px solid #00000033;
+  background-color: #eeeef1;
+  border-radius: 1px;
+  padding: 0px 10px;
+  color: var(--label-blue);
+  min-width: 150px;
+  max-width: 200px;
+}
+
+.labeled-input-field:focus {
+  outline: none;
+  padding: 0px 10px;
+}
+
+.form-check-label-field {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 150px;
+  max-width: 180px;
+}
+
+@media (max-width:500px){
+  .labeled-input-container {
+    display: block;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}

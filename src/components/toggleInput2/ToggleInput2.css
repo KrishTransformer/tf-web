@@ -1,0 +1,66 @@
+.tgi2-input-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #D7F3FC;
+  border: 0.5px solid #00000033;
+  border-radius: 4px;
+  min-height: 30px;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+}
+
+.tgi2-input-field {
+  flex: 1;
+  font-size: 16px;
+  height: 30px;
+  font-weight: 400;
+  border: none;
+  background: transparent;
+  padding: 0 6px;
+  min-width: 0;
+  outline: none;
+  color: #222;
+  box-sizing: border-box;
+}
+
+.tgi2-input-field:focus {
+  outline: none;
+}
+
+.tgi2-toggle-switch {
+  width: 30px;
+  height: 25px;
+  background: #d4ff00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-left: 0.5px solid #00000033;
+  box-sizing: border-box;
+  border-radius: 0 4px 4px 0;
+  transition: background 0.2s ease;
+  margin-right: 2px;
+}
+
+.tgi2-toggle-option {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  user-select: none;
+  line-height: 1;
+}
+
+.tgi2-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+  color: #333;
+}

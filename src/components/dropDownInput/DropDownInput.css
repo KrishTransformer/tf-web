@@ -1,0 +1,105 @@
+.dropdown-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.input-dropdown-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  overflow: hidden; 
+  width: fit-content;
+  min-width: 100px;
+  max-width: 145px;
+}
+
+.input-field-dd {
+  font-size: 15px;
+  height: 30px;
+  font-weight: 400;
+  /* border: none;
+  background-color: #eeeef1; */
+  border: 0.5px solid #00000033;
+  border-right: none;
+  background-color: #eeeef1;
+  border-radius: 1px 0px 0px 1px;
+  padding-left: 6px;
+  min-width: 50px;
+  max-width: 120px;
+}
+
+.dropdown-select {
+  padding: 1px;
+  border-radius: 0px 1px 1px 0px;
+  /* border: none;
+  background-color: #eeeef1; */
+  height: 30px;
+  border: 0.5px solid #00000033;
+  border-left: none;
+  background-color: #eeeef1;
+  cursor: pointer;
+  color: #1400fa;
+  max-width: 70px;
+  font-size: 14px;
+  font-weight: 600;
+  /* text-align: right; Aligns the text to the right */
+  text-align-last: right; /*Ensures the selected option is aligned to the right */
+  /* direction: rtl; Ensures the dropdown list aligns text to the right */
+}
+
+.input-field-dd:focus,
+.dropdown-select:focus {
+  border: none;
+  outline: none;
+  border: 0.5px solid #00000033;
+  border-left: none;
+}
+
+@media (max-width: 1200px) {
+  .input-dropdown-wrapper {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .input-field-dd {
+    min-width: 50%;
+    max-width: 100%;
+  }
+
+  .dropdown-select {
+    width: 50%;
+    max-width: 100%;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 500px) {
+  .input-dropdown-wrapper {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .input-field-dd {
+    width: 70%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .dropdown-select {
+    width: 30%;
+    max-width: none;
+    font-size: 12px;
+  }
+}

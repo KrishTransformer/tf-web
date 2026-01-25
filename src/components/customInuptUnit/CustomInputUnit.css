@@ -1,0 +1,41 @@
+.labeled-input-unit-label {
+  font-size: 15px;
+  height: 30px;
+  font-weight: 500;
+  border: none;
+  /* border: 1px solid transparent;
+  background-color: #eeeef1; */
+  border: 0.5px solid #00000033;
+  background-color: #EEEEF1;
+  border-radius: 2px;
+  padding: 0px 10px;
+  color: var(--label-blue);
+  min-width: 150px;
+  max-width: 200px;
+}
+
+.labeled-input-unit-label:focus {
+  border: none;
+  outline: none;
+  border: 0.5px solid #00000033;
+  background-color: #EEEEF1;
+  padding: 0px 10px;
+}
+
+.input-label {
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.labeled-input-field {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.unit-label {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #666;
+}

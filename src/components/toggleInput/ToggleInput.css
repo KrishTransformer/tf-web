@@ -1,0 +1,119 @@
+.toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.input-toggle-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+}
+
+.input-field {
+  font-size: 15px;
+  height: 30px;
+  font-weight: 400;
+  border: none;
+  /* border: 1px solid transparent;
+  background-color: #eeeef1; */
+  border: 0.5px solid #00000033;
+  background-color: #EEEEF1;
+  border-radius: 1px;
+  padding-left: 6px;
+  min-width: 50px;
+  max-width: 145px;
+}
+
+.input-field:focus {
+  font-size: 15px;
+  font-weight: 400;
+  border-radius: 1px;
+  outline: none;
+  border: 0.5px solid #00000033;
+  background-color: #EEEEF1;
+}
+
+.toggle-switch {
+  position: absolute;
+  right: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.toggle-option {
+  font-size: 12px;
+  padding: 3px 7px;
+  cursor: pointer;
+  border-radius: 3px;
+  background-color: var(--light-white);
+  transition: all 0.3s ease;
+}
+
+.highlight {
+  background-color: #d4ff00;
+  font-weight: bold;
+  color: black;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 1200px) {
+  .input-toggle-wrapper {
+    width: 100%;
+    display: flex;
+  }
+
+  .input-field {
+    min-width: 50%;
+    max-width: 100%;
+  }
+
+  .toggle-option {
+    font-size: 12px;
+    padding: 3px 20px;
+    cursor: pointer;
+    border-radius: 3px;
+    background-color: var(--light-white);
+    transition: all 0.3s ease;
+  }
+  
+  .highlight {
+    background-color: #d4ff00;
+    font-weight: bold;
+    color: black;
+    transition: all 0.3s ease;
+  }
+}
+
+@media (max-width: 500px) {
+  .input-toggle-wrapper {
+    width: 100%;
+    display: flex;
+  }
+
+  .input-field {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .toggle-option {
+    font-size: 12px;
+    padding: 3px 20px;
+    cursor: pointer;
+    border-radius: 3px;
+    background-color: var(--light-white);
+    transition: all 0.3s ease;
+  }
+
+  .highlight {
+    background-color: #d4ff00;
+    font-weight: bold;
+    color: black;
+    transition: all 0.3s ease;
+  }
+}

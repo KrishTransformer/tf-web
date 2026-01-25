@@ -1,0 +1,90 @@
+.toggle-btn-label {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.toggle-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.switch-toggle {
+  --width: 80px;
+  --height: 30px;
+  --offset: 0px;
+  --radius: 4px;
+  position: relative;
+  width: var(--width);
+  height: var(--height);
+  padding: var(--offset);
+  background: rgba(227, 229, 232, 0.5);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: normal;
+  font-style: normal;
+}
+
+.switch-toggle input[type="checkbox"] {
+  cursor: pointer;
+  position: absolute;
+  inset: 0;
+  appearance: none;
+  z-index: 2;
+}
+
+.switch-toggle input[type="checkbox"]:checked + label.switch-toggle-label:before {
+  translate: 100% 0;
+}
+
+.switch-toggle input[type="checkbox"]:checked + label.switch-toggle-label span:nth-child(1) {
+  color: gray;
+}
+
+.switch-toggle input[type="checkbox"]:checked + label.switch-toggle-label span:nth-child(2) {
+  color: #1a1a1a;
+}
+
+.switch-toggle input[type="checkbox"] + label.switch-toggle-label {
+  position: absolute;
+  inset: var(--offset, 0);
+  /* padding: 10px 0; */
+  /* display: block;
+  user-select: none;
+  pointer-events: none; */
+  display: grid;
+  gap: 2px;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  place-items: center;
+  user-select: none;
+}
+
+.switch-toggle input[type="checkbox"] + label.switch-toggle-label:before {
+  content: "";
+  position: absolute;
+  width: 50%;
+  inset: 0;
+  background: #d4ff00;
+  border-radius: calc(var(--radius) - var(--offset));
+  box-shadow: 0px 10px 20px 0px rgba(16, 39, 68, 0.1);
+  translate: 0 0;
+  transition: translate 250ms cubic-bezier(0.93, 0.26, 0.07, 0.69), background-color 250ms ease-in-out;
+}
+
+.switch-toggle input[type="checkbox"] + label.switch-toggle-label span {
+  position: relative;
+  transition: 200ms linear;
+}
+
+.switch-toggle input[type="checkbox"] + label.switch-toggle-label span:nth-child(1) {
+  color: #1a1a1a;
+}
+
+.switch-toggle input[type="checkbox"] + label.switch-toggle-label span:nth-child(2) {
+  color: gray;
+}
