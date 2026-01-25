@@ -34,10 +34,10 @@ jobs:
           USERNAME: ${{ secrets.DOCKER_USERNAME }}
           PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKERFILE: "Dockerfile"
-          IMAGE_NAME: "rajeshmylsamy/tf-web"
+          IMAGE_NAME: "krishtransformer/tf-web"
           TAG_NAME: "v1"
           LATEST: "true"
       - name: Webhook
         uses: joelwmale/webhook-action@master
         with:
-          url: "http://164.52.197.201:8085/hooks/redeploy-tf-web"
+          url: "http://122.166.121.189:8085/hooks/redeploy-tf-web"
