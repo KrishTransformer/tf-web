@@ -34,19 +34,19 @@ let subDomain = urlParts[0];
 
 export const persistService = {
   prod: {
-    API_URL: "https://backend-rw.riverworld.io/ecom/api/" + fullUrl,
+    API_URL: "https://tf-common-service.riverworld.io/tf/api/" + fullUrl,
   },
   local: {
-    API_URL: "https://backend-rw.riverworld.io/ecom/api/transformer.riverworld.io",
+    API_URL: "https://tf-common-service.riverworld.io/tf/api/transformer.riverworld.io",
   },
 };
 
 export const coreService = {
   prod: {
-    API_URL: "https://backend-transformer.riverworld.io/tf/api/" + fullUrl,
+    API_URL: "https://tf-core-service.riverworld.io/tf/api/" + fullUrl,
   },
   local: {
-    API_URL: "https://backend-transformer.riverworld.io/tf/api/transformer.riverworld.io",
+    API_URL: "https://tf-core-service.riverworld.io/tf/api/transformer.riverworld.io",
     // API_URL: "http://localhost:8080/tf/api/transformer.riverworld.io",
   },
 };
@@ -54,10 +54,10 @@ export const coreService = {
 
 export const cadService = {
   prod: {
-    API_URL: "https://tf-cad-server.riverworld.io",
+    API_URL: "https://tf-cad-service.riverworld.io",
   },
   local: {
-    API_URL: "https://tf-cad-server.riverworld.io",
+    API_URL: "https://tf-cad-service.riverworld.io",
   },
 };
 
