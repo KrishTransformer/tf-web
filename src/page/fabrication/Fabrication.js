@@ -35,8 +35,8 @@ import PendingIcon from '@mui/icons-material/Pending';
 import { StepperContainer, StyledStepLabel, TimeText, } from "../../styles/components/StepperStyles";
 import { Divider } from "@mui/material";
 import { io } from 'socket.io-client';
-//const socket = io('http://localhost:5000'); //https://tf-cad-server.riverworld.io
-//const socket = io('https://tf-cad-server.riverworld.io');
+//const socket = io('http://localhost:5000'); //https://tf-cad-server.trafointel.com
+//const socket = io('https://tf-cad-server.trafointel.com');
 const Fabrication = () => {
   const { id } = useParams();
   const { twoWindings } = useSelector(selectCalc);
@@ -124,7 +124,7 @@ const Fabrication = () => {
 
   useEffect(() => {
     if (drawerOpen) {
-      socketRef.current = io('https://tf-cad-server.riverworld.io');
+      socketRef.current = io('https://tf-cad-server.trafointel.com');
 
       socketRef.current.on('connect', () => {
         console.log('✅ Connected to Flask Socket.IO Server');
@@ -151,7 +151,7 @@ const Fabrication = () => {
 
   // useEffect(() => {
   // if (!generate3d?.isLoading && !isGenerate3DDisabled) {
-  //   socketRef.current = io('https://tf-cad-server.riverworld.io');
+  //   socketRef.current = io('https://tf-cad-server.trafointel.com');
 
   //   socketRef.current.on('connect', () => {
   //     console.log('✅ Connected to Flask Socket.IO Server');

@@ -12,7 +12,7 @@ import {
 import { fetchEntity } from "../actions/EntityActions";
 import * as constants from "../constants/AuthConstants";
 import { postApi } from "../api";
-import { PERSIST_SERVICE } from "../constants/CommonConstants";
+import { COMMON_SERVICE } from "../constants/CommonConstants";
 function* triggerSignIn(payload) {
 	try {
 		let auth = btoa(`${payload.username}:${payload.password}`);
@@ -22,7 +22,7 @@ function* triggerSignIn(payload) {
 			  postApi,
 			 "/auth/signin" ,
 			  {},headers,{},
-			  PERSIST_SERVICE
+			  COMMON_SERVICE
 			);
 		if (response && response.data?.registered === true) {
 			yield put(signInFullfiled(response.data));

@@ -39,7 +39,7 @@ const Accessories1 = ({ formState, handleInputChange }) => {
 
   async function checkIfFileExists(designId) {
     const url =
-      "https://s3.ap-south-1.amazonaws.com/transformer.riverworld.io/" +
+      "https://s3.ap-south-1.amazonaws.com/design.trafointel.com/" +
       designId +
       "/" +
       designId +

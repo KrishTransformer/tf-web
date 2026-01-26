@@ -19,8 +19,8 @@
 
 // const ObjMtlViewer = ({designId}) => {
 
-//   const mtlUrl = "https://s3.ap-south-1.amazonaws.com/transformer.riverworld.io/" + designId + "/" + designId + ".mtl";
-//   const  objUrl = "https://s3.ap-south-1.amazonaws.com/transformer.riverworld.io/" + designId + "/" + designId + ".obj";
+//   const mtlUrl = "https://s3.ap-south-1.amazonaws.com/design.trafointel.com/" + designId + "/" + designId + ".mtl";
+//   const  objUrl = "https://s3.ap-south-1.amazonaws.com/design.trafointel.com/" + designId + "/" + designId + ".obj";
 //   return (
 //     <>
 //       <Canvas resize={{scroll: false}}>

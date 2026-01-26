@@ -8,8 +8,8 @@ import "./ObjMtlViewer.css";
 
 const ObjMtlViewerGlb = () => {
 
-//   let glbUrl = "https://s3.ap-south-1.amazonaws.com/transformer.riverworld.io/1100k-82911/1100k-82911.glb";
-//   glbUrl = "https://transformer.riverworld.io.s3.ap-south-1.amazonaws.com/1100k-82911/1100k-82911.glb";
+//   let glbUrl = "https://s3.ap-south-1.amazonaws.com/design.trafointel.com/1100k-82911/1100k-82911.glb";
+//   glbUrl = "https://design.trafointel.com.s3.ap-south-1.amazonaws.com/1100k-82911/1100k-82911.glb";
 //   glbUrl = "https://demo-rw.s3.ap-south-1.amazonaws.com/1100k-82911.glb"
 //   const  objUrl = "https://demo-rw.s3.ap-south-1.amazonaws.com/1000kv.obj";
 

@@ -5,7 +5,7 @@ export const titleCase = (text) => {
 
 
 export const extractFromHostname = (hostname) => {
-  hostname = hostname.replace(".riverworld.io", "");
+  hostname = hostname.replace(".trafointel.com", "");
   hostname = hostname.replace("-timesheet", "");
   return hostname.toUpperCase();
 };

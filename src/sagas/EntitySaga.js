@@ -15,7 +15,7 @@ import {
 } from "../actions/EntityActions";
 import * as constants from "../constants/EntityConstants";
 import { postApi, putApi, deleteApi } from "../api";
-import { PERSIST_SERVICE } from "../constants/CommonConstants";
+import { COMMON_SERVICE } from "../constants/CommonConstants";
 
 function* fetchEntityData(payload) {
   try {
@@ -33,7 +33,7 @@ function* fetchEntityData(payload) {
       postApi,
       `/entity/v2/` + payload.entityName + `?` + queryParam,
       payloadBody, {}, {},
-      PERSIST_SERVICE
+      COMMON_SERVICE
     );
     if (payload.overWriteEntityName) {
       payload.entityName = payload.overWriteEntityName;
@@ -66,7 +66,7 @@ function* fetchSearchEntityData(payload) {
       postApi,
       `/entity/v2/` + payload.entityName + `/search?` + queryParam,
       payloadBody, {}, {},
-      PERSIST_SERVICE
+      COMMON_SERVICE
     );
     if (payload.overWriteEntityName) {
       payload.entityName = payload.overWriteEntityName;
@@ -101,7 +101,7 @@ function* addEntityData(payload) {
         putApi,
         `/entity/` + payload.entityName,
         payload.jsonBody, {}, {},
-        PERSIST_SERVICE
+        COMMON_SERVICE
       );
     }
     if (response && response.data) {
@@ -122,7 +122,7 @@ function* deleteEntityData(payload) {
     const response = yield call(
       deleteApi,
       `/entity/` + payload.entityName + `/` + payload.entityId,
-      PERSIST_SERVICE
+      COMMON_SERVICE
     );
     if (payload.skipFetch === "undefined") {
       payload.skipFetch = false;
@@ -152,7 +152,7 @@ function* updateEntityData(payload) {
       `/entity/${payload.entityName}/${payload.entityId}`,
       payload.jsonBody,
       {}, {},
-      PERSIST_SERVICE
+      COMMON_SERVICE
     );
     if (response && response.data) {
       if (payload.entityName == "lomMaterial") {
