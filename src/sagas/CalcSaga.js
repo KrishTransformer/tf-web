@@ -68,7 +68,7 @@ function* generate3DData({ payload, params, calcName }) {
   try {
     const response = yield call(
       postApi,
-      `/hooks/create-fabrication-file`,
+      `/cad/run-3d-generation`,
       payload,
       {},
       params,
