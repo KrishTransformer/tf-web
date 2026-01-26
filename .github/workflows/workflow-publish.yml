@@ -40,4 +40,4 @@ jobs:
       - name: Webhook
         uses: joelwmale/webhook-action@master
         with:
-          url: "https://tf-cad-service.trafointel.com/redeploy/redeploy-tf-web"
+          url: "http://122.166.121.189:8085/hooks/redeploy-tf-web"
