@@ -1,6 +1,25 @@
 import React, { useEffect, useState } from "react";
 import "./ToggleInput.css";
-import { Tuple } from "@reduxjs/toolkit";
+
+const currentDensityValue = (dryType, eTransCostType, dryTempClass, conductorMaterial) => {
+  if (dryType === true || dryType === "true") {
+    if (dryTempClass === "CLASS_B") {
+      return conductorMaterial === "Cu" ? 2.3 : 1.5;
+    } else if (dryTempClass === "CLASS_F") {
+      return conductorMaterial === "Cu" ? 2.4 : 1.7;
+    } else if (dryTempClass === "CLASS_H") {
+      return conductorMaterial === "Cu" ? 2.7 : 1.9;
+    } else {
+      return conductorMaterial === "Cu" ? 2.6 : 1.8;
+    }
+  } else {
+    if (eTransCostType === "ECONOMIC") {
+      return conductorMaterial === "Cu" ? 4.24 : 2.37;
+    } else {
+      return conductorMaterial === "Cu" ? 1.7 : 0.9;
+    }
+  }
+};
 
 const ToggleInput = ({
   label,
@@ -14,18 +33,30 @@ const ToggleInput = ({
   const [isAl, setIsAl] = useState(false);
 
   useEffect(() => {
-    if (valueOfToggle == "Al") {
+    if (valueOfToggle === "Al") {
       setIsAl(true);
     } else {
       setIsAl(false);
     }
   }, [valueOfToggle]);
 
+  useEffect(() => {
+    const conductorMaterial = valueOfToggle === "Al" ? "Al" : "Cu";
+    const newDensity = currentDensityValue(
+      formState.dryType,
+      formState.eTransCostType,
+      formState.dryTempClass,
+      conductorMaterial
+    );
+    onValueChange(newDensity);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formState.dryType, formState.eTransCostType, formState.dryTempClass, valueOfToggle]);
+
   const handleToggle = (input) => {
     console.log(isAl);
     setIsAl(!isAl);
     console.log(input);
-    onValueChange(formState.eTransCostType == "ECONOMIC" ? (input == "Cu" ? 4.24 : 2.37) : (input == "Cu" ? 1.7 : 0.9));
+    onValueChange(currentDensityValue(formState.dryType, formState.eTransCostType, formState.dryTempClass, input));
     onLabelChange(input);
   };
   console.log("formState in toggleInput:", formState);

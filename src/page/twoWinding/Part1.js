@@ -28,8 +28,32 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             onChange={(e) =>
               handleInputChange("eTransBodyType", e.target.value)
             }
-          />
+          />          
           <CustomInput
+            type="dropdown"
+            options={[
+              { label: "Oil Type", value: false },
+              { label: "Dry Type", value: true },
+            ]}
+            value={formState.dryType || "Oil Type"}
+            onChange={(e) => handleInputChange("dryType", e.target.value)}
+          />
+          {(formState.dryType === true || formState.dryType === "true") && (
+            <CustomInput
+              type="dropdown"
+              options={[
+                { label: "Class B", value: "CLASS_B" },
+                { label: "Class F", value: "CLASS_F" },
+                { label: "Class H", value: "CLASS_H" },
+              ]}
+              value={formState.dryTempClass || "Class B"}
+              onChange={(e) =>
+                handleInputChange("dryTempClass", e.target.value)
+              }
+            />
+          )}
+          {(formState.dryType === false || formState.dryType === "false" || formState.dryType === undefined) && (
+            <CustomInput
             type="dropdown"
             options={[
               { label: "Economic", value: "ECONOMIC" },
@@ -40,6 +64,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
               handleInputChange("eTransCostType", e.target.value)
             }
           />
+          )}
         </FlexContainer>
         <FlexContainer align="center">
           <CustomInput
@@ -198,7 +223,6 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
               { label: "Pos30PG140", value: "Pos30PG140" },
               { label: "Pos30PH105", value: "Pos30PH105" },
               { label: "CRGO", value: "CRGO" },
-              { label: "OVER", value: "OVER" },
             ]}
             value={formState.core.coreMaterial}
             onChange={(e) => handleInputChange("core.coreMaterial", e.target.value)}
