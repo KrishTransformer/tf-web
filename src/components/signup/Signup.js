@@ -28,6 +28,7 @@ import { selectConfig } from "../../selectors/ConfigSelector";
 
 const SignUp = () => {
   const [openSnakeBar, setOpenSnakeBar] = useState(false);
+  const [signUpType, setSignUpType] = useState("individual");
   const { signUpSucceeded, isLoading, errorMessage, sessionInfo } =
     useSelector(selectAuth);
   const navigate = useNavigate();
@@ -39,7 +40,11 @@ const SignUp = () => {
     resetPassword,
     clearErrorMessage,
   });
-  const [phoneNumber, setPhoneNumber] = useState();
+  const [username, setUsername] = useState("");
+  const [emailId, setEmailId] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [organizationName, setOrganizationName] = useState("");
   const [password, setPassword] = useState();
   const [confirmPassword, setConfirmPassword] = useState();
   const [errors, setErrors] = useState();
@@ -57,11 +62,57 @@ const SignUp = () => {
   const handleSubmit = () => {
     setErrors("");
     actions.clearErrorMessage();
+
+    if (!emailId?.trim()) {
+      setErrors("Email ID is required");
+      return;
+    }
+
+    if (!emailId?.includes("@")) {
+      setErrors("Email ID is not valid");
+      return;
+    }
+
+    if (!otpRequested || !sessionInfo) {
+      setErrors("Please get OTP before signup");
+      return;
+    }
+
+    if (!otpCode?.trim()) {
+      setErrors("Please enter OTP to confirm signup");
+      return;
+    }
+
+    if (!username?.trim()) {
+      setErrors("Username is required");
+      return;
+    }
+
+    if (signUpType === "organization" && !organizationName?.trim()) {
+      setErrors("Organization Name is required");
+      return;
+    }
+
     if (password == confirmPassword) {
-      actions.signUp(phoneNumber, password);
+      actions.signUp(username, password);
     } else {
       setErrors("Passwords not matched");
     }
+  };
+
+  const handleGetOtp = () => {
+    setErrors("");
+    actions.clearErrorMessage();
+    if (!emailId?.trim()) {
+      setErrors("Email ID is required");
+      return;
+    }
+    if (!emailId?.includes("@")) {
+      setErrors("Email ID is not valid");
+      return;
+    }
+    setOtpRequested(false);
+    actions.sendOTP(emailId.trim(), "done");
   };
 
   const togglePasswordVisibility = () => {
@@ -84,9 +135,28 @@ const SignUp = () => {
     }
   }, [signUpSucceeded]);
 
+  useEffect(() => {
+    if (sessionInfo) {
+      setOtpRequested(true);
+    }
+  }, [sessionInfo]);
+
   return (
     <div className="signfullpage">
-      <CustomCard companyName={companyName} title="Sign Up">
+      <CustomCard
+        companyName={companyName}
+        title="Sign Up"
+        titleStyle={{ fontWeight: 400, fontSize: "1.5rem" }}
+      >
+        <h3 style={{ 
+          color: "#26221f", 
+          margin: "5px", 
+          fontWeight: 400, 
+          fontSize: "1rem", 
+          fontFamily: "Philosopher" }} 
+          className="text-left">
+          {"Sign up as an,"}
+        </h3>
         <InputContainer>
           {errorMessage?.message && (
             <Alert
@@ -105,34 +175,51 @@ const SignUp = () => {
             </Alert>
           )}
         </InputContainer>
-        {/* <div>
-        <label>Name</label>
-        <input
-          autoComplete="off"
-          type="text"
-          name="name"
-          inputProps={{
-            maxLength: 40,
-          }}
-          className="signin-inputfield"
-          required
-        />
-      </div> */}
+        <div className="signup-segment mt-2 mb-3">
+          <button
+            type="button"
+            className={`signup-segment-btn ${
+              signUpType === "individual" ? "active" : ""
+            }`}
+            onClick={() => setSignUpType("individual")}
+          >
+            Individual
+          </button>
+          <button
+            type="button"
+            className={`signup-segment-btn ${
+              signUpType === "organization" ? "active" : ""
+            }`}
+            onClick={() => setSignUpType("organization")}
+          >
+            Organization
+          </button>
+        </div>
         <div>
-          <label>Email</label>
+          <label>Username</label>
           <input
-            name="name"
+            name="username"
             autoComplete="off"
             className="signin-inputfield"
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             type="text"
-            // inputProps={{
-            //   minLength: 10,
-            //   maxLength: 10,
-            // }}
             required
           />
         </div>
+        {signUpType === "organization" && (
+          <div>
+            <label>Organization Name</label>
+            <input
+              name="organizationName"
+              autoComplete="off"
+              className="signin-inputfield"
+              onChange={(e) => setOrganizationName(e.target.value)}
+              type="text"
+              required
+            />
+          </div>
+        )}
         <div>
           <label>Password</label>
           <div className="password-input">
@@ -154,7 +241,7 @@ const SignUp = () => {
         </div>
         <div>
           <label>Confirm Password</label>
-          <div className="password-input mb-3">
+          <div className="password-input mb-2">
             <input
               autoComplete="off"
               type={showConfirmPassword ? "text" : "password"}
@@ -170,6 +257,46 @@ const SignUp = () => {
               {showConfirmPassword ? < FaEye /> : <FaEyeSlash />}
             </button>
           </div>
+        </div>
+        <div>
+          <label>Email ID</label>
+          <div className="d-flex align-items-center gap-2">
+            <input
+              name="email"
+              autoComplete="off"
+              className="signin-inputfield mb-2"
+              value={emailId}
+              onChange={(e) => {
+                setEmailId(e.target.value);
+                setOtpRequested(false);
+                setOtpCode("");
+              }}
+              type="text"
+              required
+            />
+            <button
+              type="button"
+              className="otp-btn mb-2"
+              onClick={handleGetOtp}
+            >
+              Get OTP
+            </button>
+          </div>
+          {otpRequested && (
+            <p className="otp-note">OTP sent to the entered Email ID.</p>
+          )}
+        </div>
+        <div>
+          <label>OTP</label>
+          <input
+            name="otp"
+            autoComplete="off"
+            className="signin-inputfield mb-3"
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.target.value)}
+            type="text"
+            required
+          />
         </div>
         <InputContainer>
           <ModalButton
