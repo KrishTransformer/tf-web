@@ -75,7 +75,13 @@ const Login = () => {
 
   return (
     <div className="signfullpage">
-      <CustomCard companyName={companyName} title="Sign In">
+      <CustomCard 
+        // companyName={companyName}
+        companyName={"K R I S H"} 
+        companyNameExt={"Transformer Design Software"}
+        title="Sign In"
+        titleStyle={{ fontWeight: 400, fontSize: "1.5rem" }}
+      >
         <InputContainer>
           {errorMessage && (
             <Alert
@@ -160,17 +166,14 @@ const Login = () => {
           </ModalButton>
         </InputContainer>
 
-        <div className="d-flex justify-content-between mt-3">
-          {/* <div className="d-flex">
-            <h6 className="signin-subtext">New User ? &nbsp;</h6>
+        <div className="d-flex justify-content-between align-items-center mt-3">
+          <NavLink to="/forgotPassword" className="signin-subtext1">
+            Forgot Password?
+          </NavLink>
+          <div className="d-flex align-items-center">
+            <h6 className="signin-subtext mb-0">Not Registered? &nbsp;</h6>
             <NavLink to="/signUp" className="signin-subtext1">
               Sign Up
-            </NavLink>
-          </div> */}
-          <div className="d-flex">
-            <h6 className="signin-subtext">Forgot Password? &nbsp;</h6>
-            <NavLink to="/forgotPassword" className="signin-subtext1">
-              Click here
             </NavLink>
           </div>
         </div>

@@ -14,7 +14,27 @@
   height: 100vh;
   display: flex;
   justify-content: center; /* horizontally center */
-  align-items: center; 
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.signfullpage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../../assets/background2.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(6px) brightness(0.5);
+  transform: scale(1.05);
+  z-index: 0;
+}
+
+.signfullpage > * {
+  position: relative;
+  z-index: 1;
 }
 
 form {
@@ -39,9 +59,12 @@ label {
 }
 
 input[name="name"],
+input[name="username"],
 input[name="email"],
+input[name="otp"],
 input[name="password"],
-input[name="confirmPassword"] {
+input[name="confirmPassword"],
+input[name="organizationName"] {
   width: 100%;
   padding: 5px;
   border: 1px solid #ccc;
@@ -49,9 +72,12 @@ input[name="confirmPassword"] {
 }
 
 input[name="name"] svg,
+input[name="username"] svg,
 input[name="email"] svg,
+input[name="otp"] svg,
 input[name="password"] svg,
-input[name="confirmPassword"] svg {
+input[name="confirmPassword"] svg,
+input[name="organizationName"] svg {
   position: relative;
   left: 10px;
 }
@@ -109,6 +135,45 @@ font-size: 14px;
   text-align: left;
   text-decoration: underline !important;
   color: #0000EE !important;
+}
+
+.signup-segment {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.signup-segment-btn {
+  flex: 1;
+  border: none;
+  background: #f5f5f5;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-segment-btn.active {
+  background: #26221f;
+  color: #fff;
+}
+
+.otp-btn {
+  height: 40px;
+  border: none;
+  border-radius: 5px;
+  background-color: #26221f;
+  color: #fff;
+  padding: 0 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.otp-note {
+  font-size: 12px;
+  margin: 0 0 8px 0;
+  color: #2e7d32;
 }
 
 @media (max-width: 500px) {

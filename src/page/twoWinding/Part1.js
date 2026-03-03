@@ -78,9 +78,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             options={[
               { label: "Helical", value: "HELICAL" },
               { label: "Disc", value: "DISC" },
-              { label: "Foil", value: "FOIL" }
-
-              // { label: "LayerDisc", value: "layerDisc" },
+              { label: "Foil", value: "FOIL" },
+              { label: "LayerDisc", value: "LAYERDISC" },
             ]}
             inputValue={formState.lowVoltage}
             dropdownValue={formState.lvWindingType}
