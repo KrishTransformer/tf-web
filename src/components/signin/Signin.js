@@ -2,15 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useActions } from "../../app/use-Actions.js";
 import { signIn, signOut, clearErrorMessage } from "../../actions/AuthActions.js";
 import { fetchConfig } from "../../actions/ConfigActions";
-import { NavLink, Navigate, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { selectAuth } from "../../selectors/AuthSelector.js";
 import { useSelector } from "react-redux";
 import CustomCard from "../../components/CustomCard/CustomCard.js";
-import { CircularProgress, Alert, Link, Snackbar } from "@mui/material";
+import { CircularProgress, Alert } from "@mui/material";
 import {
   InputContainer,
-  Label,
-  StyledInput,
   ModalButton,
 } from "./Login.styles.js";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -23,6 +21,7 @@ const Login = () => {
   const { isAuthenticated, isLoading, errorMessage } = useSelector(selectAuth);
   const [errors, setErrors] = useState();
   const navigate = useNavigate();
+  const location = useLocation();
   const actions = useActions({
     signIn,
     signOut,
@@ -43,6 +42,13 @@ const Login = () => {
     setCompanyName(extracted);
   }, []);
 
+  useEffect(() => {
+    if (location.state?.redirectMessage) {
+      setRedirectMessage(location.state.redirectMessage);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate]);
+
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -62,8 +68,6 @@ const Login = () => {
     setErrors("");
     if (username?.length == 0 || password?.length == 0) {
       setErrors("Please fill out all fields.");
-    } else if (!username?.includes("@")) {
-      setErrors("Email is not valid");
     } else {
       if (password == undefined || password?.length < 6) {
         setErrors("Password should have atleast 6 characters");
@@ -121,7 +125,7 @@ const Login = () => {
           )}
         </InputContainer>
         <div>
-          <label>Email</label>
+          <label>Username / Email</label>
           <input
             autoComplete="off"
             type="text"

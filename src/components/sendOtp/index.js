@@ -54,17 +54,12 @@ const RequestOtp = () => {
 
   const handleSubmit = () => {
     console.log("clicked sendotp submit");
-    const token = "done";
-    console.log(token);
-
-    if (token) {
+    if (phoneNumber?.trim()) {
       console.log("triggering send otp");
       setErrors();
-      actions.sendOTP("+91" + phoneNumber, token);
-      // captchaRef.current.reset();
+      actions.sendOTP(phoneNumber.trim());
     } else {
-      console.log("enter recatcha token");
-      setErrors("Check the reCaptcha button");
+      setErrors("Email is required");
     }
     console.log("finished passwordReset submit");
   };

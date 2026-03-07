@@ -30,10 +30,12 @@ export const signInFailed = (response) => {
 	};
 };
 
-export const signUp = (username, password) => ({
+export const signUp = (username, password, email, otp) => ({
 	type: constants.SIGNUP_REQUESTED,
 	username,
 	password,
+	email,
+	otp,
 });
 
 export const signUpFullfiled = (response) => ({
@@ -50,10 +52,9 @@ export const signOut = () => ({
 	type: constants.SIGNOUT,
 });
 
-export const sendOTP = (phoneNumber, captchaToken) => ({
+export const sendOTP = (email) => ({
 	type: constants.SENDOTP_REQUESTED,
-	phoneNumber,
-	captchaToken,
+	email,
 });
 
 export const sendOTPFullfiled = (response) => ({
