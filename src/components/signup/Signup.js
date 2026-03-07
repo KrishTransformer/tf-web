@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useActions } from "../../app/use-Actions";
 import {
   signIn,
@@ -8,15 +8,13 @@ import {
   resetPassword,
   clearErrorMessage,
 } from "../../actions/AuthActions";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { selectAuth } from "../../selectors/AuthSelector";
 import { useSelector } from "react-redux";
 import CustomCard from "../../components/CustomCard/CustomCard.js";
-import { CircularProgress, Alert, Link } from "@mui/material";
+import { CircularProgress, Alert } from "@mui/material";
 import {
   InputContainer,
-  Label,
-  StyledInput,
   ModalButton,
 } from "../signin/Login.styles";
 import "../signin/Signin.css";
@@ -42,12 +40,11 @@ const SignUp = () => {
   });
   const [username, setUsername] = useState("");
   const [emailId, setEmailId] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [otpRequested, setOtpRequested] = useState(false);
   const [organizationName, setOrganizationName] = useState("");
-  const [password, setPassword] = useState();
-  const [confirmPassword, setConfirmPassword] = useState();
-  const [errors, setErrors] = useState();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [errors, setErrors] = useState("");
   const [companyName, setCompanyName] = useState("");
   
   const [showPassword, setShowPassword] = useState(false);
@@ -73,16 +70,6 @@ const SignUp = () => {
       return;
     }
 
-    if (!otpRequested || !sessionInfo) {
-      setErrors("Please get OTP before signup");
-      return;
-    }
-
-    if (!otpCode?.trim()) {
-      setErrors("Please enter OTP to confirm signup");
-      return;
-    }
-
     if (!username?.trim()) {
       setErrors("Username is required");
       return;
@@ -93,11 +80,22 @@ const SignUp = () => {
       return;
     }
 
-    if (password == confirmPassword) {
-      actions.signUp(username, password);
-    } else {
-      setErrors("Passwords not matched");
+    if (!password || password.length < 6) {
+      setErrors("Password should have at least 6 characters");
+      return;
     }
+
+    if (password !== confirmPassword) {
+      setErrors("Passwords not matched");
+      return;
+    }
+
+    if (!otp?.trim()) {
+      setErrors("OTP is required");
+      return;
+    }
+
+    actions.signUp(username.trim(), password, emailId.trim(), otp.trim());
   };
 
   const handleGetOtp = () => {
@@ -111,8 +109,7 @@ const SignUp = () => {
       setErrors("Email ID is not valid");
       return;
     }
-    setOtpRequested(false);
-    actions.sendOTP(emailId.trim(), "done");
+    actions.sendOTP(emailId.trim());
   };
 
   const togglePasswordVisibility = () => {
@@ -125,21 +122,13 @@ const SignUp = () => {
 
   useEffect(() => {
     if (signUpSucceeded) {
-      console.log("signUpSucceeded");
       navigate("/", {
-        pathname: `/`,
         state: {
-          redirectMessage: "SignUp Succeeded!",
+          redirectMessage: "Sign Up succeeded. Please sign in.",
         },
       });
     }
-  }, [signUpSucceeded]);
-
-  useEffect(() => {
-    if (sessionInfo) {
-      setOtpRequested(true);
-    }
-  }, [sessionInfo]);
+  }, [signUpSucceeded, navigate]);
 
   return (
     <div className="signfullpage">
@@ -158,12 +147,14 @@ const SignUp = () => {
           {"Sign up as an,"}
         </h3>
         <InputContainer>
-          {errorMessage?.message && (
+          {errorMessage && (
             <Alert
               severity="error"
               style={{ marginTop: "12px", marginBottom: "-4px" }}
             >
-              {errorMessage?.message}
+              {typeof errorMessage === "string"
+                ? errorMessage
+                : errorMessage?.message || "Sign up failed"}
             </Alert>
           )}
           {errors && (
@@ -268,8 +259,6 @@ const SignUp = () => {
               value={emailId}
               onChange={(e) => {
                 setEmailId(e.target.value);
-                setOtpRequested(false);
-                setOtpCode("");
               }}
               type="text"
               required
@@ -282,8 +271,10 @@ const SignUp = () => {
               Get OTP
             </button>
           </div>
-          {otpRequested && (
-            <p className="otp-note">OTP sent to the entered Email ID.</p>
+          {sessionInfo && (
+            <p className="otp-note">
+              OTP was requested successfully. You can continue signup.
+            </p>
           )}
         </div>
         <div>
@@ -291,9 +282,9 @@ const SignUp = () => {
           <input
             name="otp"
             autoComplete="off"
-            className="signin-inputfield mb-3"
-            value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value)}
+            className="signin-inputfield mb-2"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
             type="text"
             required
           />

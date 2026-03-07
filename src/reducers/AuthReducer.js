@@ -47,7 +47,9 @@ const authReducer = (state, action) => {
 					...authState.auth,
 					isLoading: false,
 					isAuthenticated: false,
-					errorMessage: processErrorMessage(action.response.message),
+					errorMessage: processErrorMessage(
+						action.response?.message || action.response?.error || action.response
+					),
 				},
 			};
 		case constants.SIGNUP_REQUESTED:
