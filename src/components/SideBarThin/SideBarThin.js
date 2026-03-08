@@ -71,21 +71,7 @@ const SideBarThin = ({ id }) => {
           )}
 
         </div>
-        <div className="sideBar-Icons">
-          <div className="icon-container">
-            <IoIosInformationCircleOutline />
-          </div>
 
-          <NavLink to="/profile">
-            <div className="icon-container">
-              <IoMdPerson />
-            </div>
-          </NavLink>
-
-          <div className="icon-container">
-            <CiLogin className="text-danger" />
-          </div>
-        </div>
       </div>
     </div>
   );

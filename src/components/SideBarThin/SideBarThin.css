@@ -70,3 +70,17 @@
   width:  40px;
 
 }
+
+.profile-icon-link {
+  display: block;
+}
+
+.profile-icon-container {
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.profile-icon {
+  font-size: 32px;
+  color: #fff;
+}

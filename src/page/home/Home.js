@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   CheckedTable,
   Container,
-  FilledBtn,
   FlexContainer,
   Layout,
-  TextTypo,
   SearchInput,
 } from "../../components";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +21,14 @@ import { IconButton } from "@mui/material";
 import ConfirmationDialog from "../../components/DeletingConfirmation";
 import { deleteEntity } from "../../actions/EntityActions";
 import { selectCalc } from "../../selectors/CalcSelector";
+import { IoMdPerson } from "react-icons/io";
+import { IoLogOutOutline, IoSettingsOutline } from "react-icons/io5";
+import { signOut } from "../../actions/AuthActions";
+import { selectAuth } from "../../selectors/AuthSelector";
+import CustomCookies from "../../api/Cookies";
+import { parseJwt } from "../../utils/AuthUtil";
+import logo from "../../assets/dstar-electric-logo.png";
+import "./Home.css";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -31,8 +37,13 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDesigns, setSelectedDesigns] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const profileMenuRef = useRef(null);
+  const settingsMenuRef = useRef(null);
 
   const { design } = useSelector(selectEntity);
+  const { name } = useSelector(selectAuth);
   const totalEntries = design?.data?.total || 0;
   const totalPages = Math.ceil(totalEntries / size);
   const { generate3d } = useSelector(selectGenerate3D);
@@ -46,7 +57,37 @@ const Home = () => {
     generate3DCleared,
     resetCustomerData,
     deleteEntity,
+    signOut,
   });
+
+  const profileInfo = useMemo(() => {
+    const fallback = {
+      username: name || "User",
+      email: "N/A",
+    };
+
+    try {
+      const token = CustomCookies.getAccessToken();
+      if (!token) return fallback;
+      const payload = parseJwt(token);
+      const payloadEmail =
+        Object.prototype.hasOwnProperty.call(payload || {}, "email") && payload?.email
+          ? payload.email
+          : "N/A";
+
+      return {
+        username:
+          payload?.name ||
+          payload?.preferred_username ||
+          payload?.username ||
+          name ||
+          "User",
+        email: payloadEmail,
+      };
+    } catch (error) {
+      return fallback;
+    }
+  }, [name]);
 
   const searchPayload = {
     "attributeName": ["designId"],
@@ -70,6 +111,22 @@ const Home = () => {
     }
 
   }, [currentPage, sortOption]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileCardOpen(false);
+      }
+      if (settingsMenuRef.current && !settingsMenuRef.current.contains(event.target)) {
+        setIsSettingsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchData = () => {
     const [sortAttribute, sortOrder] = sortOption.split("-");
@@ -129,16 +186,90 @@ const Home = () => {
     }
   };
 
+  const handleLogout = () => {
+    actions.signOut();
+    CustomCookies.clearTokens();
+    setIsProfileCardOpen(false);
+    navigate("/");
+  };
+
+  const handleUpdateRates = () => {
+    setIsSettingsOpen(false);
+    navigate("/lomCost");
+  };
+
   // let a;
   // console.log(a.name)
   // console.log("selectedDesigns in home page:", selectedDesigns)
 
   return (
-    <Layout>
-      <div className="m-1">
+    <Layout hideSidebar>
+      <div className="home-page-wrapper">
         <FlexContainer align="center" justify="space-between" margin="2px 2px">
-          <TextTypo text="Designs" fontSize="22px" fontWeight="700" />
-          <FlexContainer>
+          <FlexContainer align="center" gap="10px">
+            <img src={logo} alt="Company Logo" className="home-header-logo" />
+            <h1 className="home-header-title" data-text="Krish Transformer Design Software">
+              Krish Transformer Design Software
+            </h1>
+          </FlexContainer>
+          <FlexContainer align="center">
+            <div className="home-settings-menu" ref={settingsMenuRef}>
+              <button
+                type="button"
+                className="home-settings-btn"
+                onClick={() => setIsSettingsOpen((prev) => !prev)}
+              >
+                <IoSettingsOutline className="home-settings-icon" />
+              </button>
+              {isSettingsOpen && (
+                <div className="home-settings-dropdown">
+                  <button type="button" className="home-settings-item" onClick={handleUpdateRates}>
+                    Update Rates
+                  </button>
+                </div>
+              )}
+            </div>
+            <button className="home-new-design-btn" onClick={handleNewDesignClick}>
+              + New Design
+            </button>
+            
+            <div className="home-profile-menu" ref={profileMenuRef}>
+              <button
+                type="button"
+                className="home-profile-link"
+                onClick={() => setIsProfileCardOpen((prev) => !prev)}
+              >
+                <div className="home-profile-avatar">
+                  <IoMdPerson className="home-profile-icon" />
+                </div>
+              </button>
+
+              {isProfileCardOpen && (
+                <div className="home-profile-card">
+                  <div className="home-profile-card-info">
+                    <p className="home-profile-name">{profileInfo.username}</p>
+                    <p className="home-profile-email">{profileInfo.email}</p>
+                  </div>
+                  <button type="button" className="home-logout-btn" onClick={handleLogout}>
+                    <IoLogOutOutline className="home-logout-icon" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </FlexContainer>
+        </FlexContainer>
+        <div className="home-header-divider" />
+
+
+        <Container borderRadius="8px" margin="13px 2px">
+          <FlexContainer justify="left" align="center" gap="12px" padding="10px 12px">
+            <SearchInput placeholder="Search by Des Ref." onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+              onSortChange={handleSortChange} width="400px" />
             {selectedDesigns.length > 0 && (
               <IconButton
                 sx={{
@@ -159,20 +290,8 @@ const Home = () => {
                 Delete Design ({selectedDesigns?.length})
               </IconButton>
             )}
-
-            <FilledBtn text="+ New Design" bgColor="#000" fontColor="white" onClick={handleNewDesignClick} />
           </FlexContainer>
-        </FlexContainer>
-
-
-        <FlexContainer align="center" bgColor="#f8f9fa" borderRadius="8px" margin="13px 2px">
-          <SearchInput placeholder="Search by Des Ref." onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
-            }
-          }}
-            onSortChange={handleSortChange} width="400px" />
-        </FlexContainer>
+        </Container>
 
         <Container bgColor="white" padding="0px" borderRadius="8px" boxShadow="0px 4px 8px rgba(0, 0, 0, 0.1)">
           {design?.isLoading ? ( // Show loading spinner if isLoading is true

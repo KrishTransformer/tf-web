@@ -2,12 +2,9 @@ import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { LuSlidersVertical } from "react-icons/lu";
 import { BsSortAlphaDown } from "react-icons/bs";
-
-import { IconButton } from "@mui/material";
 import "./SearchInput.css";
 
-const SearchInput = ({ placeholder, onChange, onKeyDown, onSortChange, width, margin }) => {
-  const [showFilter, setShowFilter] = useState(false);
+const SearchInput = ({ placeholder, onChange, onKeyDown, onSortChange, width, margin, }) => {
   return (
     <>
       {/* Search Field */}
@@ -20,40 +17,6 @@ const SearchInput = ({ placeholder, onChange, onKeyDown, onSortChange, width, ma
           onChange={onChange}
           onKeyDown={onKeyDown}
         />
-      </div>
-
-      {/* Filter By Field */}
-      <div className="search-container" style={{ width, margin }}>
-        <LuSlidersVertical className="search-icon" />
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Filter By"
-          onChange={onChange}
-        />
-        {/* <IconButton
-          sx={{
-            fontSize: "16px",
-            fontWeight: 600,
-            color: "white",
-            backgroundColor: "#000000ff",
-            padding: "7px 30px",
-            borderRadius: "10px",
-            cursor: "pointer",
-            "&:hover": {
-              backgroundColor: "#000000ff",
-            },
-          }}
-          onClick={() => setShowFilter(!showFilter)}
-        >
-          <LuSlidersVertical className="search-icon" />
-          filter by
-        </IconButton>
-        {showFilter && (
-          <div className="filter-options">
-            
-          </div>
-        )} */}
       </div>
 
       {/* Sort By Dropdown */}

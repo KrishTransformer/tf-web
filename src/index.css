@@ -86,6 +86,10 @@ a {
   overflow-y: scroll;
 }
 
+.children-container-full {
+  width: 100%;
+}
+
 /* global.css */
 .MuiTable-root {
   font-family: 'Jost' !important;

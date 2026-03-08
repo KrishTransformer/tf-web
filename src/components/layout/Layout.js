@@ -5,12 +5,16 @@ import { useNavigate } from "react-router-dom";
 import ThinHeader from "../ThinHeader/index.js";
 const Layout = (props) => {
   const navigate = useNavigate();
-  const { id, children, headProps, isThinHeader } = props;
+  const { id, children, headProps, isThinHeader, hideSidebar = false } = props;
+  const childrenContainerClass = hideSidebar
+    ? "children-container children-container-full"
+    : "children-container";
+
   return (
     <div className="d-flex">
       {/* <TopNav /> */}
-      <SideBarThin id={id} />
-      <div>
+      {!hideSidebar && <SideBarThin id={id} />}
+      <div style={hideSidebar ? { width: "100%" } : {}}>
         {isThinHeader && (
           <ThinHeader
             onRefresh={() => {
@@ -23,7 +27,7 @@ const Layout = (props) => {
             navigate={navigate}
           />
         )}
-        <div className="children-container">{children}</div>
+        <div className={childrenContainerClass}>{children}</div>
       </div>
     </div>
   );
