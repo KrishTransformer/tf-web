@@ -1,28 +1,24 @@
-import React, { useState } from "react";
-import { Typography, CardContent, Grid } from "@mui/material";
+import React from "react";
+import { CardContent } from "@mui/material";
 
 import { StyledCard } from "./StyledCard.styles.js";
 
 const CustomCard = ({ title, children, companyName, companyNameExt, titleStyle }) => {
 	return (
 		<StyledCard>
-			<CardContent>
+			<CardContent className="auth-card-content">
 				{companyName && (
-					<h5 
-					style={{ color: "#26221f", margin: "5px", fontWeight: 600, fontSize: "2rem", fontFamily: "Philosopher" }} 
-					className="text-center">
+					<h5 className="auth-card-company text-center">
 						{companyName}
 					</h5>
 				)}
 				{(companyNameExt) && (
-					<h6 
-					style={{ color: "#26221f", marginBottom: "15px", fontWeight: 400, fontSize: "1.2rem", fontFamily: "Philosopher", imageOrientation: "initial" }}
-					className="text-center">
+					<h6 className="auth-card-company-ext text-center">
 						{companyNameExt}
 					</h6>
 				)}
 				{title && (
-					<h6 mt={2} className="text-center" style={titleStyle}>
+					<h6 mt={2} className="text-center auth-card-title" style={titleStyle}>
 						{title}
 					</h6>
 				)}

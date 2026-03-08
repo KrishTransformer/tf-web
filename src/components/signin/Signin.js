@@ -69,6 +69,10 @@ const Login = () => {
     if (username?.length == 0 || password?.length == 0) {
       setErrors("Please fill out all fields.");
     } else {
+      if (/\s/.test(username) || /\s/.test(password)) {
+        setErrors("Spaces are not allowed in Username / Email or Password");
+        return;
+      }
       if (password == undefined || password?.length < 6) {
         setErrors("Password should have atleast 6 characters");
       } else {
@@ -84,7 +88,6 @@ const Login = () => {
         companyName={"K R I S H"} 
         companyNameExt={"Transformer Design Software"}
         title="Sign In"
-        titleStyle={{ fontWeight: 400, fontSize: "1.5rem" }}
       >
         <InputContainer>
           {errorMessage && (

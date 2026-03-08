@@ -6,18 +6,16 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./page/home/Home.js";
 import TwoWinding from "./page/twoWinding/TwoWinding";
 import Fabrication from "./page/fabrication/Fabrication.js";
-// import PrivateRoutes from "./components/privateRoute/PrivateRoute.js";
 import Login from "./components/signin/Signin.js";
 import RequestOtp from "./components/sendOtp/index.js";
 import SignUp from "./components/signup/Signup.js";
 import CoreModel from "./page/coreModel/CoreModel.js";
-import ObjMtlViewer from "./components/objMtlViewer/ObjMtlViewer.js";
 import Files from "./page/files/Files.js";
-import MyGlbViewer from "./components/glbViewer/MyGlbViewer.js";
 import SocketChat from "./page/other/SocketChat.js";
 import Profile from "./page/profile/profile.js";
 import Users from "./page/users/users.js";
 import LomCost from "./page/lomCost/lomCost.js";
+import PrivateRoutes from "./components/privateRoute/PrivateRoute.js";
 function App() {
   return (
 
@@ -26,17 +24,18 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/forgotPassword" element={<RequestOtp />} />
-        {/* <Route element={<PrivateRoutes />}> */}
-        <Route path="/home" element={<Home />} />
-        <Route path="/2windings/:id" element={<TwoWinding />} />
-        <Route path="/fabrication/:id" element={<Fabrication />} />
-        <Route path="/files/:id" element={<Files />} />
-        <Route path="*" element={<Home />} />
-        <Route path="/core/:id" element={<CoreModel />} />
-        <Route path="/socket" element={<SocketChat />} />
-        <Route path="/profile" element={<Profile/>}/>
-        <Route path="/users" element={<Users/>}/>
-        <Route path="/lomCost" element={<LomCost/>}/>
+        <Route element={<PrivateRoutes />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/2windings/:id" element={<TwoWinding />} />
+          <Route path="/fabrication/:id" element={<Fabrication />} />
+          <Route path="/files/:id" element={<Files />} />
+          <Route path="/core/:id" element={<CoreModel />} />
+          <Route path="/socket" element={<SocketChat />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/lomCost" element={<LomCost />} />
+        </Route>
+        <Route path="*" element={<Login />} />
       </Routes>
     </Router>
 

@@ -76,23 +76,34 @@ function* triggerSignUp(payload) {
 	} catch (e) {
 		console.log(e);
 		console.log(JSON.stringify(e));
-		yield put(signUpFailed(e.response.data));
+		yield put(
+			signUpFailed({
+				message: e?.response?.data?.message || e?.response?.data?.error || e?.message,
+				error: e?.response?.data?.error,
+				code: e?.response?.data?.code || e?.response?.data?.error,
+				status: e?.response?.status,
+			})
+		);
 	}
 }
 
 function* triggerSendOTP(payload) {
 	try {
+		const endpoint =
+			payload.purpose === "forgotPassword"
+				? `/auth/sendForgotPasswordOtp`
+				: `/auth/sendEmailOtp`;
 		const response = yield call(
 			postApi,
-			`/auth/sendEmailOtp`,
+			endpoint,
 			{ email: payload.email },
 			{},
 			{},
 			COMMON_SERVICE
 		);
-		if (response && response?.data && response?.data?.sessionInfo) {
-			console.log(response.data.sessionInfo);
-			yield put(sendOTPFullfiled(response.data.sessionInfo));
+		if (response && response.status >= 200 && response.status < 300 && !response?.data?.error) {
+			const responseToken = response?.data?.sessionInfo || true;
+			yield put(sendOTPFullfiled(responseToken));
 		} else {
 			yield put(sendOTPFailed(response?.data));
 		}
@@ -103,6 +114,27 @@ function* triggerSendOTP(payload) {
 
 function* triggerResetPassword(payload) {
 	try {
+		if (payload.purpose === "forgotPasswordEmail") {
+			const response = yield call(
+				postApi,
+				`/auth/passwordResetByEmail`,
+				{
+					email: payload.phoneNumber,
+					otp: payload.otpCode,
+					newPassword: payload.password,
+				},
+				{},
+				{},
+				COMMON_SERVICE
+			);
+			if (response && response.status >= 200 && response.status < 300 && !response?.data?.error) {
+				yield put(resetPasswordFullfiled(true));
+			} else {
+				yield put(resetPasswordFailed(response?.data));
+			}
+			return;
+		}
+
 		let auth = btoa(
 			`${payload.phoneNumber}:${payload.sessionInfo}:${payload.otpCode}:${payload.password}`
 		);

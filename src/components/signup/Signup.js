@@ -26,7 +26,7 @@ import { selectConfig } from "../../selectors/ConfigSelector";
 
 const SignUp = () => {
   const [openSnakeBar, setOpenSnakeBar] = useState(false);
-  const [signUpType, setSignUpType] = useState("individual");
+  // const [signUpType, setSignUpType] = useState("individual");
   const { signUpSucceeded, isLoading, errorMessage, sessionInfo } =
     useSelector(selectAuth);
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ const SignUp = () => {
   });
   const [username, setUsername] = useState("");
   const [emailId, setEmailId] = useState("");
-  const [organizationName, setOrganizationName] = useState("");
+  // const [organizationName, setOrganizationName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -75,10 +75,21 @@ const SignUp = () => {
       return;
     }
 
-    if (signUpType === "organization" && !organizationName?.trim()) {
-      setErrors("Organization Name is required");
+    if (
+      /\s/.test(username) ||
+      /\s/.test(emailId) ||
+      /\s/.test(password) ||
+      /\s/.test(confirmPassword) ||
+      /\s/.test(otp)
+    ) {
+      setErrors("Spaces are not allowed in Sign Up fields");
       return;
     }
+
+    // if (signUpType === "organization" && !organizationName?.trim()) {
+    //   setErrors("Organization Name is required");
+    //   return;
+    // }
 
     if (!password || password.length < 6) {
       setErrors("Password should have at least 6 characters");
@@ -103,6 +114,10 @@ const SignUp = () => {
     actions.clearErrorMessage();
     if (!emailId?.trim()) {
       setErrors("Email ID is required");
+      return;
+    }
+    if (/\s/.test(emailId)) {
+      setErrors("Spaces are not allowed in Email ID");
       return;
     }
     if (!emailId?.includes("@")) {
@@ -135,9 +150,8 @@ const SignUp = () => {
       <CustomCard
         companyName={companyName}
         title="Sign Up"
-        titleStyle={{ fontWeight: 400, fontSize: "1.5rem" }}
       >
-        <h3 style={{ 
+        {/* <h3 style={{ 
           color: "#26221f", 
           margin: "5px", 
           fontWeight: 400, 
@@ -145,7 +159,7 @@ const SignUp = () => {
           fontFamily: "Philosopher" }} 
           className="text-left">
           {"Sign up as an,"}
-        </h3>
+        </h3> */}
         <InputContainer>
           {errorMessage && (
             <Alert
@@ -166,7 +180,7 @@ const SignUp = () => {
             </Alert>
           )}
         </InputContainer>
-        <div className="signup-segment mt-2 mb-3">
+        {/* <div className="signup-segment mt-2 mb-3">
           <button
             type="button"
             className={`signup-segment-btn ${
@@ -185,7 +199,7 @@ const SignUp = () => {
           >
             Organization
           </button>
-        </div>
+        </div> */}
         <div>
           <label>Username</label>
           <input
@@ -198,7 +212,7 @@ const SignUp = () => {
             required
           />
         </div>
-        {signUpType === "organization" && (
+        {/* {signUpType === "organization" && (
           <div>
             <label>Organization Name</label>
             <input
@@ -210,7 +224,7 @@ const SignUp = () => {
               required
             />
           </div>
-        )}
+        )} */}
         <div>
           <label>Password</label>
           <div className="password-input">
