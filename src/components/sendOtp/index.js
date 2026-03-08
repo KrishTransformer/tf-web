@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useActions } from "../../app/use-Actions";
 import {
   signIn,
@@ -12,19 +12,15 @@ import { selectAuth } from "../../selectors/AuthSelector";
 import { useSelector } from "react-redux";
 import { selectConfig } from "../../selectors/ConfigSelector";
 import CustomCard from "../../components/CustomCard/CustomCard";
-import { CircularProgress, Alert, Link } from "@mui/material";
-import {
-  InputContainer,
-  Label,
-  StyledInput,
-  ModalButton,
-} from "../signin/Login.styles";
+import { CircularProgress, Alert } from "@mui/material";
+import { InputContainer, ModalButton } from "../signin/Login.styles";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 // import ReCAPTCHA from "react-google-recaptcha";
 // import { getDomainName } from "utils/Utils";
 import { NavLink } from "react-router-dom";
 
 const RequestOtp = () => {
-  const { isAuthenticated, isLoading, errorMessage, sessionInfo } =
+  const { isLoading, errorMessage, sessionInfo, passwordResetSucceeded } =
     useSelector(selectAuth);
   const navigate = useNavigate();
   const actions = useActions({
@@ -36,11 +32,12 @@ const RequestOtp = () => {
   });
   const [phoneNumber, setPhoneNumber] = useState();
   const [errors, setErrors] = useState();
+  const [otpCode, setOtpCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [otpSentMessage, setOtpSentMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   // const captchaRef = useRef("");
   const [companyName, setCompanyName] = useState("");
-  const handleSignIn = () => {
-    navigate("/signIn");
-  };
 
   useEffect(() => {
     actions.clearErrorMessage();
@@ -57,23 +54,50 @@ const RequestOtp = () => {
     if (phoneNumber?.trim()) {
       console.log("triggering send otp");
       setErrors();
-      actions.sendOTP(phoneNumber.trim());
+      setOtpSentMessage("");
+      actions.sendOTP(phoneNumber.trim(), "forgotPassword");
     } else {
       setErrors("Email is required");
     }
     console.log("finished passwordReset submit");
   };
 
+  const handleResetPassword = () => {
+    setErrors("");
+    actions.clearErrorMessage();
+
+    if (!otpCode?.trim()) {
+      setErrors("OTP is required");
+      return;
+    }
+    if (!password || password.length < 6) {
+      setErrors("Password should have at least 6 characters");
+      return;
+    }
+    actions.resetPassword(
+      phoneNumber?.trim(),
+      sessionInfo,
+      otpCode.trim(),
+      password,
+      "forgotPasswordEmail"
+    );
+  };
+
   useEffect(() => {
     if (sessionInfo) {
-      console.log("received sessionInfo");
-      navigate("/password-reset", {
+      setOtpSentMessage("OTP sent to the registered email");
+    }
+  }, [sessionInfo]);
+
+  useEffect(() => {
+    if (passwordResetSucceeded) {
+      navigate("/", {
         state: {
-          phoneNumber,
+          redirectMessage: "Password reset succeeded. Please sign in.",
         },
       });
     }
-  }, [sessionInfo]);
+  }, [passwordResetSucceeded, navigate]);
 
   return (
     <div className="signfullpage">
@@ -93,6 +117,14 @@ const RequestOtp = () => {
               style={{ marginTop: "12px", marginBottom: "-4px" }}
             >
               {errors}
+            </Alert>
+          )}
+          {otpSentMessage && (
+            <Alert
+              severity="success"
+              style={{ marginTop: "12px", marginBottom: "-4px" }}
+            >
+              {otpSentMessage}
             </Alert>
           )}
         </InputContainer>
@@ -139,6 +171,52 @@ const RequestOtp = () => {
             )}
           </ModalButton>
         </InputContainer>
+        {sessionInfo && (
+          <>
+            <div>
+              <label>OTP</label>
+              <input
+                name="otp"
+                autoComplete="off"
+                className="signin-inputfield mb-2"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                type="text"
+                required
+              />
+            </div>
+            <div>
+              <label>New Password</label>
+              <div className="password-input">
+                <input
+                  autoComplete="off"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  className="signin-inputfield"
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button type="button" onClick={() => setShowPassword((prev) => !prev)}>
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
+              </div>
+            </div>
+            <InputContainer>
+              <ModalButton data-testid="modalResetPassword" onClick={() => handleResetPassword()}>
+                {isLoading ? (
+                  <CircularProgress
+                    size={16}
+                    style={{
+                      color: "#ffffff",
+                    }}
+                  />
+                ) : (
+                  "Confirm"
+                )}
+              </ModalButton>
+            </InputContainer>
+          </>
+        )}
 
         <div className="d-flex justify-content-center mt-3">
           <div className="d-flex">

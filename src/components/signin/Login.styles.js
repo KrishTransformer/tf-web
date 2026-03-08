@@ -94,15 +94,16 @@ export const Label = styled.span(
 export const ModalButton = styled.button(
 	{
 		border: "none",
-		padding: "10px",
-		borderRadius: "4px",
-		fontSize: "16px",
-		lineHeight: "24px",
+		padding: "10px 14px",
+		borderRadius: "10px",
+		fontSize: "15px",
+		lineHeight: "20px",
 		textTransform: "none",
 		cursor: "pointer",
 		width: "100%",
-		height: "40px",
-		fontWeight: "400",
+		height: "42px",
+		fontWeight: "700",
+		letterSpacing: "0.01em",
 		display: "flex",
 		alignItems: "center",
 		justifyContent: "center",
@@ -110,15 +111,19 @@ export const ModalButton = styled.button(
 	({ isCancel, isLoading, type }) => ({
 		color: isCancel ? "#0067A0" : "#ffffff",
 		type,
-		background: isCancel ? "#26221f" : "#26221f",
+		background: isCancel ? "#0f172a" : "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
 		pointerEvents: isLoading ? "none" : "auto",
+		transition: "transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease",
+		boxShadow: "0 10px 18px rgba(15, 23, 42, 0.18)",
 		"&:hover": {
-			backgroundColor: "#26221f",
+			backgroundColor: "#0b1220",
 			color: "#ffffff",
+			transform: "translateY(-1px)",
 		},
 		"&:active": {
-			background: "#26221f",
+			background: "#0b1220",
 			color: "#ffffff",
+			transform: "translateY(0)",
 		},
 	})
 );

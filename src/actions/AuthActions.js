@@ -52,9 +52,10 @@ export const signOut = () => ({
 	type: constants.SIGNOUT,
 });
 
-export const sendOTP = (email) => ({
+export const sendOTP = (email, purpose) => ({
 	type: constants.SENDOTP_REQUESTED,
 	email,
+	purpose,
 });
 
 export const sendOTPFullfiled = (response) => ({
@@ -67,12 +68,13 @@ export const sendOTPFailed = (response) => ({
 	response,
 });
 
-export const resetPassword = (phoneNumber, sessionInfo, otpCode, password) => ({
+export const resetPassword = (phoneNumber, sessionInfo, otpCode, password, purpose) => ({
 	type: constants.RESETPASSWORD_REQUESTED,
 	phoneNumber,
 	sessionInfo,
 	otpCode,
 	password,
+	purpose,
 });
 
 export const resetPasswordFullfiled = (response) => ({

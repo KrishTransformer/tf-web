@@ -26,6 +26,8 @@ import { IoLogOutOutline, IoSettingsOutline } from "react-icons/io5";
 import { signOut } from "../../actions/AuthActions";
 import { selectAuth } from "../../selectors/AuthSelector";
 import CustomCookies from "../../api/Cookies";
+import { postApi } from "../../api";
+import { COMMON_SERVICE } from "../../constants/CommonConstants";
 import { parseJwt } from "../../utils/AuthUtil";
 import logo from "../../assets/dstar-electric-logo.png";
 import "./Home.css";
@@ -186,11 +188,26 @@ const Home = () => {
     }
   };
 
-  const handleLogout = () => {
-    actions.signOut();
-    CustomCookies.clearTokens();
-    setIsProfileCardOpen(false);
-    navigate("/");
+  const handleLogout = async () => {
+    const accessToken = CustomCookies.getAccessToken();
+    try {
+      if (accessToken) {
+        await postApi(
+          "/auth/logout",
+          {},
+          { Authorization: `Bearer ${accessToken}` },
+          {},
+          COMMON_SERVICE
+        );
+      }
+    } catch (error) {
+      console.error("Logout API failed:", error);
+    } finally {
+      actions.signOut();
+      CustomCookies.clearTokens();
+      setIsProfileCardOpen(false);
+      navigate("/");
+    }
   };
 
   const handleUpdateRates = () => {

@@ -1,22 +1,11 @@
-/* App.css */
-.loginform {
-  width: 27%;
-  margin: auto; /* Center horizontally */
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  /* margin-top: 13vh; */
-
-}
-
 .signfullpage {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
-  justify-content: center; /* horizontally center */
+  justify-content: center;
   align-items: center;
   position: relative;
   overflow: hidden;
+  padding: 20px 12px;
 }
 
 .signfullpage::before {
@@ -27,8 +16,19 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: blur(6px) brightness(0.5);
-  transform: scale(1.05);
+  filter: saturate(0.9) brightness(0.45);
+  transform: scale(1.03);
+  z-index: 0;
+}
+
+.signfullpage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(59, 130, 246, 0.25), transparent 34%),
+    radial-gradient(circle at 88% 82%, rgba(16, 185, 129, 0.2), transparent 28%),
+    linear-gradient(145deg, rgba(2, 6, 23, 0.58), rgba(15, 23, 42, 0.46));
   z-index: 0;
 }
 
@@ -37,117 +37,127 @@
   z-index: 1;
 }
 
-form {
+.auth-card-content {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-label {
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 26px;
+.auth-card-company {
+  margin: 2px 0 0;
+  font-weight: 700;
+  font-size: 1.9rem;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+  font-family: "Philosopher", serif;
+}
+
+.auth-card-company-ext {
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #334155;
+  font-family: "Kaisei Opti", serif;
+}
+
+.auth-card-title {
+  margin: 4px 0 6px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.01em;
+}
+
+.signfullpage label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
   text-align: left;
+  margin-bottom: 6px;
+  color: #334155;
 }
 
-/* form div {
-  margin-bottom: 7px;
-} */
-
-label {
-  font-weight: bold;
-}
-
-input[name="name"],
-input[name="username"],
-input[name="email"],
-input[name="otp"],
-input[name="password"],
-input[name="confirmPassword"],
-input[name="organizationName"] {
+.signfullpage input[name="name"],
+.signfullpage input[name="username"],
+.signfullpage input[name="email"],
+.signfullpage input[name="otp"],
+.signfullpage input[name="password"],
+.signfullpage input[name="confirmPassword"],
+.signfullpage input[name="organizationName"] {
   width: 100%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 1px solid #d0d8e3;
+  border-radius: 10px;
+  background: #ffffff;
 }
 
-input[name="name"] svg,
-input[name="username"] svg,
-input[name="email"] svg,
-input[name="otp"] svg,
-input[name="password"] svg,
-input[name="confirmPassword"] svg,
-input[name="organizationName"] svg {
+.signin-inputfield {
+  height: 42px;
+  font-size: 14px;
+  line-height: 1.25;
+  padding: 0 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signin-inputfield:focus {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.14);
+}
+
+.password-input {
   position: relative;
-  left: 10px;
-}
-
-input[name="password"] button {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.signin-btn {
-    margin-top: 15px;
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: #26221f;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.signin-btn:hover {
-  background-color: #26221f;
+  display: flex;
+  align-items: center;
 }
 
 .password-input button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1rem;
+  color: #64748b;
   padding: 0;
-  margin-left: -30px; /* Adjust as needed */
 }
 
-.signin-inputfield{
-height: 40px;
-font-size: 14px;
-}
-
-.signin-subtext{
-  font-family: Kaisei Opti;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0em;
+.signin-subtext {
+  font-family: "Kaisei Opti", serif;
+  font-size: 0.78rem;
+  font-weight: 500;
   text-align: left;
   margin-top: 2px;
+  color: #334155;
 }
 
-.signin-subtext1{
-  font-family: Kaisei Opti;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0em;
+.signin-subtext1 {
+  font-family: "Kaisei Opti", serif;
+  font-size: 0.78rem;
+  font-weight: 700;
   text-align: left;
+  text-decoration: none !important;
+  color: #1d4ed8 !important;
+}
+
+.signin-subtext1:hover {
   text-decoration: underline !important;
-  color: #0000EE !important;
 }
 
 .signup-segment {
   display: flex;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: 1px solid #d3dbe8;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .signup-segment-btn {
   flex: 1;
   border: none;
-  background: #f5f5f5;
+  background: #f8fafc;
   padding: 8px 10px;
   font-size: 13px;
   font-weight: 600;
@@ -155,35 +165,41 @@ font-size: 14px;
 }
 
 .signup-segment-btn.active {
-  background: #26221f;
+  background: #0f172a;
   color: #fff;
 }
 
 .otp-btn {
-  height: 40px;
+  height: 42px;
   border: none;
-  border-radius: 5px;
-  background-color: #26221f;
+  border-radius: 10px;
+  background-color: #0f172a;
   color: #fff;
-  padding: 0 12px;
+  padding: 0 14px;
   font-size: 12px;
+  font-weight: 700;
   white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.otp-btn:hover {
+  background-color: #111827;
 }
 
 .otp-note {
   font-size: 12px;
   margin: 0 0 8px 0;
-  color: #2e7d32;
+  color: #047857;
+  font-weight: 600;
 }
 
-@media (max-width: 500px) {
-  .loginform {
-  width: 90%;
-  margin: auto; /* Center horizontally */
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  /* margin-top: 13vh; */
+@media (max-width: 600px) {
+  .auth-card-company {
+    font-size: 1.55rem;
+    letter-spacing: 0.05em;
+  }
 
-}}
+  .auth-card-company-ext {
+    font-size: 0.9rem;
+  }
+}
