@@ -7,6 +7,16 @@
   border-bottom: 1px solid #ddd;
 }
 
+.home-page-wrapper {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.home-header-divider {
+  border-top: 1px solid #d9d9d9;
+  margin: 8px 2px 10px;
+}
+
 .user-info {
   display: flex;
   gap: 20px;
@@ -53,12 +63,12 @@
   border-color: #007bff;
 } */
 
-.search-icon {
+.bar-container .search-icon {
   color: #888;
   margin-right: 8px;
 }
 
-.search-input {
+.bar-container .search-input {
   flex: 1;
   border: none;
   outline: none;
@@ -66,7 +76,7 @@
   background: transparent;
 }
 
-.filter-icon {
+.bar-container .filter-icon {
   color: #888;
   cursor: pointer;
   margin-left: 8px;
@@ -74,22 +84,22 @@
   transition: color 0.3s ease;
 }
 
-.filter-icon:hover {
+.bar-container .filter-icon:hover {
   color: #007bff;
 }
 
-.sort-by {
+.bar-container .sort-by {
   display: flex;
   align-items: center;
   margin-left: 8px;
 }
 
-.sort-icon {
+.bar-container .sort-icon {
   color: #888;
   margin-right: 4px;
 }
 
-.sort-by select {
+.bar-container .sort-by select {
   border: none;
   outline: none;
   font-size: 14px;
@@ -97,6 +107,59 @@
   cursor: pointer;
 }
 
-.sort-by select:hover {
+.bar-container .sort-by select:hover {
   color: #007bff;
+}
+
+.home-header-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.home-profile-link {
+  display: inline-flex;
+  text-decoration: none;
+  margin-left: 6px;
+}
+
+.home-new-design-btn {
+  border: 1px solid #1f1f1f;
+  background: linear-gradient(145deg, #111111, #2d2d2d);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 9px 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-new-design-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+}
+
+.home-profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #111111, #2d2d2d);
+  border: 1px solid #222;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-profile-avatar:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+}
+
+.home-profile-icon {
+  font-size: 23px;
+  color: #ffffff;
 }

@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import {
   CheckedTable,
   Container,
-  FilledBtn,
   FlexContainer,
   Layout,
   TextTypo,
   SearchInput,
 } from "../../components";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useActions } from "../../app/use-Actions";
 import { fetchEntity, fetchSearchEntity } from "../../actions/EntityActions";
 import { clearCalc, generate3DCleared } from "../../actions/CalcActions";
@@ -23,6 +22,9 @@ import { IconButton } from "@mui/material";
 import ConfirmationDialog from "../../components/DeletingConfirmation";
 import { deleteEntity } from "../../actions/EntityActions";
 import { selectCalc } from "../../selectors/CalcSelector";
+import { IoMdPerson, IoIosInformationCircleOutline } from "react-icons/io";
+import logo from "../../assets/dstar-electric-logo.png";
+import "./Home.css";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -134,11 +136,36 @@ const Home = () => {
   // console.log("selectedDesigns in home page:", selectedDesigns)
 
   return (
-    <Layout>
-      <div className="m-1">
+    <Layout hideSidebar>
+      <div className="home-page-wrapper">
         <FlexContainer align="center" justify="space-between" margin="2px 2px">
-          <TextTypo text="Designs" fontSize="22px" fontWeight="700" />
-          <FlexContainer>
+          <FlexContainer align="center" gap="10px">
+            <img src={logo} alt="Company Logo" className="home-header-logo" />
+            <TextTypo text="Krish Transformer Design Software" fontSize="22px" fontWeight="700" />
+          </FlexContainer>
+          <FlexContainer align="center">
+            <button className="home-new-design-btn" onClick={handleNewDesignClick}>
+              + New Design
+            </button>
+            
+            <NavLink to="/profile" className="home-profile-link">
+              <div className="home-profile-avatar">
+                <IoMdPerson className="home-profile-icon" />
+              </div>
+            </NavLink>
+          </FlexContainer>
+        </FlexContainer>
+        <div className="home-header-divider" />
+
+
+        <Container borderRadius="8px" margin="13px 2px">
+          <FlexContainer justify="left" align="center" gap="12px" padding="10px 12px">
+            <SearchInput placeholder="Search by Des Ref." onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+              onSortChange={handleSortChange} width="400px" />
             {selectedDesigns.length > 0 && (
               <IconButton
                 sx={{
@@ -159,20 +186,8 @@ const Home = () => {
                 Delete Design ({selectedDesigns?.length})
               </IconButton>
             )}
-
-            <FilledBtn text="+ New Design" bgColor="#000" fontColor="white" onClick={handleNewDesignClick} />
           </FlexContainer>
-        </FlexContainer>
-
-
-        <FlexContainer align="center" bgColor="#f8f9fa" borderRadius="8px" margin="13px 2px">
-          <SearchInput placeholder="Search by Des Ref." onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
-            }
-          }}
-            onSortChange={handleSortChange} width="400px" />
-        </FlexContainer>
+        </Container>
 
         <Container bgColor="white" padding="0px" borderRadius="8px" boxShadow="0px 4px 8px rgba(0, 0, 0, 0.1)">
           {design?.isLoading ? ( // Show loading spinner if isLoading is true
