@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&display=swap");
+
 .bar-container {
   display: flex;
   justify-content: space-between;
@@ -117,10 +119,39 @@
   object-fit: contain;
 }
 
+.home-header-title {
+  font-family: "Philosopher", serif;
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+  color: #111;
+  position: relative;
+}
+
+.home-header-title::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  transform: scaleY(-1);
+  transform-origin: top;
+  color: rgba(17, 17, 17, 0.28);
+  line-height: 1.2;
+  max-height: 26px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+}
+
 .home-profile-link {
   display: inline-flex;
   text-decoration: none;
   margin-left: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
 }
 
 .home-new-design-btn {
@@ -139,6 +170,63 @@
 .home-new-design-btn:hover {
   transform: translateY(-1px) scale(1.02);
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+}
+
+.home-settings-menu {
+  position: relative;
+}
+
+.home-settings-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #1f1f1f;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #111111, #2d2d2d);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-settings-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+}
+
+.home-settings-icon {
+  font-size: 20px;
+}
+
+.home-settings-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 170px;
+  background: #fff;
+  border: 1px solid #e7e7e7;
+  border-radius: 10px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.home-settings-item {
+  width: 100%;
+  border: none;
+  background: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  cursor: pointer;
+}
+
+.home-settings-item:hover {
+  background: #f6f6f6;
 }
 
 .home-profile-avatar {
@@ -162,4 +250,62 @@
 .home-profile-icon {
   font-size: 23px;
   color: #ffffff;
+}
+
+.home-profile-menu {
+  position: relative;
+}
+
+.home-profile-card {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 260px;
+  background: #ffffff;
+  border: 1px solid #e7e7e7;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.home-profile-card-info {
+  padding: 12px 14px;
+  border-bottom: 1px solid #ececec;
+}
+
+.home-profile-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.home-profile-email {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+  word-break: break-word;
+}
+
+.home-logout-btn {
+  width: 100%;
+  border: none;
+  background: #fff;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c62828;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-logout-btn:hover {
+  background: #fff1f1;
+}
+
+.home-logout-icon {
+  font-size: 18px;
 }

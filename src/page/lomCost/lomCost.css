@@ -1,0 +1,128 @@
+.lom-rate-page {
+  min-height: 100vh;
+  padding: 22px 34px 28px;
+  max-width: 1320px;
+  margin: 0 auto;
+  background:
+    radial-gradient(circle at 2% 8%, rgba(148, 163, 184, 0.18), transparent 220px),
+    linear-gradient(180deg, #f8fafc 0%, #ffffff 42%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lom-rate-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 6px;
+}
+
+.lom-rate-heading-block {
+  flex: 1;
+}
+
+.lom-rate-home-btn {
+  min-width: 92px;
+  height: 38px;
+  border-radius: 10px;
+  text-transform: none;
+  font-weight: 600;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  background: #ffffff;
+  align-self: center;
+}
+
+.lom-rate-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+
+.lom-rate-subtitle {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.lom-rate-default-btn {
+  height: 38px;
+  border-radius: 10px;
+  text-transform: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  align-self: center;
+  background-color: #111827;
+  box-shadow: none;
+}
+
+.lom-rate-default-btn:hover {
+  background-color: #0b1220;
+  box-shadow: none;
+}
+
+.lom-rate-default-btn:disabled {
+  background-color: #475569;
+  color: #e2e8f0;
+}
+
+.lom-rate-form-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.lom-rate-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 180px;
+  gap: 12px;
+  align-items: center;
+}
+
+.lom-rate-count {
+  margin-top: 12px;
+  color: #475569;
+  font-size: 0.86rem;
+}
+
+.lom-rate-table-wrap {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.lom-rate-table-wrap .MuiTableCell-root {
+  border-bottom-color: #e8edf3;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.lom-rate-action-btn {
+  transition: transform 0.15s ease;
+}
+
+.lom-rate-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 980px) {
+  .lom-rate-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lom-rate-page {
+    padding: 14px 16px 18px;
+  }
+
+  .lom-rate-default-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
