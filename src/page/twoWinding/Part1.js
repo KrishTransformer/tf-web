@@ -13,6 +13,7 @@ import {
 } from "../../components";
 
 const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttributes, handleHover, handleMouseLeave }) => {
+  const isDryType = formState.dryType === true || formState.dryType === "true";
 
   return (
     <div>
@@ -38,7 +39,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             value={formState.dryType || "Oil Type"}
             onChange={(e) => handleInputChange("dryType", e.target.value)}
           />
-          {(formState.dryType === true || formState.dryType === "true") && (
+          {isDryType && (
             <CustomInput
               type="dropdown"
               options={[
@@ -46,13 +47,13 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
                 { label: "Class F", value: "CLASS_F" },
                 { label: "Class H", value: "CLASS_H" },
               ]}
-              value={formState.dryTempClass || "Class B"}
+              value={formState.dryTempClass || "CLASS_B"}
               onChange={(e) =>
                 handleInputChange("dryTempClass", e.target.value)
               }
             />
           )}
-          {(formState.dryType === false || formState.dryType === "false" || formState.dryType === undefined) && (
+          {!isDryType && (
             <CustomInput
             type="dropdown"
             options={[
@@ -424,14 +425,16 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             bgColor="#D7F3FC"
             borderColor="0.5px solid #00000033"
           /> */}
-          <CustomInput
-            label="Tank Loss"
-            type="text"
-            value={formState.tank?.tankLoss}
-            onChange={(e) => handleInputChange("tank.tankLoss", e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
-          />
+          {!isDryType && (
+            <CustomInput
+              label="Tank Loss"
+              type="text"
+              value={formState.tank?.tankLoss}
+              onChange={(e) => handleInputChange("tank.tankLoss", e.target.value)}
+              bgColor="#D7F3FC"
+              borderColor="0.5px solid #00000033"
+            />
+          )}
           <CustomInput
             label="Load Loss"
             type="text"

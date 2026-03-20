@@ -19,6 +19,7 @@ const Part2 = ({
   handleHover,
   handleMouseLeave,
 }) => {
+  const isDryType = formState.dryType === true || formState.dryType === "true";
   const fieldData = [
     {
       key: "turnsPerPhase",
@@ -498,43 +499,45 @@ const Part2 = ({
               </div>
             )
       )}
-      <div className="row align-items-center">
-        <div className="col-4">
-          <CustomInput
-            type="dropdown"
-            options={[
-              { label: "Bushing", value: "Bushing" },
-              { label: "Cable Box", value: "Cable Box" },
-            ]}
-            value={formState.innerWindings?.terminal || "Economic"}
-            onChange={(e) =>
-              handleInputChange("innerWindings.terminal", e.target.value)
-            }
-          />
+      {!isDryType && (
+        <div className="row align-items-center">
+          <div className="col-4">
+            <CustomInput
+              type="dropdown"
+              options={[
+                { label: "Bushing", value: "Bushing" },
+                { label: "Cable Box", value: "Cable Box" },
+              ]}
+              value={formState.innerWindings?.terminal || "Economic"}
+              onChange={(e) =>
+                handleInputChange("innerWindings.terminal", e.target.value)
+              }
+            />
+          </div>
+          <div className="col">
+            <TextTypo
+              text="Terminal"
+              fontSize="13px"
+              fontWeight="600"
+              fontColor="#000"
+              textAlign="center"
+            />
+          </div>
+          <div className="col-4">
+            <CustomInput
+              type="dropdown"
+              options={[
+                { label: "Bushing", value: "Bushing" },
+                { label: "Cable Box", value: "Cable Box" },
+              ]}
+              value={formState.outerWindings?.terminal || "Economic"}
+              onChange={(e) =>
+                handleInputChange("outerWindings.terminal", e.target.value)
+              }
+            />
+          </div>
         </div>
-        <div className="col">
-          <TextTypo
-            text="Terminal"
-            fontSize="13px"
-            fontWeight="600"
-            fontColor="#000"
-            textAlign="center"
-          />
-        </div>
-        <div className="col-4">
-          <CustomInput
-            type="dropdown"
-            options={[
-              { label: "Bushing", value: "Bushing" },
-              { label: "Cable Box", value: "Cable Box" },
-            ]}
-            value={formState.outerWindings?.terminal || "Economic"}
-            onChange={(e) =>
-              handleInputChange("outerWindings.terminal", e.target.value)
-            }
-          />
-        </div>
-      </div>
+      )}
     </Container>
   );
 };
