@@ -115,6 +115,17 @@ const Home = () => {
   }, [currentPage, sortOption]);
 
   useEffect(() => {
+    if (totalPages === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+      return;
+    }
+
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setIsProfileCardOpen(false);
@@ -158,7 +169,13 @@ const Home = () => {
 
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    if (totalPages === 0) {
+      setCurrentPage(1);
+      return;
+    }
+
+    const nextPage = Math.min(Math.max(page, 1), totalPages);
+    setCurrentPage(nextPage);
   };
 
   const handleNext = () => {
@@ -180,9 +197,8 @@ const Home = () => {
 
   const handleSearch = () => {
     setCurrentPage(1);
-    let offset = (currentPage - 1);
     if (searchQuery !== "") {
-      actions.fetchSearchEntity("design", `offset=${offset}&size=${size}`, searchPayload);
+      actions.fetchSearchEntity("design", `offset=0&size=${size}`, searchPayload);
     } else {
       fetchData();
     }

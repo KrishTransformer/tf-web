@@ -1,14 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
+  CustomModal,
   CustomInput,
   FlexContainer,
   NavTabs,
-  TextBtn,
   TextTypo,
 } from "../../components";
 
 const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
+  const [isRadiatorWidthModalOpen, setIsRadiatorWidthModalOpen] = useState(false);
+  const [customRadiatorWidth, setCustomRadiatorWidth] = useState(
+    String(formState?.tankAndOilFormulas?.radiatorWidth || "226")
+  );
+  const formulaRadiatorWidthValue =
+    formState?.tankAndOilFormulas?.radiatorWidth?.toString?.() || "";
+  const selectedRadiatorWidthValue =
+    formState?.radiatorWidth?.toString?.() || formulaRadiatorWidthValue || "226";
+  const openRadiatorWidthModal = () => {
+    setCustomRadiatorWidth(selectedRadiatorWidthValue);
+    setIsRadiatorWidthModalOpen(true);
+  };
+
+  const handleRadiatorWidthSubmit = () => {
+    const parsedWidth = parseInt(customRadiatorWidth, 10);
+
+    if (Number.isNaN(parsedWidth)) {
+      return;
+    }
+
+    handleInputChange("radiatorWidth", parsedWidth);
+    setIsRadiatorWidthModalOpen(false);
+  };
+
   const tabs = [
     // {
     //   key: "general-info",
@@ -105,6 +129,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
           <FlexContainer>
             <CustomInput
               type="dropdown"
+              label="Cooling method"
               options={[
                 { label: "Radiator", value: "RADIATOR" },
                 { label: "Pipes", value: "PIPES" },
@@ -115,6 +140,16 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                 handleInputChange("eRadiatorType", e.target.value)
               }
             />
+            {formState?.eRadiatorType === "RADIATOR" && (
+              <CustomInput
+                label="Radiator Width"
+                type="text"
+                value={selectedRadiatorWidthValue}
+                readOnly
+                onClick={openRadiatorWidthModal}
+                style={{ cursor: "pointer" }}
+              />
+            )}
             <CustomInput
               type="checkbox"
               value={formState?.isCSP}
@@ -578,6 +613,27 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
   return (
     <div>
       <NavTabs tabs={tabs} />
+      <CustomModal
+        open={isRadiatorWidthModalOpen}
+        onClose={() => setIsRadiatorWidthModalOpen(false)}
+        onModalSubmit={handleRadiatorWidthSubmit}
+        title="Radiator Width"
+      >
+        <TextTypo
+          text="Enter radiator width. Common values are 226, 300, and 520."
+          margin="20px 0px"
+          fontColor="grey"
+        />
+        <CustomInput
+          label="Radiator Width"
+          value={customRadiatorWidth}
+          onChange={(e) =>
+            setCustomRadiatorWidth(e.target.value.replace(/\D/g, ""))
+          }
+          bgColor="#D7F3FC"
+          borderColor="0.5px solid #00000033"
+        />
+      </CustomModal>
     </div>
   );
 };
