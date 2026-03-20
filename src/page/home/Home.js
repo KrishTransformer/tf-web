@@ -41,6 +41,9 @@ const Home = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("appTheme") === "dark";
+  });
   const profileMenuRef = useRef(null);
   const settingsMenuRef = useRef(null);
 
@@ -141,6 +144,29 @@ const Home = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const previousBodyBackground = document.body.style.backgroundColor;
+    const previousHtmlBackground = document.documentElement.style.backgroundColor;
+
+    if (isDarkMode) {
+      localStorage.setItem("appTheme", "dark");
+      document.body.style.backgroundColor = "#101722";
+      document.documentElement.style.backgroundColor = "#101722";
+      document.body.classList.add("app-dark-mode");
+    } else {
+      localStorage.setItem("appTheme", "light");
+      document.body.style.backgroundColor = "#ebebeb";
+      document.documentElement.style.backgroundColor = "#ebebeb";
+      document.body.classList.remove("app-dark-mode");
+    }
+
+    return () => {
+      document.body.style.backgroundColor = previousBodyBackground;
+      document.documentElement.style.backgroundColor = previousHtmlBackground;
+      document.body.classList.remove("app-dark-mode");
+    };
+  }, [isDarkMode]);
+
   const fetchData = () => {
     const [sortAttribute, sortOrder] = sortOption.split("-");
     //let offset = (currentPage - 1);
@@ -237,7 +263,7 @@ const Home = () => {
 
   return (
     <Layout hideSidebar>
-      <div className="home-page-wrapper">
+      <div className={`home-page-wrapper ${isDarkMode ? "home-page-wrapper-dark" : ""}`}>
         <FlexContainer align="center" justify="space-between" margin="2px 2px">
           <FlexContainer align="center" gap="10px">
             <img src={logo} alt="Company Logo" className="home-header-logo" />
@@ -256,6 +282,17 @@ const Home = () => {
               </button>
               {isSettingsOpen && (
                 <div className="home-settings-dropdown">
+                  <label className="home-settings-toggle">
+                    <span className="home-settings-toggle-label">Dark Mode</span>
+                    <button
+                      type="button"
+                      className={`home-darkmode-switch ${isDarkMode ? "active" : ""}`}
+                      onClick={() => setIsDarkMode((prev) => !prev)}
+                      aria-pressed={isDarkMode}
+                    >
+                      <span className="home-darkmode-knob" />
+                    </button>
+                  </label>
                   <button type="button" className="home-settings-item" onClick={handleUpdateRates}>
                     Update Rates
                   </button>
@@ -309,12 +346,12 @@ const Home = () => {
                   fontSize: "16px",
                   fontWeight: 600,
                   color: "white",
-                  backgroundColor: "#000000ff",
+                  backgroundColor: isDarkMode ? "#8f2727" : "#000000ff",
                   padding: "7px 30px",
                   borderRadius: "10px",
                   cursor: "pointer",
                   "&:hover": {
-                    backgroundColor: "#000000ff",
+                    backgroundColor: isDarkMode ? "#a93333" : "#000000ff",
                   },
                 }}
                 onClick={handleTrashOpen}
@@ -326,13 +363,25 @@ const Home = () => {
           </FlexContainer>
         </Container>
 
-        <Container bgColor="white" padding="0px" borderRadius="8px" boxShadow="0px 4px 8px rgba(0, 0, 0, 0.1)">
+        <Container
+          bgColor={isDarkMode ? "#1a2534" : "white"}
+          padding="0px"
+          borderRadius="8px"
+          boxShadow={isDarkMode ? "0px 18px 34px rgba(0, 0, 0, 0.35)" : "0px 4px 8px rgba(0, 0, 0, 0.1)"}
+        >
           {design?.isLoading ? ( // Show loading spinner if isLoading is true
             <FlexContainer align="center" justify="center" padding="20px">
               <CircularProgress />
             </FlexContainer>
           ) : (
-            <CheckedTable currentPage={currentPage} rows={design?.data?.data || []} size={size} selectedDesigns={selectedDesigns} setSelectedDesigns={setSelectedDesigns} />
+            <CheckedTable
+              currentPage={currentPage}
+              rows={design?.data?.data || []}
+              size={size}
+              selectedDesigns={selectedDesigns}
+              setSelectedDesigns={setSelectedDesigns}
+              isDarkMode={isDarkMode}
+            />
           )}
         </Container>
 
@@ -352,6 +401,7 @@ const Home = () => {
           onPageChange={handlePageChange}
           totalEntries={totalEntries}
           entriesPerPage={size}
+          activeColor={isDarkMode ? "#4d8dff" : "#444cf71a"}
         />
       </div>
     </Layout>

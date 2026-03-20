@@ -1,0 +1,107 @@
+.files-page {
+  --files-page-text: #111827;
+  --files-page-muted: #5f6b7a;
+  --files-page-bg: transparent;
+  --files-surface: #ffffff;
+  --files-surface-soft: #eef1f5;
+  --files-surface-muted: #f7fafc;
+  --files-border: rgba(15, 23, 42, 0.16);
+  --files-border-strong: rgba(15, 23, 42, 0.24);
+  --files-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+  --files-accent-row: #d9f0ff;
+  --files-icon-accent: #1400fa;
+  --files-btn-bg: #111827;
+  --files-btn-text: #ffffff;
+
+  --files-download-blue: #d2e7ff;
+  --files-download-pink: #eadfe7;
+  --files-download-amber: #fff6e9;
+  --files-download-sky: #e6f1ff;
+
+  --app-input-bg: #eef1f5;
+  --app-input-accent-bg: #d7f3fc;
+  --app-input-border: rgba(15, 23, 42, 0.18);
+  --app-input-text: #111827;
+  --app-input-accent-text: #1400fa;
+  --app-label-text: #111827;
+}
+
+body.app-dark-mode .files-page {
+  --files-page-text: #edf4ff;
+  --files-page-muted: #9eb0ca;
+  --files-page-bg:
+    radial-gradient(circle at top right, rgba(77, 141, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, #101722 0%, #162233 100%);
+  --files-surface: #172233;
+  --files-surface-soft: #203147;
+  --files-surface-muted: #1d2b40;
+  --files-border: rgba(255, 255, 255, 0.1);
+  --files-border-strong: rgba(143, 181, 255, 0.28);
+  --files-shadow: 0 22px 44px rgba(2, 10, 24, 0.42);
+  --files-accent-row: #213852;
+  --files-icon-accent: #9fc5ff;
+  --files-btn-bg: #3b82f6;
+  --files-btn-text: #ffffff;
+
+  --files-download-blue: #243b59;
+  --files-download-pink: #3a3044;
+  --files-download-amber: #413625;
+  --files-download-sky: #22344b;
+
+  --app-input-bg: #203147;
+  --app-input-accent-bg: #233952;
+  --app-input-border: rgba(255, 255, 255, 0.12);
+  --app-input-text: #edf4ff;
+  --app-input-accent-text: #9fc5ff;
+  --app-label-text: #dfe9f8;
+}
+
+.files-page-shell {
+  margin: 0 -10px -10px;
+  min-height: 100vh;
+  padding: 10px;
+  background: var(--files-page-bg);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.files-page .files-card {
+  background: var(--files-surface);
+  border: 1px solid var(--files-border);
+  border-radius: 8px;
+  box-shadow: var(--files-shadow);
+  color: var(--files-page-text);
+}
+
+.files-page .files-card-soft {
+  background: var(--files-surface-soft);
+}
+
+.files-page .files-search-input {
+  width: 100%;
+  background: var(--app-input-bg);
+  color: var(--app-input-text);
+  border: 1px solid var(--app-input-border);
+  border-radius: 8px;
+}
+
+.files-page .files-search-input::placeholder {
+  color: var(--files-page-muted);
+}
+
+.files-page .files-search-container .search-icon {
+  color: var(--files-page-muted);
+}
+
+.files-page .files-accordion-title,
+.files-page .files-accordion-toggle,
+.files-page .files-edit-trigger,
+.files-page label,
+.files-page span,
+.files-page h5,
+.files-page p {
+  color: inherit;
+}
+
+.files-page .files-download-list > * + * {
+  margin-top: 12px;
+}

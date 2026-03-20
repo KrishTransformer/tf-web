@@ -60,8 +60,8 @@ const Input2WithModal = ({
         label={label}
         value={value}
         onClick={handleInputClick}
-        bgColor="#D7F3FC"
-        borderColor="0.5px solid #00000033"
+        bgColor="var(--app-input-accent-bg, #D7F3FC)"
+        borderColor="var(--app-input-border, #00000033)"
         readOnly={isLocked}
         showUnlockIcon={showUnlockIcon}
         handleToggleLock={() => handleToggleLock()}
@@ -82,15 +82,15 @@ const Input2WithModal = ({
             label={label1}
             value={modalValue1}
             onChange={(e) => setModalValue1(e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg, #D7F3FC)"
+            borderColor="var(--app-input-border, #00000033)"
           />
           <CustomInput
             label={label2}
             value={modalValue2}
             onChange={(e) => setModalValue2(e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg, #D7F3FC)"
+            borderColor="var(--app-input-border, #00000033)"
           />
         </FlexContainer>
       </CustomModal>

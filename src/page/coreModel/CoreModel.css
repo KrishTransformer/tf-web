@@ -1,5 +1,122 @@
+.core-model-page {
+  --core-page-text: #111827;
+  --core-page-muted: #5f6b7a;
+  --core-surface: #f0f0f0;
+  --core-surface-soft: #ebebeb;
+  --core-surface-strong: #f0f0f0;
+  --core-border: rgba(15, 23, 42, 0.14);
+  --core-border-strong: rgba(15, 23, 42, 0.22);
+  --core-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  --core-page-bg: transparent;
+  --core-btn-bg: #111827;
+  --core-btn-text: #ffffff;
+  --core-table-row-selected: #ffffff;
+  --core-diagram-bg: #ffffff;
+  --core-diagram-stroke: #223044;
+  --core-diagram-fill: #ffffff;
+  --core-diagram-highlight: #c3c3c3;
+  --app-input-bg: #ffffff;
+  --app-input-accent-bg: #d7f3fc;
+  --app-input-border: rgba(15, 23, 42, 0.22);
+  --app-input-text: #111827;
+  --app-input-accent-text: #1400fa;
+  --app-label-text: #111827;
+  --app-toggle-track: #ffffff;
+  --app-toggle-active: #d4ff00;
+  --app-toggle-active-text: #111111;
 
-th, td {
-  padding-left: 8px 
+  color: var(--core-page-text);
+}
+
+body.app-dark-mode .core-model-page {
+  --core-page-text: #edf4ff;
+  --core-page-muted: #9eb0ca;
+  --core-surface: #304865;
+  --core-surface-soft: #203147;
+  --core-surface-strong: #263a54;
+  --core-border: rgba(255, 255, 255, 0.08);
+  --core-border-strong: rgba(143, 181, 255, 0.24);
+  --core-shadow: 0 20px 42px rgba(2, 10, 24, 0.42);
+  --core-page-bg:
+    radial-gradient(circle at top right, rgba(77, 141, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, #101722 0%, #162233 100%);
+  --core-btn-bg: #3b82f6;
+  --core-btn-text: #ffffff;
+  --core-table-row-selected: #172233;
+  --core-diagram-bg: #203147;
+  --core-diagram-stroke: #9eb0ca;
+  --core-diagram-fill: #172233;
+  --core-diagram-highlight: #4d8dff;
+  --app-input-bg: #172233;
+  --app-input-accent-bg: #203147;
+  --app-input-border: rgba(255, 255, 255, 0.16);
+  --app-input-text: #edf4ff;
+  --app-input-accent-text: #9fc5ff;
+  --app-label-text: #edf4ff;
+  --app-toggle-track: #2b3e56;
+  --app-toggle-active: #8bc34a;
+  --app-toggle-active-text: #0d1608;
+}
+
+.core-model-shell {
+  margin: 0 -10px -10px;
+  min-height: 100vh;
+  padding: 10px;
+  background: var(--core-page-bg);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.core-model-page .core-card {
+  background: var(--core-surface);
+  color: var(--core-page-text);
+  border: 1px solid var(--core-border);
+  box-shadow: var(--core-shadow);
+}
+
+.core-model-page .core-card-soft {
+  background: var(--core-surface-soft);
+  border: 1px solid var(--core-border);
+}
+
+.core-model-page .core-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--core-page-text);
+  border: 1px solid var(--core-border-strong);
+  background: var(--core-surface);
+}
+
+.core-model-page .core-table th,
+.core-model-page .core-table td {
+  padding: 8px;
+  border: 1px solid var(--core-border);
+}
+
+.core-model-page .core-table th {
+  background: var(--core-surface-soft);
+}
+
+.core-model-page .core-table tbody tr {
+  background: var(--core-surface);
+}
+
+.core-model-page .core-table tbody tr.is-selected {
+  background: var(--core-table-row-selected);
+}
+
+.core-model-page .core-svg-container,
+.core-model-page .quarter-circle-container {
+  color: var(--core-page-text);
+}
+
+.core-model-page .core-svg-container {
+  background: var(--core-diagram-bg);
+  border: 1px solid var(--core-border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.core-model-page .quarter-circle-container {
+  background: transparent;
 }
 

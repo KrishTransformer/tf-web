@@ -5,8 +5,8 @@ const FilledBtn = ({
   width,
   fontSize = "16px",
   fontWeight = "600",
-  fontColor = "black",
-  bgColor = "#CCCCCC",
+  fontColor = "var(--app-label-text, black)",
+  bgColor = "var(--files-btn-bg, #CCCCCC)",
   padding = "7px 30px",
   borderRadius = "10px",
   ...props

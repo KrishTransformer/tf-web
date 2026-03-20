@@ -16,7 +16,7 @@ const Stiffners = ({ formState, handleInputChange }) => {
       key: "horizontalStiffenerPreview",
       label: "Horizontal Stiffener Preview",
       content: (
-        <Container bgColor="white" padding="10px" borderRadius="20px">
+        <Container bgColor="var(--fab-surface)" padding="10px" borderRadius="20px">
           <ImagePreview btnText="Maximize" />
         </Container>
       ),
@@ -25,7 +25,7 @@ const Stiffners = ({ formState, handleInputChange }) => {
       key: "verticalStiffenerPreview",
       label: "Vertical Stiffener Preview",
       content: (
-        <Container bgColor="white" padding="10px" borderRadius="20px">
+        <Container bgColor="var(--fab-surface)" padding="10px" borderRadius="20px">
           <ImagePreview btnText="Maximize" />
         </Container>
       ),

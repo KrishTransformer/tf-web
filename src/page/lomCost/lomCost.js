@@ -30,6 +30,9 @@ import "./lomCost.css";
 
 const LomCost = () => {
   const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => localStorage.getItem("appTheme") === "dark"
+  );
   const [lomCost, setLomCost] = useState([]);
   const [newEntry, setNewEntry] = useState({ materialName: "", materialRate: "" });
   const [editIndex, setEditIndex] = useState(null);
@@ -57,6 +60,21 @@ const LomCost = () => {
       setLomCost(transformed);
     }
   }, [lomMaterial?.data]);
+
+  useEffect(() => {
+    const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
+    setIsDarkMode(darkModeEnabled);
+
+    document.body.classList.toggle("app-dark-mode", darkModeEnabled);
+    document.body.style.background = darkModeEnabled ? "#101722" : "#f4f7fb";
+    document.documentElement.style.background = darkModeEnabled ? "#101722" : "#f4f7fb";
+
+    return () => {
+      document.body.classList.remove("app-dark-mode");
+      document.body.style.background = "";
+      document.documentElement.style.background = "";
+    };
+  }, []);
 
   const handleAdd = () => {
     if (!newEntry.materialName || !newEntry.materialRate) {
@@ -146,10 +164,24 @@ const LomCost = () => {
     }
   };
 
+  const lomTheme = {
+    surface: "var(--lom-surface)",
+    surfaceSoft: "var(--lom-surface-soft)",
+    surfaceAlt: "var(--lom-surface-alt)",
+    border: "var(--lom-border)",
+    borderSoft: "var(--lom-border-soft)",
+    text: "var(--lom-page-text)",
+    muted: "var(--lom-page-muted)",
+    headText: "var(--lom-table-head-text)",
+    rowHover: "var(--lom-row-hover)",
+    buttonBg: "var(--lom-btn-bg)",
+    buttonText: "var(--lom-btn-text)",
+  };
+
   return (
     <Layout hideSidebar>
       <ToastContainer />
-      <div className="lom-rate-page">
+      <div className={`lom-rate-page ${isDarkMode ? "lom-rate-page-dark" : ""}`}>
         <div className="lom-rate-header">
           <Button
             onClick={() => navigate("/home")}
@@ -193,8 +225,8 @@ const LomCost = () => {
               onClick={handleAdd}
               text="Add Material"
               width="100%"
-              bgColor="#1f2937"
-              fontColor="#ffffff"
+              bgColor={lomTheme.buttonBg}
+              fontColor={lomTheme.buttonText}
             />
           </div>
           <div className="lom-rate-count">
@@ -203,23 +235,24 @@ const LomCost = () => {
         </div>
 
         <Container
-          bgColor="white"
+          bgColor={lomTheme.surface}
           padding="0px"
           borderRadius="12px"
-          boxShadow="0 10px 24px rgba(16, 24, 40, 0.06)"
+          border={`1px solid ${lomTheme.borderSoft}`}
+          boxShadow="var(--lom-shadow)"
         >
           {lomMaterial?.isLoading ? (
             <FlexContainer align="center" justify="center" padding="20px">
               <CircularProgress />
             </FlexContainer>
           ) : (
-            <TableContainer component={Paper} className="lom-rate-table-wrap">
+            <TableContainer component={Paper} className="lom-rate-table-wrap" sx={{ backgroundColor: lomTheme.surface, boxShadow: "none" }}>
               <Table aria-label="lom cost table" size="small">
-                <TableHead sx={{ backgroundColor: "#f8fafc" }}>
+                <TableHead sx={{ backgroundColor: lomTheme.surfaceSoft }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Material Name</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Material Rate (Rs.)</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: "#334155" }}>
+                    <TableCell sx={{ fontWeight: 700, color: lomTheme.headText }}>Material Name</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: lomTheme.headText }}>Material Rate (Rs.)</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: lomTheme.headText }}>
                       Options
                     </TableCell>
                   </TableRow>
@@ -230,8 +263,9 @@ const LomCost = () => {
                       <TableRow
                         key={item.id || index}
                         sx={{
-                          "&:nth-of-type(even)": { backgroundColor: "#fcfdff" },
-                          "&:hover": { backgroundColor: "#f1f5f9" },
+                          backgroundColor: lomTheme.surface,
+                          "&:nth-of-type(even)": { backgroundColor: lomTheme.surfaceAlt },
+                          "&:hover": { backgroundColor: lomTheme.rowHover },
                         }}
                       >
                         <TableCell>
@@ -244,6 +278,14 @@ const LomCost = () => {
                               onChange={(e) =>
                                 setEditedEntry({ ...editedEntry, materialName: e.target.value })
                               }
+                              sx={{
+                                "& .MuiOutlinedInput-root": {
+                                  backgroundColor: "var(--app-input-bg)",
+                                  color: "var(--app-input-text)",
+                                  "& fieldset": { borderColor: "var(--app-input-border)" },
+                                },
+                                "& .MuiInputBase-input": { color: "var(--app-input-text)" },
+                              }}
                             />
                           ) : (
                             item.materialName
@@ -259,6 +301,14 @@ const LomCost = () => {
                               onChange={(e) =>
                                 setEditedEntry({ ...editedEntry, materialRate: e.target.value })
                               }
+                              sx={{
+                                "& .MuiOutlinedInput-root": {
+                                  backgroundColor: "var(--app-input-bg)",
+                                  color: "var(--app-input-text)",
+                                  "& fieldset": { borderColor: "var(--app-input-border)" },
+                                },
+                                "& .MuiInputBase-input": { color: "var(--app-input-text)" },
+                              }}
                             />
                           ) : (
                             `Rs. ${item.materialRate}`
@@ -267,13 +317,13 @@ const LomCost = () => {
                         <TableCell align="center">
                           {editIndex === index ? (
                             <>
-                              <IconButton onClick={handleSave} size="small" sx={{ color: "black" }}>
+                              <IconButton onClick={handleSave} size="small" sx={{ color: lomTheme.text }}>
                                 <FaSave />
                               </IconButton>
                               <IconButton
                                 onClick={() => setEditIndex(null)}
                                 size="small"
-                                sx={{ color: "black" }}
+                                sx={{ color: lomTheme.text }}
                               >
                                 <FaBan />
                               </IconButton>
@@ -283,7 +333,7 @@ const LomCost = () => {
                               <IconButton
                                 onClick={() => handleEdit(index)}
                                 size="small"
-                                sx={{ color: "black" }}
+                                sx={{ color: lomTheme.text }}
                                 className="lom-rate-action-btn"
                               >
                                 <FaEdit />
@@ -295,7 +345,7 @@ const LomCost = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={3} align="center" sx={{ padding: "28px 12px", color: "#64748b" }}>
+                      <TableCell colSpan={3} align="center" sx={{ padding: "28px 12px", color: lomTheme.muted }}>
                         No materials available. Add your first material rate above.
                       </TableCell>
                     </TableRow>

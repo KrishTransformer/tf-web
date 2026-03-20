@@ -23,9 +23,10 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
       </Container> */}
 
       <Container
-        bgColor="white"
+        className="two-winding-card"
+        bgColor="var(--tw-surface)"
         padding="20px"
-        borderRadius="5px"
+        borderRadius="10px"
         margin="0px 0px 20px 0px"
       >
         <FlexContainer>
@@ -34,7 +35,7 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
             type="text"
             value={formState.coilDimensions?.coreGap}
             onChange={(e) => handleInputChange("coilDimensions.coreGap", e.target.value)}
-             bgColor="#D7F3FC"
+             bgColor="var(--app-input-accent-bg)"
              onMouseEnter={() => handleHover("coreToLvClrComment")}
              onMouseLeave={() => handleMouseLeave()}
             
@@ -44,7 +45,7 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
             type="text"
             value={formState.coilDimensions?.lvhvgap}
             onChange={(e) => handleInputChange("coilDimensions.lvhvgap", e.target.value)}
-             bgColor="#D7F3FC"
+             bgColor="var(--app-input-accent-bg)"
              onMouseEnter={() => handleHover("lvToHvClrComment")}
              onMouseLeave={() => handleMouseLeave()}
             
@@ -54,7 +55,7 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
             type="text"
             value={formState.coilDimensions?.hvhvgap}
             onChange={(e) => handleInputChange("coilDimensions.hvhvgap", e.target.value)}
-             bgColor="#D7F3FC"
+             bgColor="var(--app-input-accent-bg)"
              onMouseEnter={() => handleHover("hvToHvClrComment")}
              onMouseLeave={() => handleMouseLeave()}
             
@@ -81,24 +82,15 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
         </FlexContainer> */}
       </Container>
 
-      <Container bgColor="white" padding="20px" borderRadius="5px">
+      <Container className="two-winding-card" bgColor="var(--tw-surface)" padding="20px" borderRadius="10px">
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            cursor: "pointer",
-          }}
+          className="two-winding-accordion-trigger"
           onClick={toggleTabsVisibility}
         >
-          <h5>More Info</h5>
+          <h5 className="two-winding-accordion-title">More Info</h5>
           <button
             type="button"
-            style={{
-              border: "none",
-              background: "transparent",
-              fontSize: "16px",
-            }}
+            className="two-winding-icon-btn"
           >
             {isTabsVisible ? <IoIosArrowDown size={23} /> : <IoIosArrowForward size={23} /> }
           </button>

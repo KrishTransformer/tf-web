@@ -5,16 +5,16 @@ export const StyledDialog = styled(Dialog)({
 		"& .MuiDialog-container": {
 			"& .MuiDialog-paper": {
 				maxWidth: "288px",
-				background: "#F1F4F6",
+				background: "var(--app-modal-bg, #F1F4F6)",
 				padding: "24px",
-				border: "1px solid #FFFFFF",
+				border: "1px solid var(--app-modal-border, #FFFFFF)",
 				borderRadius: "12px",
 				"& .MuiDialogTitle-root": {
 					padding: "0px",
 					display: "flex",
 					justifyContent: "center",
 					"& .MuiTypography-root": {
-						color: "#00172F",
+						color: "var(--app-modal-text, #00172F)",
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "space-between",

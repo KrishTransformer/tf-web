@@ -36,7 +36,7 @@ const Part3 = ({ formState, handleInputChange }) => {
 
   return (
     <Container margin="0px 0px 10px 0px">
-      <Container bgColor="white" padding="20px" borderRadius="5px">
+      <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="20px" borderRadius="10px">
         <div
           style={{
             display: "flex",
@@ -76,7 +76,7 @@ const Part3 = ({ formState, handleInputChange }) => {
         )}
       </Container>
 
-      <Container bgColor="white" padding="10px" borderRadius="20px" margin="10px 0px 0px 0px">
+      <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="10px" borderRadius="20px" margin="10px 0px 0px 0px">
 
         <ImagePreview btnText="Maximize" btnOnClick={handleOpen}
           disablebtn={generate3d?.data?.blob?.includes?.("generate3d") === true

@@ -35,10 +35,14 @@ import PendingIcon from '@mui/icons-material/Pending';
 import { StepperContainer, StyledStepLabel, TimeText, } from "../../styles/components/StepperStyles";
 import { Divider } from "@mui/material";
 import { io } from 'socket.io-client';
+import "./FabricationTheme.css";
 //const socket = io('http://localhost:5000'); //https://tf-cad-server.trafointel.com
 //const socket = io('https://tf-cad-server.trafointel.com');
 const Fabrication = () => {
   const { id } = useParams();
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => localStorage.getItem("appTheme") === "dark"
+  );
   const { twoWindings } = useSelector(selectCalc);
   console.log("twoWindings:", twoWindings.data.designId);
   const { fabrication } = useSelector(selectFabrication);
@@ -338,6 +342,21 @@ const Fabrication = () => {
   });
 
   useEffect(() => {
+    const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
+    setIsDarkMode(darkModeEnabled);
+
+    if (darkModeEnabled) {
+      document.body.classList.add("app-dark-mode");
+      document.body.style.backgroundColor = "#101722";
+      document.documentElement.style.backgroundColor = "#101722";
+    } else {
+      document.body.classList.remove("app-dark-mode");
+      document.body.style.backgroundColor = "#ebebeb";
+      document.documentElement.style.backgroundColor = "#ebebeb";
+    }
+  }, []);
+
+  useEffect(() => {
     //console.log("fab:", fabrication);
     //console.log("fabrication?.tank?.tank_L:", fabrication?.data?.tank?.tank_L);
     if (
@@ -610,6 +629,8 @@ const Fabrication = () => {
         currentPath: twoWindings.data?.designId,
       }}
     >
+      <div className={`fabrication-page ${isDarkMode ? "fabrication-page-dark" : ""}`}>
+      <div className="fabrication-page-shell">
       <div className="row m-1 align-items-start">
         <div className="col-xl-4 mt-3">
           <Part1
@@ -639,23 +660,34 @@ const Fabrication = () => {
               Calculate
             </button>
             {/* Drawer */}
-            <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-              <Box sx={{ pt: 2, pr: 2, pb: 2, width: 550, pl: 2 }}>
+            <Drawer
+              anchor="right"
+              open={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+              PaperProps={{
+                sx: {
+                  width: 550,
+                  bgcolor: isDarkMode ? "#172233" : "#ffffff",
+                  color: isDarkMode ? "#edf4ff" : "#111111",
+                },
+              }}
+            >
+              <Box sx={{ pt: 2, pr: 2, pb: 2, pl: 2 }}>
 
                 <Box display="flex" justifyContent="space-between" alignItems="center" >
-                  <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
+                  <Typography variant="h6" gutterBottom sx={{ mt: 1, color: "inherit" }}>
                     Fabrication 3D Generation Status
                   </Typography>
                   <IconButton onClick={() => setDrawerOpen(false)} sx={{ mt: 1 }}>
-                    <CloseIcon />
+                    <CloseIcon sx={{ color: "inherit" }} />
                   </IconButton>
                 </Box>
 
-                <Divider sx={{ width: "100%", my: 1, borderBottomWidth: 2 }} />
+                <Divider sx={{ width: "100%", my: 1, borderBottomWidth: 2, borderColor: isDarkMode ? "rgba(255,255,255,0.12)" : undefined }} />
 
                 {/* Duration and Status Header */}
                 <Box display="flex" justifyContent="space-between" alignItems="center" >
-                  <Typography variant="subtitle1">
+                  <Typography variant="subtitle1" sx={{ color: "inherit" }}>
                     <AccessTimeIcon fontSize="small" sx={{ verticalAlign: "middle", mr: 1 }} />
                     Duration: <strong>{totalDuration}</strong>
                   </Typography>
@@ -675,7 +707,7 @@ const Fabrication = () => {
                   </Typography>
                 </Box>
 
-                <Divider sx={{ width: "100%", my: 1, borderBottomWidth: 2 }} />
+                <Divider sx={{ width: "100%", my: 1, borderBottomWidth: 2, borderColor: isDarkMode ? "rgba(255,255,255,0.12)" : undefined }} />
 
                 <Box sx={{ pt: 2, pl: 6, ml: 3 }}>
                   {/* Stepper with Time and Text Content */}
@@ -796,6 +828,8 @@ const Fabrication = () => {
         message="CAD drawings generation inprogress, Check after 5 minutes"
       // action={action}
       />
+      </div>
+      </div>
       {/* <Alert
           // onClose={handleClose}
           severity="success"

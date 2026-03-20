@@ -12,14 +12,15 @@
   padding: 10px;
   cursor: pointer;
   text-align: center;
-  background-color: #f0f0f0;
+  background-color: var(--app-input-bg, #f0f0f0);
   transition: background-color 0.3s, border-color 0.3s;
   border-bottom: 2px solid transparent;
+  color: var(--app-tab-text, #00000080);
 }
 
 .nav-tab.active {
-  color: #000000;
-  border-bottom-color: #000000;
+  color: var(--app-tab-active-text, #000000);
+  border-bottom-color: var(--app-tab-active-border, #000000);
 }
 
 .nav-tab-content {

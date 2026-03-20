@@ -4,7 +4,7 @@
 }
 
 .nav-tabs .nav-tab {
-  color: #00000080;
+  color: var(--app-tab-text, #00000080);
   /* background-color: #EEEEF1; */
   background: transparent;
   padding: 5px 5px;
@@ -16,8 +16,8 @@
 }
 
 .nav-tabs .nav-tab.active {
-  color: #000000;
-  border-bottom: 2px solid #000000;
+  color: var(--app-tab-active-text, #000000);
+  border-bottom: 2px solid var(--app-tab-active-border, #000000);
   padding-bottom: 0.5rem;
 }
 

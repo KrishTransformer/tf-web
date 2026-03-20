@@ -4,12 +4,13 @@
   align-items: center;
   padding: 10px 20px;
   height: 60px;
-  background: #fff;
+  background: var(--app-topbar-bg, #fff);
+  border-bottom: 1px solid var(--app-topbar-border, rgba(15, 23, 42, 0.08));
 }
 
 .logo {
   font-size: 24px;
-  color: #00000099;
+  color: var(--app-topbar-text, #00000099);
   font-weight: 600;
 }
 
@@ -27,7 +28,7 @@
   margin: 0 5px;
   padding: 8px 16px;
   /* color: var(--light-white); */
-  color: var(--dark-charcoal);
+  color: var(--app-topbar-text, var(--dark-charcoal));
   cursor: pointer;
   /* border-radius: 30px; */
   border-radius: none;
@@ -37,27 +38,25 @@
 .nav-item.active {
   /* background-color: var(--neon-green); */
   background: transparent;
-  color: var(--dark-charcoal);
+  color: var(--app-topbar-current, var(--dark-charcoal));
   font-weight: 600;
-  border-bottom: 2px solid var(--dark-charcoal);
+  border-bottom: 2px solid var(--app-topbar-current, var(--dark-charcoal));
 }
 
 .icon {
   margin-right: 5px;
-  /* color: var(--dark-charcoal); */
-  color: var(--light-white);
+  color: var(--app-topbar-text, var(--light-white));
 }
 
 .icon.active-icon {
   margin-right: 5px;
-  color: var(--dark-charcoal);
-  /* color: var(--light-white); */
+  color: var(--app-topbar-current, var(--dark-charcoal));
 }
 
 .menu-icon {
   display: none;
   font-size: 24px;
-  color: #00000099;
+  color: var(--app-topbar-text, #00000099);
   cursor: pointer;
 }
 
@@ -78,8 +77,8 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: var(--app-topbar-bg, white);
+  border: 1px solid var(--app-topbar-border, #ccc);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   padding: 10px;
@@ -100,7 +99,7 @@
 }
 
 .dropdownItem:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(127, 147, 170, 0.16);
 }
 
 .core-svg-container {
@@ -140,7 +139,7 @@
     transform: translateY(0);
     pointer-events: auto;
     z-index: 1000;
-    background-color: #ffffff;
+    background-color: var(--app-topbar-bg, #ffffff);
   }
 
   .menu-icon {
@@ -148,7 +147,7 @@
   }
 
   .nav-item.active {
-    background-color: var(--dark-charcoal);
+    background-color: var(--app-topbar-current, var(--dark-charcoal));
     color: var(--light-white);
     font-weight: 600;
     width: 50vw;
@@ -161,7 +160,7 @@
 
   .icon {
     margin-right: 5px;
-    color: var(--dark-charcoal);
+    color: var(--app-topbar-text, var(--dark-charcoal));
   }
 
   .nav-item.active .icon{

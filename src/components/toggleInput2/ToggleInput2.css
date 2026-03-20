@@ -2,8 +2,8 @@
   display: flex;
   align-items: center;
   width: 100%;
-  background: #D7F3FC;
-  border: 0.5px solid #00000033;
+  background: var(--app-input-accent-bg, #D7F3FC);
+  border: 0.5px solid var(--app-input-border, #00000033);
   border-radius: 4px;
   min-height: 30px;
   box-sizing: border-box;
@@ -21,7 +21,7 @@
   padding: 0 6px;
   min-width: 0;
   outline: none;
-  color: #222;
+  color: var(--app-input-text, #222);
   box-sizing: border-box;
 }
 
@@ -32,12 +32,12 @@
 .tgi2-toggle-switch {
   width: 30px;
   height: 25px;
-  background: #d4ff00;
+  background: var(--app-toggle-active, #d4ff00);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-left: 0.5px solid #00000033;
+  border-left: 0.5px solid var(--app-input-border, #00000033);
   box-sizing: border-box;
   border-radius: 0 4px 4px 0;
   transition: background 0.2s ease;
@@ -52,7 +52,7 @@
   justify-content: center;
   font-size: 14px;
   font-weight: 700;
-  color: #111;
+  color: var(--app-toggle-active-text, #111);
   user-select: none;
   line-height: 1;
 }
@@ -62,5 +62,5 @@
   font-weight: 600;
   margin-bottom: 4px;
   display: block;
-  color: #333;
+  color: var(--app-label-text, #333);
 }

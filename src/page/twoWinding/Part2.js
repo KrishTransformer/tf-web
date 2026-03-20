@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   CustomInput,
-  // FlexContainer,
   Container,
   TextTypo,
-  InputWithModal,
-  InputWithRadioModal,
 } from "../../components";
 import Input2WithModal from "../../components/input2WithModal/Input2WithModal";
 import Input2WithRadioModal from "../../components/input2WithRadioModal/Input2WithRadioModal";
@@ -20,32 +17,40 @@ const Part2 = ({
   handleMouseLeave,
 }) => {
   const isDryType = formState.dryType === true || formState.dryType === "true";
+  const sectionColors = {
+    lvAccent: "var(--tw-accent-blue)",
+    hvAccent: "var(--tw-accent-orange)",
+    fieldBase: "var(--app-input-bg)",
+    fieldHighlight: "var(--app-input-accent-bg)",
+  };
+  const defaultFieldColors = {
+    bgColorLV: sectionColors.fieldBase,
+    bgColorHV: sectionColors.fieldBase,
+  };
+  const highlightedFieldColors = {
+    bgColorLV: sectionColors.fieldHighlight,
+    bgColorHV: sectionColors.fieldHighlight,
+  };
   const fieldData = [
     {
       key: "turnsPerPhase",
       label: "No. of Turns",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
       showUnlockIconLv: true,
     },
     { key: "phaseCurrent", label: "Phase Current (A)" },
     {
       key: "currentDensity",
       label: "Current Density (A/mm2)",
-      // bgColorLV: "#D7F3FC",
-      // bgColorHV: "#D7F3FC",
-      // borderColorLV: "#FF4500",
     },
     {
       key: "condCrossSec",
       label: "Cond. Cross Sec (mm2)",
-      // borderColorLV: "#FF4500",
     },
     {
       key: "conductorSizes",
       label: "Conductor Sizes (mm)",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
       showUnlockIconLv: true,
       showUnlockIconHv: true,
       label1: "Breadth",
@@ -61,14 +66,12 @@ const Part2 = ({
     {
       key: "condInsulation",
       label: "Cond. Insulation (mm)",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
     },
     {
       key: "noInParallel",
       label: "No. in Parallel",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
       showUnlockIconLv: true,
       showUnlockIconHv: true,
       label1: "No in Radial",
@@ -84,20 +87,17 @@ const Part2 = ({
     {
       key: "noOfLayers",
       label: "No. of Layers",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
     },
     {
       key: "interLayerInsulation",
       label: "Inter Layer Insulation (mm)",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
     },
     {
       key: "noOfDuctsWidth",
       label: "No. of Ducts / Width",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
       label1: "No Of Ducts",
       label2: "Duct Width",
       key1: "ducts",
@@ -108,8 +108,7 @@ const Part2 = ({
     {
       key: "endClearances",
       label: "End Clearances (mm)",
-      bgColorLV: "#D7F3FC",
-      bgColorHV: "#D7F3FC",
+      ...highlightedFieldColors,
     },
     { key: "eddyStrayLoss", label: "Eddy (Stray) Loss (%)" },
     { key: "tempGradDegC", label: "Temp. Grad. deg C" },
@@ -117,19 +116,22 @@ const Part2 = ({
     { key: "loadLoss", label: "Load Loss (W)" },
     // { key: "terminal", label: "Terminal" },
     // { key: "commRawCond", label: "Comm. Raw Cond." },
-  ];
+  ].map((field) => ({
+    ...defaultFieldColors,
+    ...field,
+  }));
 
   return (
-    <Container bgColor="white" padding="30px 20px" borderRadius="5px">
+    <Container className="two-winding-card" bgColor="var(--tw-surface)" padding="30px 20px" borderRadius="10px">
       <div className="d-flex justify-content-between">
         <TextTypo
           text="Inner Winding LV"
-          fontColor="#0081FF"
+          fontColor={sectionColors.lvAccent}
           margin="10px 0px"
         />
         <TextTypo
           text="Outer Winding HV"
-          fontColor="#FF5B1E"
+          fontColor={sectionColors.hvAccent}
           margin="10px 0px"
         />
       </div>
@@ -180,7 +182,7 @@ const Part2 = ({
                 text={field.label}
                 fontSize="13px"
                 fontWeight="600"
-                fontColor="#000"
+                fontColor="var(--tw-page-text)"
                 textAlign="center"
               />
             </div>
@@ -269,7 +271,7 @@ const Part2 = ({
                 text={field.label}
                 fontSize="13px"
                 fontWeight="600"
-                fontColor="#000"
+                fontColor="var(--tw-page-text)"
                 textAlign="center"
               />
             </div>
@@ -320,7 +322,7 @@ const Part2 = ({
               <div className="col-4">
                 <ToggleInput2
                   // label={field.label}
-                  labelColor="#0081FF"
+                  labelColor={sectionColors.lvAccent}
                   value={formState.innerWindings.condInsulation}
                   onValueChange={(val) =>
                     handleInputChange("innerWindings.condInsulation", val)
@@ -338,14 +340,14 @@ const Part2 = ({
                   text={field.label}
                   fontSize="13px"
                   fontWeight="600"
-                  fontColor="#000"
+                  fontColor="var(--tw-page-text)"
                   textAlign="center"
                 />
               </div>
               <div className="col-4">
                 <ToggleInput2
                   // label={field.label}
-                  labelColor="#FF5B1E"
+                  labelColor={sectionColors.hvAccent}
                   value={formState.outerWindings.condInsulation}
                   onValueChange={(val) =>
                     handleInputChange("outerWindings.condInsulation", val)
@@ -444,7 +446,7 @@ const Part2 = ({
                     text={field.label}
                     fontSize="13px"
                     fontWeight="600"
-                    fontColor="#000"
+                  fontColor="var(--tw-page-text)"
                     textAlign="center"
                   />
                 </div>
@@ -512,6 +514,7 @@ const Part2 = ({
               onChange={(e) =>
                 handleInputChange("innerWindings.terminal", e.target.value)
               }
+              bgColor={sectionColors.fieldBase}
             />
           </div>
           <div className="col">
@@ -519,7 +522,7 @@ const Part2 = ({
               text="Terminal"
               fontSize="13px"
               fontWeight="600"
-              fontColor="#000"
+              fontColor="var(--tw-page-text)"
               textAlign="center"
             />
           </div>
@@ -534,6 +537,7 @@ const Part2 = ({
               onChange={(e) =>
                 handleInputChange("outerWindings.terminal", e.target.value)
               }
+              bgColor={sectionColors.fieldBase}
             />
           </div>
         </div>

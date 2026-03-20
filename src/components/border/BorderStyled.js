@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BorderStyled = ({ borderColor = '#00000080', margin = '0px', borderStyle = 'solid' ,borderWidth = "100%", borderHeight = "2px"}) => {
+const BorderStyled = ({ borderColor = 'var(--app-input-border, #00000080)', margin = '0px', borderStyle = 'solid' ,borderWidth = "100%", borderHeight = "2px"}) => {
   const style = {
     border: 'none',
     borderTop: `${borderHeight} ${borderStyle} ${borderColor}`,

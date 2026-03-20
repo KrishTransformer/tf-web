@@ -53,9 +53,135 @@ import { useActions } from "../../app/use-Actions";
 import { fetchFile, addDataToLom, deleteDataFromLom, addCustomer } from "../../actions/FileActions";
 import { selectEntity } from "../../selectors/EntitySelector";
 import { fetchEntity, addEntity } from "../../actions/EntityActions";
+import "./FilesTheme.css";
+
+const buildLomPayload = ({ fabrication, twoWindings, materialData, rateOverrides = {} }) => {
+  const lomBooleans = {
+    hvCableBox: fabrication.data.hvcb.hvcb == false ? false : true,
+    lvCableBox: fabrication.data.lvcb.lvcb == false ? false : true,
+    hvBushing: fabrication.data.hvcb.hvcb == false ? true : false,
+    lvBushing: fabrication.data.lvcb.lvcb == false ? true : false,
+    permaWood: true,
+    drainValve: fabrication.data.drain_Vlv.drain_Vlv,
+    filterValve: fabrication.data.fill_Vlv.fill_Vlv,
+    samplingValve: fabrication.data.smpl_Vlv.smpl_Vlv,
+    relayShutOffValve: true,
+    thermometerPocket: true,
+    airReleasePlug: true,
+    oltc: twoWindings.data.isOLTC,
+    octc: twoWindings.data.isOLTC === true ? false : true,
+    oti: true,
+    wti: true,
+    buchholzRelay: true,
+    marshallingBox: true,
+    oilLevelGauge: twoWindings.data.isCSP === false ? true : false,
+    mog: fabrication.data.mog.mog,
+    pressureReliefValve: fabrication.data.restOfVariables.prv,
+    oilCirculatingPump: true,
+    avrrtcc: true,
+    rollers: fabrication.data.roller.roller,
+    pumpControlCubicle: true,
+    biMetallicConnector: true,
+    fasteners: true,
+  };
+
+  const lomQuantity = {
+    lamination: twoWindings.data.core.coreWeight,
+    hvConductor: twoWindings.data.hvFormulas.hvProcurementWeight,
+    lvConductor: twoWindings.data.lvFormulas.lvProcurementWeight,
+    hvConnectionLeads: twoWindings.data.tankAndOilFormulas.hvConnectionWeight,
+    lvConnectionLeads: twoWindings.data.tankAndOilFormulas.lvConnectionWeight,
+    insulationMaterial: twoWindings.data.tankAndOilFormulas.insulationWeight,
+    transformerOil: twoWindings.data.tankAndOilFormulas.totalOil,
+    tankLidEtc: twoWindings.data.tankAndOilFormulas.weightOfTankAndAcc,
+    hvCableBox: 1,
+    lvCableBox: 1,
+    hvBushing: twoWindings.data.vectorGroup.charAt(0) == "D" ? 3 : 4,
+    lvBushing: twoWindings.data.vectorGroup.charAt(1) == "d" ? 3 : 4,
+    radiatorsAndHeatExc: twoWindings.data.tankAndOilFormulas.totalRadiatorWeight,
+    permaWood: 0.0,
+    drainValve: fabrication.data.drain_Vlv.drain_Vlv_Nos,
+    filterValve: fabrication.data.fill_Vlv.fill_Vlv_Nos,
+    samplingValve: fabrication.data.smpl_Vlv.smpl_Vlv_Nos,
+    relayShutOffValve: 0.0,
+    breatherSilicaGel: 1,
+    ratingPlate: 1,
+    thermometerPocket: 1,
+    airReleasePlug: 0.0,
+    coreBoltsAndTieRods: twoWindings.data.tankAndOilFormulas.channelWeight,
+    oltc: 1,
+    octc: 1,
+    oti: 0.0,
+    wti: 0.0,
+    buchholzRelay: 0.0,
+    marshallingBox: 0.0,
+    oilLevelGauge: fabrication.data.cons.cons_Olg_Nos,
+    mog: 1,
+    pressureReliefValve: 0.0,
+    oilCirculatingPump: 0.0,
+    avrrtcc: 0.0,
+    rollers: 4,
+    pumpControlCubicle: 0.0,
+    biMetallicConnector: 0.0,
+    fasteners: 0.0,
+    otherMaterials: 0.0,
+  };
+
+  const lomRate = {
+    lamination: rateOverrides.lamination ?? materialData[0]?.materialRate ?? 0.0,
+    hvConductor: rateOverrides.hvConductor ?? materialData[1]?.materialRate ?? 0.0,
+    lvConductor: rateOverrides.lvConductor ?? materialData[2]?.materialRate ?? 0.0,
+    hvConnectionLeads: rateOverrides.hvConnectionLeads ?? materialData[3]?.materialRate ?? 0.0,
+    lvConnectionLeads: rateOverrides.lvConnectionLeads ?? materialData[4]?.materialRate ?? 0.0,
+    insulationMaterial: rateOverrides.insulationMaterial ?? materialData[5]?.materialRate ?? 0.0,
+    transformerOil: rateOverrides.transformerOil ?? materialData[6]?.materialRate ?? 0.0,
+    tankLidEtc: rateOverrides.tankLidEtc ?? materialData[7]?.materialRate ?? 0.0,
+    ...(lomBooleans.hvCableBox && { hvCableBox: rateOverrides.hvCableBox ?? materialData[8]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.lvCableBox && { lvCableBox: rateOverrides.lvCableBox ?? materialData[9]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.hvBushing && { hvBushing: rateOverrides.hvBushing ?? materialData[10]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.lvBushing && { lvBushing: rateOverrides.lvBushing ?? materialData[11]?.materialRate ?? 0.0 }),
+    radiatorsAndHeatExc: rateOverrides.radiatorsAndHeatExc ?? materialData[12]?.materialRate ?? 0.0,
+    permaWood: rateOverrides.permaWood ?? materialData[13]?.materialRate ?? 0.0,
+    ...(lomBooleans.drainValve && { drainValve: rateOverrides.drainValve ?? materialData[14]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.filterValve && { filterValve: rateOverrides.filterValve ?? materialData[15]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.samplingValve && { samplingValve: rateOverrides.samplingValve ?? materialData[16]?.materialRate ?? 0.0 }),
+    relayShutOffValve: rateOverrides.relayShutOffValve ?? materialData[17]?.materialRate ?? 0.0,
+    breatherSilicaGel: rateOverrides.breatherSilicaGel ?? materialData[18]?.materialRate ?? 0.0,
+    ratingPlate: rateOverrides.ratingPlate ?? materialData[19]?.materialRate ?? 0.0,
+    thermometerPocket: rateOverrides.thermometerPocket ?? materialData[20]?.materialRate ?? 0.0,
+    airReleasePlug: rateOverrides.airReleasePlug ?? materialData[21]?.materialRate ?? 0.0,
+    coreBoltsAndTieRods: rateOverrides.coreBoltsAndTieRods ?? materialData[22]?.materialRate ?? 0.0,
+    ...(lomBooleans.oltc && { oltc: rateOverrides.oltc ?? materialData[23]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.octc && { octc: rateOverrides.octc ?? materialData[24]?.materialRate ?? 0.0 }),
+    oti: rateOverrides.oti ?? materialData[25]?.materialRate ?? 0.0,
+    wti: rateOverrides.wti ?? materialData[26]?.materialRate ?? 0.0,
+    buchholzRelay: rateOverrides.buchholzRelay ?? materialData[27]?.materialRate ?? 0.0,
+    marshallingBox: rateOverrides.marshallingBox ?? materialData[28]?.materialRate ?? 0.0,
+    ...(lomBooleans.oilLevelGauge && { oilLevelGauge: rateOverrides.oilLevelGauge ?? materialData[29]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.mog && { mog: rateOverrides.mog ?? materialData[30]?.materialRate ?? 0.0 }),
+    ...(lomBooleans.pressureReliefValve && { pressureReliefValve: rateOverrides.pressureReliefValve ?? materialData[31]?.materialRate ?? 0.0 }),
+    oilCirculatingPump: rateOverrides.oilCirculatingPump ?? materialData[32]?.materialRate ?? 0.0,
+    avrrtcc: rateOverrides.avrrtcc ?? materialData[33]?.materialRate ?? 0.0,
+    ...(lomBooleans.rollers && { rollers: rateOverrides.rollers ?? materialData[34]?.materialRate ?? 0.0 }),
+    pumpControlCubicle: rateOverrides.pumpControlCubicle ?? materialData[35]?.materialRate ?? 0.0,
+    biMetallicConnector: rateOverrides.biMetallicConnector ?? materialData[36]?.materialRate ?? 0.0,
+    fasteners: rateOverrides.fasteners ?? materialData[37]?.materialRate ?? 0.0,
+    otherMaterials: rateOverrides.otherMaterials ?? materialData[38]?.materialRate ?? 0.0,
+  };
+
+  return {
+    isTrue: true,
+    lomBooleans,
+    lomQuantity,
+    lomRate,
+  };
+};
 
 const Files = () => {
   const { id } = useParams();
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => localStorage.getItem("appTheme") === "dark"
+  );
   const { twoWindings } = useSelector(selectCalc);
   const { fabrication } = useSelector(selectFabrication);
   const { core } = useSelector(selectCore);
@@ -111,6 +237,18 @@ const Files = () => {
     },
   ];
 
+  const filesTheme = {
+    card: "var(--files-surface)",
+    cardSoft: "var(--files-surface-soft)",
+    border: "var(--files-border)",
+    borderStrong: "var(--files-border-strong)",
+    text: "var(--files-page-text)",
+    muted: "var(--files-page-muted)",
+    buttonBg: "var(--files-btn-bg)",
+    buttonText: "var(--files-btn-text)",
+    accentRow: "var(--files-accent-row)",
+  };
+
 
   //Cell-style
   const styleCell = {
@@ -118,8 +256,10 @@ const Files = () => {
     fontWeight: "600",
     padding: "10px",
     fontFamily: "'Segoe UI', sans-serif !important",
-    border: "1px solid #ddd",
-    fontWeight: "bold !important"
+    border: `1px solid ${filesTheme.border}`,
+    fontWeight: "bold !important",
+    backgroundColor: filesTheme.cardSoft,
+    color: filesTheme.text,
   };
   //Row-Style
   const styleRow = {
@@ -127,16 +267,20 @@ const Files = () => {
     fontWeight: "400",
     padding: "8px",
     fontFamily: "'Segoe UI', sans-serif !important",
-    border: "1px solid #ddd"
+    border: `1px solid ${filesTheme.border}`,
+    color: filesTheme.text,
+    backgroundColor: filesTheme.card,
   };
 
   //Add-item style
   const styleAddItem = {
-    backgroundColor: "rgb(27, 27, 27)",
+    backgroundColor: filesTheme.buttonBg,
+    color: filesTheme.buttonText,
     fontFamily: "'Segoe UI',sans-serif",
     fontSize: "15px",
     margin: "5px",
-    textTransform: "none"
+    textTransform: "none",
+    border: `1px solid ${filesTheme.buttonBg}`,
   };
 
   //State variable for show input field
@@ -191,130 +335,19 @@ const Files = () => {
 
   //Payload for LOM
   const materialData = lomMaterial?.data?.data || [];
-  const [lomPayload, setlomPayload] = useState({
-    isTrue: true,
-    lomBooleans: {
-      hvCableBox: fabrication.data.hvcb.hvcb == false ? false : true,
-      lvCableBox: fabrication.data.lvcb.lvcb == false ? false : true,
-      hvBushing: fabrication.data.hvcb.hvcb == false ? true : false,
-      lvBushing: fabrication.data.lvcb.lvcb == false ? true : false,
-      permaWood: true,
-      drainValve: fabrication.data.drain_Vlv.drain_Vlv,
-      filterValve: fabrication.data.fill_Vlv.fill_Vlv,
-      samplingValve: fabrication.data.smpl_Vlv.smpl_Vlv,
-      relayShutOffValve: true, // false in payload //{no changes for now}
-      thermometerPocket: true,
-      airReleasePlug: true, // Air Release Plug - false - doesn't need this - {left as blank}
-      oltc: twoWindings.data.isOLTC,
-      octc: twoWindings.data.isOLTC === true ? false : true,
-      oti: true, // false in payload -  {left as blank}
-      wti: true, // false in payload -  {left as blank}
-      buchholzRelay: true, // {no changes required for now}
-      marshallingBox: true, // {no changes required for now}
-      oilLevelGauge: twoWindings.data.isCSP === false ? true : false,
-      //mog: fabrication.data.mog.mog,
-      mog: false,
-      //pressureReliefValve: fabrication.data.restOfVariables.prv, // {no changes required for now}
-      pressureReliefValve: false, // {no changes required for now}
-
-      oilCirculatingPump: true, // {no changes required for now}
-      avrrtcc: true, // {no changes required for now}
-      rollers: fabrication.data.roller.roller,
-      pumpControlCubicle: true, // {no changes required for now}
-      biMetallicConn: true, // {no changes required for now}
-      fasteners: true, // {no changes required for now}
-    },
-    lomQuantity: {
-      lamination: twoWindings.data.core.coreWeight,
-      hvConductor: twoWindings.data.hvFormulas.hvProcurementWeight,
-      lvConductor: twoWindings.data.lvFormulas.lvProcurementWeight,
-      hvConnectionLeads: twoWindings.data.tankAndOilFormulas.hvConnectionWeight,
-      lvConnectionLeads: twoWindings.data.tankAndOilFormulas.lvConnectionWeight,
-      insulationMaterial: twoWindings.data.tankAndOilFormulas.insulationWeight,
-      transformerOil: twoWindings.data.tankAndOilFormulas.totalOil,
-      tankLidEtc: twoWindings.data.tankAndOilFormulas.weightOfTankAndAcc,
-      hvCableBox: 1,
-      lvCableBox: 1,
-      hvBushing: twoWindings.data.vectorGroup.charAt(0) == "D" ? 3 : 4,
-      lvBushing: twoWindings.data.vectorGroup.charAt(1) == "d" ? 3 : 4,
-      radiatorsAndHeatExc: twoWindings.data.tankAndOilFormulas.totalRadiatorWeight,
-      permaWood: 0.0,
-      drainValve: fabrication.data.drain_Vlv.drain_Vlv_Nos,
-      filterValve: fabrication.data.fill_Vlv.fill_Vlv_Nos,
-      samplingValve: fabrication.data.smpl_Vlv.smpl_Vlv_Nos,
-      relayShutOffValve: 0.0, //skipped for now
-      breatherSilicaGel: 1, //have doubt [Breather Si Gel	- "cons_Breath": true ? 1 : doesn't need this ]
-      ratingPlate: 1,
-      thermometerPocket: 1, //hardcoded for now
-      airReleasePlug: 0.0, //skipped for now
-      coreBoltsAndTieRods: twoWindings.data.tankAndOilFormulas.channelWeight,
-      oltc: 1,
-      octc: 1,
-      oti: 0.0, //skipped for now
-      wti: 0.0, //skipped for now
-      buchholzRelay: 0.0, //skipped for now
-      marshallingBox: 0.0, //skipped for now
-      oilLevelGauge: fabrication.data.cons.cons_Olg_Nos,
-      mog: 1,
-      pressureReliefValve: 0.0, //skipped for now
-      oilCirculatingPump: 0.0, //skipped for now
-      avrrtcc: 0.0, //skipped for now
-      rollers: 4,
-      pumpControlCubicle: 0.0, //skipped for now
-      biMetallicConnector: 0.0, //skipped for now
-      fasteners: 0.0, //skipped for now
-      otherMaterials: 0.0, //skipped for now
-    },
-    lomRate: {
-      lamination: materialData[0]?.materialRate || 0.0,
-      hvConductor: materialData[1]?.materialRate || 0.0,
-      lvConductor: materialData[2]?.materialRate || 0.0,
-      hvConnectionLeads: materialData[3]?.materialRate || 0.0,
-      lvConnectionLeads: materialData[4]?.materialRate || 0.0,
-      insulationMaterial: materialData[5]?.materialRate || 0.0,
-      transformerOil: materialData[6]?.materialRate || 0.0,
-      tankLidEtc: materialData[7]?.materialRate || 0.0,
-      ...(fabrication.data.hvcb.hvcb && { hvCableBox: materialData[8]?.materialRate || 0.0 }),
-      ...(fabrication.data.lvcb.lvcb && { lvCableBox: materialData[9]?.materialRate || 0.0 }),
-      ...(fabrication.data.hvcb.hvcb == false && { hvBushing: materialData[10]?.materialRate || 0.0 }),
-      ...(fabrication.data.lvcb.lvcb == false && { lvBushing: materialData[11]?.materialRate || 0.0 }),
-      radiatorsAndHeatExc: materialData[12]?.materialRate || 0.0,
-      permaWood: materialData[13]?.materialRate || 0.0,
-      ...(fabrication.data.drain_Vlv.drain_Vlv && { drainValve: materialData[14]?.materialRate || 0.0 }),
-      ...(fabrication.data.fill_Vlv.fill_Vlv && { filterValve: materialData[15]?.materialRate || 0.0 }),
-      ...(fabrication.data.smpl_Vlv.smpl_Vlv && { samplingValve: materialData[16]?.materialRate || 0.0 }),
-      relayShutOffValve: materialData[17]?.materialRate || 0.0,
-      breatherSilicaGel: materialData[18]?.materialRate || 0.0,
-      ratingPlate: materialData[19]?.materialRate || 0.0,
-      thermometerPocket: materialData[20]?.materialRate || 0.0,
-      airReleasePlug: materialData[21]?.materialRate || 0.0,
-      coreBoltsAndTieRods: materialData[22]?.materialRate || 0.0,
-      ...(twoWindings.data.isOLTC && { oltc: materialData[23]?.materialRate || 0.0 }),
-      ...(!twoWindings.data.isOLTC && { octc: materialData[24]?.materialRate || 0.0 }),
-      oti: materialData[25]?.materialRate || 0.0,
-      wti: materialData[26]?.materialRate || 0.0,
-      buchholzRelay: materialData[27]?.materialRate || 0.0,
-      marshallingBox: materialData[28]?.materialRate || 0.0,
-      ...(twoWindings.data.isCSP === false && { oilLevelGauge: materialData[29]?.materialRate || 0.0 }),
-      ...(fabrication.data.mog.mog && { mog: materialData[30]?.materialRate || 0.0 }),
-      ...(fabrication.data.restOfVariables.prv && { pressureReliefValve: materialData[31]?.materialRate || 0.0 }),
-      oilCirculatingPump: materialData[32]?.materialRate || 0.0,
-      avrrtcc: materialData[33]?.materialRate || 0.0,
-      ...(fabrication.data.roller.roller && { rollers: materialData[34]?.materialRate || 0.0 }),
-      pumpControlCubicle: materialData[35]?.materialRate || 0.0,
-      biMetallicConnector: materialData[36]?.materialRate || 0.0,
-      fasteners: materialData[37]?.materialRate || 0.0,
-      otherMaterials: materialData[38]?.materialRate || 0.0,
-    }
+  const [rateOverrides, setRateOverrides] = useState({});
+  const lomPayload = buildLomPayload({
+    fabrication,
+    twoWindings,
+    materialData,
+    rateOverrides,
   });
+  const lomRateKeys = Object.keys(lomPayload.lomRate);
+  const lomRateKeySignature = lomRateKeys.join("|");
 
   useEffect(() => {
-    // if (
-    //   lom?.data[0].size==0
-    // ) {
     actions.fetchFile(lomPayload);
-    //}
-  }, [fabrication, twoWindings]);
+  }, [fabrication, twoWindings, lomMaterial, rateOverrides]);
 
 
   console.log("customer:", customer);
@@ -336,6 +369,7 @@ const Files = () => {
         rate: Number(newItem.rate),
         cost: Number(newItem.quantity) * Number(newItem.rate),
         isNew: true,
+        rateKey: null,
       };
       setTableRows([...tableRows, newRow]);
       actions.addDataToLom(newRow);
@@ -364,54 +398,80 @@ const Files = () => {
   };
 
   //Rate Edit handler
-  const handleRateUpdate = (index) => {
-    const updatedRows = [...tableRows]; // actual data from API
-    console.log("updatedRows:", updatedRows)
+  const handleRateUpdate = (rowIndex) => {
+    const updatedRows = [...tableRows];
     const updatedRate = parseFloat(editableRate);
-    updatedRows[index].rate = updatedRate;
-
-    // const descriptionKey = updatedRows[index].description.toLowerCase();
-    // console.log("des:", descriptionKey);
-
-    const isNewRow = updatedRows[index].isNew;
-
-    if (!isNewRow) {
-      const Key = Object.keys(lomPayload.lomRate)[index];
-      setlomPayload(prevlomPayload => {
-        //Spreading prev lomRate and changing specific rate with descriptionKey eg,[lamination]:500
-        const updatedLomRate = {
-          ...prevlomPayload.lomRate,
-          [Key]: updatedRate
-        };
-        console.log("updatedLomRate", updatedLomRate);
-
-        //Spreading the entire prev lomPayload [payload] and changing the prev lomRate with new lomRate; 
-        const updatedlomPayload = {
-          ...prevlomPayload,
-          lomRate: updatedLomRate
-        };
-        console.log("updatedlomPayload", updatedlomPayload);
-
-        actions.fetchFile(updatedlomPayload);
-        return updatedlomPayload;
-      });
+    const targetRow = updatedRows[rowIndex];
+    if (Number.isNaN(updatedRate) || !targetRow) {
+      setEditingIndex(null);
+      return;
     }
-    else {
-      updatedRows[index].cost = updatedRows[index].quantity * updatedRate;
+
+    targetRow.rate = updatedRate;
+
+    if (!targetRow.isNew) {
+      const rateKey = targetRow.rateKey ?? lomRateKeys[rowIndex];
+      if (rateKey) {
+        setRateOverrides((prevRateOverrides) => ({
+          ...prevRateOverrides,
+          [rateKey]: updatedRate,
+        }));
+      }
+    } else {
+      targetRow.cost = targetRow.quantity * updatedRate;
+      setTableRows(updatedRows);
     }
+
     setEditingIndex(null);
   };
 
   useEffect(() => {
-    setTableRows(lom.data);
-  }, [lom.data]);
+    setTableRows(
+      (lom.data || []).map((row, index) => ({
+        ...row,
+        index: typeof row.index === "number" ? row.index : index,
+        isNew: Boolean(row.isNew),
+        rateKey: row.isNew ? row.rateKey ?? null : row.rateKey ?? lomRateKeys[index] ?? null,
+      }))
+    );
+  }, [lom.data, lomRateKeySignature]);
+
+  useEffect(() => {
+    const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
+    setIsDarkMode(darkModeEnabled);
+
+    document.body.classList.toggle("app-dark-mode", darkModeEnabled);
+    document.body.style.background = darkModeEnabled ? "#101722" : "#f4f7fb";
+    document.documentElement.style.background = darkModeEnabled ? "#101722" : "#f4f7fb";
+
+    return () => {
+      document.body.classList.remove("app-dark-mode");
+      document.body.style.background = "";
+      document.documentElement.style.background = "";
+    };
+  }, []);
 
   const LomTable = () => {
     // const totalQty = tableRows.reduce((sum, row) => sum + Number(row.quantity), 0);
     const totalCost = tableRows.reduce((sum, row) => sum + Number(row.cost), 0);
     return (
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650, border: "1px solid #ddd" }} aria-label="simple table">
+      <TableContainer
+        component={Paper}
+        sx={{
+          backgroundColor: filesTheme.card,
+          color: filesTheme.text,
+          border: `1px solid ${filesTheme.border}`,
+          boxShadow: "none",
+        }}
+      >
+        <Table
+          sx={{
+            minWidth: 650,
+            border: `1px solid ${filesTheme.border}`,
+            backgroundColor: filesTheme.card,
+          }}
+          aria-label="simple table"
+        >
           <TableHead>
             <TableRow>
               <TableCell sx={styleCell}>S.No</TableCell>
@@ -445,10 +505,22 @@ const Files = () => {
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
-                              handleRateUpdate(row.index);
+                              handleRateUpdate(index);
                             }
                           }}
                           size="small"
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "var(--app-input-bg)",
+                              color: "var(--app-input-text)",
+                              "& fieldset": {
+                                borderColor: "var(--app-input-border)",
+                              },
+                            },
+                            "& .MuiInputBase-input": {
+                              color: "var(--app-input-text)",
+                            },
+                          }}
                         />
                       ) : (
                         <span onClick={() => startEditing(index, row.rate)} style={{ cursor: 'pointer' }}>
@@ -478,25 +550,25 @@ const Files = () => {
                   onChange={
                     handleInputChange
                   } /></TableCell>
-                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="specification" value={newItem.specification} onChange={handleInputChange} /></TableCell>
+                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="specification" value={newItem.specification} onChange={handleInputChange} sx={{ "& .MuiOutlinedInput-root": { backgroundColor: "var(--app-input-bg)", color: "var(--app-input-text)", "& fieldset": { borderColor: "var(--app-input-border)" } }, "& .MuiInputBase-input": { color: "var(--app-input-text)" } }} /></TableCell>
                 {/* <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="materials" value={newItem.materials} onChange={handleInputChange} /></TableCell> */}
-                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="unit" value={newItem.unit} onChange={handleInputChange} /></TableCell>
-                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="quantity" type="number" value={newItem.quantity} onChange={handleInputChange} /></TableCell>
-                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="rate" type="number" value={newItem.rate} onChange={handleInputChange} /></TableCell>
+                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="unit" value={newItem.unit} onChange={handleInputChange} sx={{ "& .MuiOutlinedInput-root": { backgroundColor: "var(--app-input-bg)", color: "var(--app-input-text)", "& fieldset": { borderColor: "var(--app-input-border)" } }, "& .MuiInputBase-input": { color: "var(--app-input-text)" } }} /></TableCell>
+                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="quantity" type="number" value={newItem.quantity} onChange={handleInputChange} sx={{ "& .MuiOutlinedInput-root": { backgroundColor: "var(--app-input-bg)", color: "var(--app-input-text)", "& fieldset": { borderColor: "var(--app-input-border)" } }, "& .MuiInputBase-input": { color: "var(--app-input-text)" } }} /></TableCell>
+                <TableCell sx={styleRow}><TextField variant="outlined" fullWidth size="small" name="rate" type="number" value={newItem.rate} onChange={handleInputChange} sx={{ "& .MuiOutlinedInput-root": { backgroundColor: "var(--app-input-bg)", color: "var(--app-input-text)", "& fieldset": { borderColor: "var(--app-input-border)" } }, "& .MuiInputBase-input": { color: "var(--app-input-text)" } }} /></TableCell>
                 {/* <TableCell sx={styleRow}><TextField disabled="true" variant="outlined" fullWidth size="small" name="cost" value={newItem.cost} onChange={handleInputChange} /></TableCell> */}
-                <TableCell sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <TableCell sx={{ display: "flex", alignItems: "center", gap: 1, backgroundColor: filesTheme.card, border: `1px solid ${filesTheme.border}` }}>
                   <Button
                     onClick={handleAddItem}
                     variant="contained"
                     size="small"
-                    sx={{ minWidth: "30px", padding: "2px", backgroundColor: "transparent", border: "none" }}>
+                    sx={{ minWidth: "30px", padding: "2px", backgroundColor: "transparent", border: "none", color: "#22c55e" }}>
                     ✔️
                   </Button>
                   <Button
                     onClick={() => { setShowInputRow(false) }}
                     variant="contained"
                     size="small"
-                    sx={{ minWidth: "30px", padding: "2px", backgroundColor: "transparent", border: "none" }}>
+                    sx={{ minWidth: "30px", padding: "2px", backgroundColor: "transparent", border: "none", color: "#ef4444" }}>
                     ❌
                   </Button>
                 </TableCell>
@@ -507,7 +579,7 @@ const Files = () => {
 
 
             <TableRow>
-              <TableCell sx={{ border: "0px", padding: "8px", textAlign: "right", fontWeight: "bold", backgroundColor: "#ADD8E6" }} colSpan={9}>
+              <TableCell sx={{ border: "0px", padding: "8px", textAlign: "right", fontWeight: "bold", backgroundColor: filesTheme.accentRow, color: filesTheme.text }} colSpan={9}>
                 {/* <strong>Total: Qty. {totalQty.toFixed(2)} | Cost ₹{totalCost}</strong> */}
                 <strong>Total Cost: ₹{totalCost}</strong>
               </TableCell>
@@ -2213,9 +2285,11 @@ const Files = () => {
     <Layout id={id} isThinHeader={true} headProps={{
       currentPath: twoWindings.data.designId,
     }}>
+      <div className={`files-page ${isDarkMode ? "files-page-dark" : ""}`}>
+        <div className="files-page-shell">
       <div className="row m-1">
         <div className="col-sm-9 mt-3">
-          <Container bgColor="white" padding="20px" borderRadius="5px" margin="0 0 18px 0">
+          <Container bgColor={filesTheme.card} border={`1px solid ${filesTheme.border}`} className="files-card" padding="20px" borderRadius="5px" margin="0 0 18px 0">
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -2230,7 +2304,7 @@ const Files = () => {
               }}>
                 {/* Customer Name */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
-                  <label style={{ fontWeight: 600, fontSize: 16 }}>Customer Name:</label>
+                  <label style={{ fontWeight: 600, fontSize: 16, color: filesTheme.text }}>Customer Name:</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -2240,18 +2314,20 @@ const Files = () => {
                         flex: 1,
                         padding: "4px 6px",
                         borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: 16
+                        border: `1px solid ${filesTheme.border}`,
+                        fontSize: 16,
+                        backgroundColor: "var(--app-input-bg)",
+                        color: "var(--app-input-text)"
                       }}
                     />
                   ) : (
-                    <span>{customerName}</span>
+                    <span style={{ color: filesTheme.text }}>{customerName}</span>
                   )}
                 </div>
 
                 {/* Customer Place */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
-                  <label style={{ fontWeight: 600, fontSize: 16 }}>Customer Place:</label>
+                  <label style={{ fontWeight: 600, fontSize: 16, color: filesTheme.text }}>Customer Place:</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -2261,34 +2337,36 @@ const Files = () => {
                         flex: 1,
                         padding: "4px 6px",
                         borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: 16
+                        border: `1px solid ${filesTheme.border}`,
+                        fontSize: 16,
+                        backgroundColor: "var(--app-input-bg)",
+                        color: "var(--app-input-text)"
                       }}
                     />
                   ) : (
-                    <span>{customerPlace}</span>
+                    <span style={{ color: filesTheme.text }}>{customerPlace}</span>
                   )}
                 </div>
               </div>
 
               {/* Icon Button */}
               <div
-                style={{ cursor: "pointer" }}
+                className="files-edit-trigger"
+                style={{ cursor: "pointer", color: filesTheme.text }}
                 onClick={() => isEditing ? handleSave() : setIsEditing(true)}
               >
                 {isEditing ? <FaCheckSquare size={20} /> : <FaEdit size={20} />}
               </div>
             </div>
           </Container>
-          <Container bgColor="white" padding="20px" borderRadius="5px">
+          <Container bgColor={filesTheme.card} border={`1px solid ${filesTheme.border}`} className="files-card" padding="20px" borderRadius="5px">
             <FlexContainer justify="space-between" align="center">
-              <TextTypo text="Details" fontSize="22px" fontWeight="600" />
-              <div className="search-container" style={{ width: "50%" }}>
+              <TextTypo text="Details" fontSize="22px" fontWeight="600" fontColor={filesTheme.text} />
+              <div className="search-container files-search-container" style={{ width: "50%" }}>
                 <FaSearch className="search-icon" />
                 <input
                   type="text"
-                  className="search-input"
-                  style={{ backgroundColor: "#EEEEF1" }}
+                  className="search-input files-search-input"
                   placeholder="Search"
                 />
               </div>
@@ -2297,8 +2375,9 @@ const Files = () => {
             {accordions.map(({ key, title, content }) => (
               <Container
                 key={key}
-                bgColor={openAccordions[key] ? "white" : "#EEEEF1"}
-                border="0.5px solid #00000033"
+                bgColor={openAccordions[key] ? filesTheme.card : filesTheme.cardSoft}
+                border={`0.5px solid ${filesTheme.border}`}
+                className={`files-card ${openAccordions[key] ? "" : "files-card-soft"}`}
                 padding="10px"
                 borderRadius="3px"
                 margin="20px 0px"
@@ -2312,9 +2391,10 @@ const Files = () => {
                   }}
                   onClick={() => toggleAccordion(key)}
                 >
-                  <h5>{title}</h5>
+                  <h5 className="files-accordion-title">{title}</h5>
                   <button
                     type="button"
+                    className="files-accordion-toggle"
                     style={{
                       border: "none",
                       background: "transparent",
@@ -2329,24 +2409,26 @@ const Files = () => {
                   </button>
                 </div>
                 {openAccordions[key] && (
-                  <div style={{ marginTop: "10px" }}>
-                    {content === "table" ? <LomTable /> : <p>{content}</p>}
+                  <div style={{ marginTop: "10px", color: filesTheme.text }}>
+                    {content === "table" ? <LomTable /> : <p style={{ color: filesTheme.text }}>{content}</p>}
                   </div>
                 )}
               </Container>
             ))}
-            <BorderStyled borderColor="#000000CC" />
+            <BorderStyled borderColor={filesTheme.borderStrong} />
             <FlexContainer justify="end" margin="20px 0px">
               <OutlinedBtn
                 text="Discard"
                 borderRadius="5px"
                 padding="15px 30px"
+                fontColor={filesTheme.text}
+                borderColor={filesTheme.borderStrong}
               />
               <FilledBtn
                 text="Save this Design"
                 onClick={handleSaveThisDesign}
-                bgColor="#1B1B1B"
-                fontColor="white"
+                bgColor={filesTheme.buttonBg}
+                fontColor={filesTheme.buttonText}
                 borderRadius="5px"
                 padding="15px 30px"
               />
@@ -2354,41 +2436,47 @@ const Files = () => {
           </Container>
         </div>
         <div className="col-md-3 mt-3">
-          <Container bgColor="white" padding="20px" borderRadius="5px">
+          <Container bgColor={filesTheme.card} border={`1px solid ${filesTheme.border}`} className="files-card" padding="20px" borderRadius="5px">
             <TextTypo
               text="Download Options"
               fontSize="22px"
               fontWeight="600"
+              fontColor={filesTheme.text}
             />
-            <FlexContainer direction="column" margin="20px 0px">
+            <FlexContainer direction="column" margin="20px 0px" className="files-download-list">
               <IconBtn
                 text="Des. Prnt Out"
                 icon={<FiDownload />}
                 onClick={desGeneratePDF}
-                bgColor="#D2E7FF"
+                bgColor="var(--files-download-blue)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="GTP"
                 onClick={gtpGeneratePDF}
                 icon={<FiDownload />}
-                bgColor="#EADFE7"
+                bgColor="var(--files-download-pink)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="Core Assembly"
                 onClick={coreAssemblyGeneratePDF}
                 icon={<FiDownload />}
-                bgColor="#FFF6E9"
+                bgColor="var(--files-download-amber)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="Core Blade"
                 onClick={coreBladeGeneratePDF}
                 icon={<FiDownload />}
-                bgColor="#E6F1FF"
+                bgColor="var(--files-download-sky)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="LOM"
                 icon={<FiDownload />}
-                bgColor="#D2E7FF"
+                bgColor="var(--files-download-blue)"
+                borderColor={filesTheme.border}
                 onClick={generateLomPDF}
               />
               <IconBtn
@@ -2400,7 +2488,8 @@ const Files = () => {
                   );
                 }}
                 icon={<FiDownload />}
-                bgColor="#EADFE7"
+                bgColor="var(--files-download-pink)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="ActivePart"
@@ -2411,7 +2500,8 @@ const Files = () => {
                   );
                 }}
                 icon={<FiDownload />}
-                bgColor="#FFF6E9"
+                bgColor="var(--files-download-amber)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="Conservator"
@@ -2422,7 +2512,8 @@ const Files = () => {
                   );
                 }}
                 icon={<FiDownload />}
-                bgColor="#E6F1FF"
+                bgColor="var(--files-download-sky)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="Lid"
@@ -2433,7 +2524,8 @@ const Files = () => {
                     "_blank"
                   );
                 }}
-                bgColor="#D2E7FF"
+                bgColor="var(--files-download-blue)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="MainAssembly_GAD"
@@ -2444,7 +2536,8 @@ const Files = () => {
                   );
                 }}
                 icon={<FiDownload />}
-                bgColor="#eadfe7"
+                bgColor="var(--files-download-pink)"
+                borderColor={filesTheme.border}
               />
               <IconBtn
                 text="Rating Plate"
@@ -2455,15 +2548,19 @@ const Files = () => {
                   );
                 }}
                 icon={<FiDownload />}
-                bgColor="#FFF6E9"
+                bgColor="var(--files-download-amber)"
+                borderColor={filesTheme.border}
               />
             </FlexContainer>
             <IconBtn
               text="Print All"
               icon={<FiDownload />}
-              fontColor="#1400FA"
+              fontColor="var(--files-icon-accent)"
+              borderColor={filesTheme.borderStrong}
             />
           </Container>
+        </div>
+      </div>
         </div>
       </div>
     </Layout>

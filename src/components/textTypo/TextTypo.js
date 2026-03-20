@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TextTypo = ({ text, fontSize = '16px', fontWeight = 'normal', textAlign = 'left', fontColor = 'black',margin = "0px" }) => {
+const TextTypo = ({ text, fontSize = '16px', fontWeight = 'normal', textAlign = 'left', fontColor = 'inherit',margin = "0px" }) => {
   const style = {
     fontSize: fontSize,
     fontWeight: fontWeight,

@@ -10,7 +10,7 @@ import {
 const Part1 = ({ formState, handleInputChange, twoWindings }) => {
   return (
     <Container>
-      <Container bgColor="white" padding="20px" borderRadius="5px">
+      <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="20px" borderRadius="10px">
         <TextTypo
           text="Design Reference:"
           fontSize="18px"
@@ -25,9 +25,10 @@ const Part1 = ({ formState, handleInputChange, twoWindings }) => {
         </FlexContainer>
       </Container>
       <Container
-        bgColor="white"
+        className="fabrication-card"
+        bgColor="var(--fab-surface)"
         padding="20px"
-        borderRadius="5px"
+        borderRadius="10px"
         margin="20px 0px"
       >
         <TextTypo
@@ -43,9 +44,10 @@ const Part1 = ({ formState, handleInputChange, twoWindings }) => {
         </FlexContainer>
       </Container>
       <Container
-        bgColor="white"
+        className="fabrication-card"
+        bgColor="var(--fab-surface)"
         padding="20px"
-        borderRadius="5px"
+        borderRadius="10px"
         margin="20px 0px"
       >
         <TextTypo
@@ -104,7 +106,7 @@ const Part1 = ({ formState, handleInputChange, twoWindings }) => {
           />
         </FlexContainer>
       </Container>
-      <Container bgColor="white" padding="20px" borderRadius="5px">
+      <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="20px" borderRadius="10px">
         <TextTypo
           text="Radiators Details:"
           fontSize="18px"

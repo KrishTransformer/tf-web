@@ -1,0 +1,118 @@
+.fabrication-page {
+  --fab-page-text: #111827;
+  --fab-page-muted: #5f6b7a;
+  --fab-surface: #ffffff;
+  --fab-surface-soft: #f7fafc;
+  --fab-surface-strong: #eef4fb;
+  --fab-border: rgba(15, 23, 42, 0.12);
+  --fab-border-strong: rgba(15, 23, 42, 0.18);
+  --fab-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  --fab-page-bg: transparent;
+  --fab-btn-bg: #111827;
+  --fab-btn-text: #ffffff;
+
+  --app-input-bg: #eef1f5;
+  --app-input-accent-bg: #d7f3fc;
+  --app-input-border: rgba(15, 23, 42, 0.18);
+  --app-input-text: #111827;
+  --app-input-accent-text: #1400fa;
+  --app-label-text: #111827;
+  --app-toggle-track: #ffffff;
+  --app-toggle-active: #d4ff00;
+  --app-toggle-active-text: #111111;
+  --app-tab-text: rgba(17, 24, 39, 0.55);
+  --app-tab-active-text: #111827;
+  --app-tab-active-border: #111827;
+  --app-modal-bg: #ffffff;
+  --app-modal-border: rgba(15, 23, 42, 0.18);
+  --app-modal-text: #111827;
+  --app-modal-muted: #4b5563;
+  --app-modal-btn-secondary-bg: #f8fafc;
+  --app-modal-btn-secondary-border: rgba(15, 23, 42, 0.18);
+  --app-modal-btn-secondary-text: #111827;
+  --app-modal-btn-primary-bg: #111827;
+  --app-modal-btn-primary-border: #111827;
+  --app-modal-btn-primary-text: #ffffff;
+
+  color: var(--fab-page-text);
+}
+
+body.app-dark-mode .fabrication-page {
+  --fab-page-text: #edf4ff;
+  --fab-page-muted: #9eb0ca;
+  --fab-surface: #172233;
+  --fab-surface-soft: #1d2b40;
+  --fab-surface-strong: #22344b;
+  --fab-border: rgba(255, 255, 255, 0.08);
+  --fab-border-strong: rgba(143, 181, 255, 0.28);
+  --fab-shadow: 0 20px 42px rgba(2, 10, 24, 0.42);
+  --fab-page-bg:
+    radial-gradient(circle at top right, rgba(77, 141, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, #101722 0%, #162233 100%);
+  --fab-btn-bg: #3b82f6;
+  --fab-btn-text: #ffffff;
+
+  --app-input-bg: #203147;
+  --app-input-accent-bg: #233952;
+  --app-input-border: rgba(255, 255, 255, 0.12);
+  --app-input-text: #edf4ff;
+  --app-input-accent-text: #9fc5ff;
+  --app-label-text: #dfe9f8;
+  --app-toggle-track: #2b3e56;
+  --app-toggle-active: #8bc34a;
+  --app-toggle-active-text: #0d1608;
+  --app-tab-text: rgba(223, 233, 248, 0.62);
+  --app-tab-active-text: #edf4ff;
+  --app-tab-active-border: #8fb5ff;
+  --app-modal-bg: #172233;
+  --app-modal-border: rgba(255, 255, 255, 0.12);
+  --app-modal-text: #edf4ff;
+  --app-modal-muted: #9eb0ca;
+  --app-modal-btn-secondary-bg: #1f3147;
+  --app-modal-btn-secondary-border: rgba(255, 255, 255, 0.12);
+  --app-modal-btn-secondary-text: #edf4ff;
+  --app-modal-btn-primary-bg: #3b82f6;
+  --app-modal-btn-primary-border: #3b82f6;
+  --app-modal-btn-primary-text: #ffffff;
+}
+
+.fabrication-page-shell {
+  margin: 0 -10px -10px;
+  min-height: 100vh;
+  padding: 10px;
+  background: var(--fab-page-bg);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.fabrication-page .fabrication-card {
+  background: var(--fab-surface);
+  border: 1px solid var(--fab-border);
+  border-radius: 10px;
+  box-shadow: var(--fab-shadow);
+  color: var(--fab-page-text);
+}
+
+.fabrication-page .fabrication-card-soft {
+  background: var(--fab-surface-soft);
+}
+
+.fabrication-page h1,
+.fabrication-page h5,
+.fabrication-page p,
+.fabrication-page span,
+.fabrication-page label,
+.fabrication-page td,
+.fabrication-page th,
+.fabrication-page button {
+  color: inherit;
+}
+
+.fabrication-page .btn-calculate {
+  background: var(--fab-btn-bg) !important;
+  color: var(--fab-btn-text) !important;
+  border: 1px solid var(--fab-btn-bg) !important;
+}
+
+.fabrication-page .btn-calculate:disabled {
+  opacity: 0.7;
+}
