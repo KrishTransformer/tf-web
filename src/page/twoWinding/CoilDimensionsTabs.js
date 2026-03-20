@@ -9,6 +9,7 @@ import {
 } from "../../components";
 
 const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
+  const isDryType = formState.dryType === true || formState.dryType === "true";
   const [isRadiatorWidthModalOpen, setIsRadiatorWidthModalOpen] = useState(false);
   const [customRadiatorWidth, setCustomRadiatorWidth] = useState(
     String(formState?.tankAndOilFormulas?.radiatorWidth || "226")
@@ -17,6 +18,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
     formState?.tankAndOilFormulas?.radiatorWidth?.toString?.() || "";
   const selectedRadiatorWidthValue =
     formState?.radiatorWidth?.toString?.() || formulaRadiatorWidthValue || "226";
+
   const openRadiatorWidthModal = () => {
     setCustomRadiatorWidth(selectedRadiatorWidthValue);
     setIsRadiatorWidthModalOpen(true);
@@ -85,7 +87,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
     // },
     {
       key: "tank-Cooling",
-      label: "Tank & Cooling",
+      label: isDryType ? "Enclosure & Temp" : "Tank & Cooling",
       content: (
         <div>
           <table class="tableTabsGeneral">
@@ -94,7 +96,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               <td>{formState.tank?.overallDimension}</td>
             </tr>
             <tr>
-              <td>Tank (L x B x H):</td>
+              <td>{isDryType ? "Enclosure (L x B x H):" : "Tank (L x B x H):"}</td>
               <td>{formState.tank?.tankDimension} </td>
             </tr>
           </table>
@@ -108,14 +110,16 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               borderColor="0.5px solid #00000033"
             />
 
-            <CustomInput
-              label="Oil Temp"
-              type="text"
-              value={formState?.topOilTemp}
-              onChange={(e) => handleInputChange("topOilTemp", e.target.value)}
-              bgColor="#D7F3FC"
-              borderColor="0.5px solid #00000033"
-            />
+            {!isDryType && (
+              <CustomInput
+                label="Oil Temp"
+                type="text"
+                value={formState?.topOilTemp}
+                onChange={(e) => handleInputChange("topOilTemp", e.target.value)}
+                bgColor="#D7F3FC"
+                borderColor="0.5px solid #00000033"
+              />
+            )}
 
             <CustomInput
               label="Amb. Temp"
@@ -126,56 +130,51 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               borderColor="0.5px solid #00000033"
             />
           </FlexContainer>
-          <FlexContainer>
-            <CustomInput
-              type="dropdown"
-              label="Cooling method"
-              options={[
-                { label: "Radiator", value: "RADIATOR" },
-                { label: "Pipes", value: "PIPES" },
-                { label: "Corrugation", value: "CORRUGATION" },
-              ]}
-              value={formState?.eRadiatorType || "Radiator"}
-              onChange={(e) =>
-                handleInputChange("eRadiatorType", e.target.value)
-              }
-            />
-            {formState?.eRadiatorType === "RADIATOR" && (
-              <CustomInput
-                label="Radiator Width"
-                type="text"
-                value={selectedRadiatorWidthValue}
-                readOnly
-                onClick={openRadiatorWidthModal}
-                style={{ cursor: "pointer" }}
-              />
-            )}
-            <CustomInput
-              type="checkbox"
-              value={formState?.isCSP}
-              label="CSP"
-              onChange={(e) => handleInputChange("isCSP", e.target.value)}
-            />
-            {/* <CustomInput
-              type="dropdown"
-              options={[
-                { label: "Rectangular Core", value: "RECTANGULAR" },
-                { label: "Circular Core", value: "CIRCULAR" },
-              ]}
-              value={formState.eTransType || "Rectangular Core"}
-              onChange={(e) => handleInputChange("eTransType", e.target.value)}
-            /> */}
-          </FlexContainer>
-          <Container
-            border="0.5px solid #00000080"
-            padding="10px"
-            margin="10px 0px 15px 0px"
-          >
-            <TextTypo
-              text={formState?.tankAndOilFormulas?.coolingStatement}
-              fontColor="black"
-            />
-          </Container>
+          {!isDryType && (
+            <>
+              <FlexContainer>
+                <CustomInput
+                  type="dropdown"
+                  label="Cooling method"
+                  options={[
+                    { label: "Radiator", value: "RADIATOR" },
+                    { label: "Pipes", value: "PIPES" },
+                    { label: "Corrugation", value: "CORRUGATION" },
+                  ]}
+                  value={formState?.eRadiatorType || "Radiator"}
+                  onChange={(e) =>
+                    handleInputChange("eRadiatorType", e.target.value)
+                  }
+                />
+                {formState?.eRadiatorType === "RADIATOR" && (
+                  <CustomInput
+                    label="Radiator Width"
+                    type="text"
+                    value={selectedRadiatorWidthValue}
+                    readOnly
+                    onClick={openRadiatorWidthModal}
+                    style={{ cursor: "pointer" }}
+                  />
+                )}
+                <CustomInput
+                  type="checkbox"
+                  value={formState?.isCSP}
+                  label="CSP"
+                  onChange={(e) => handleInputChange("isCSP", e.target.value)}
+                />
+              </FlexContainer>
+              <Container
+                border="0.5px solid #00000080"
+                padding="10px"
+                margin="10px 0px 15px 0px"
+              >
+                <TextTypo
+                  text={formState?.tankAndOilFormulas?.coolingStatement}
+                  fontColor="black"
+                />
+              </Container>
+            </>
+          )}
           {/* <table class="tableTabsGeneral">
             <tr>
               <td>Conservator Dia:</td>
@@ -185,7 +184,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               <td>{formState.tankAndOilFormulas?.conservatorLength} </td>
             </tr>
             </table> */}
-          {formState?.isCSP == false ? (
+          {!isDryType && formState?.isCSP == false ? (
             <FlexContainer align="center" margin="20px 0px">
               <TextTypo
                 text={`Conservator Dia :  ${formState.tankAndOilFormulas?.conservatorDia}`}
@@ -511,34 +510,36 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                 />
               </td>
             </tr>
-            <tr>
-              <td>Net oil:</td>
-              <td>
-                <CustomInput
-                  type="text"
-                  value={formState?.tankAndOilFormulas?.totalOil}
-                  onChange={(e) => handleInputChange("ez", e.target.value)}
-                />
-              </td>
-              <td>
-                <CustomInput
-                  type="text"
-                  value={formState?.cost?.oilCostPerKg}
-                  onChange={(e) =>
-                    handleInputChange("cost.oilCostPerKg", e.target.value)
-                  }
-                  bgColor="#D7F3FC"
-                  borderColor="0.5px solid #00000033"
-                />
-              </td>
-              <td>
-                <CustomInput
-                  type="text"
-                  value={formState?.cost?.totalOilCost}
-                  onChange={(e) => handleInputChange("ez", e.target.value)}
-                />
-              </td>
-            </tr>
+            {!isDryType && (
+              <tr>
+                <td>Net oil:</td>
+                <td>
+                  <CustomInput
+                    type="text"
+                    value={formState?.tankAndOilFormulas?.totalOil}
+                    onChange={(e) => handleInputChange("ez", e.target.value)}
+                  />
+                </td>
+                <td>
+                  <CustomInput
+                    type="text"
+                    value={formState?.cost?.oilCostPerKg}
+                    onChange={(e) =>
+                      handleInputChange("cost.oilCostPerKg", e.target.value)
+                    }
+                    bgColor="#D7F3FC"
+                    borderColor="0.5px solid #00000033"
+                  />
+                </td>
+                <td>
+                  <CustomInput
+                    type="text"
+                    value={formState?.cost?.totalOilCost}
+                    onChange={(e) => handleInputChange("ez", e.target.value)}
+                  />
+                </td>
+              </tr>
+            )}
             <tr>
               <td>Insulation:</td>
               <td>
@@ -570,34 +571,36 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                 />
               </td>
             </tr>
-            <tr>
-              <td>Radiator:</td>
-              <td>
-                <CustomInput
-                  type="text"
-                  value={formState?.tankAndOilFormulas?.totalRadiatorWeight}
-                  onChange={(e) => handleInputChange("ez", e.target.value)}
-                />
-              </td>
-              <td>
-                <CustomInput
-                  type="text"
-                  value={formState?.cost?.radiatorCostPerKg}
-                  onChange={(e) =>
-                    handleInputChange("cost.radiatorCostPerKg", e.target.value)
-                  }
-                  bgColor="#D7F3FC"
-                  borderColor="0.5px solid #00000033"
-                />
-              </td>
-              <td>
-                <CustomInput
-                  type="text"
-                  value={formState?.cost?.totalRadiatorCost}
-                  onChange={(e) => handleInputChange("ez", e.target.value)}
-                />
-              </td>
-            </tr>
+            {!isDryType && (
+              <tr>
+                <td>Radiator:</td>
+                <td>
+                  <CustomInput
+                    type="text"
+                    value={formState?.tankAndOilFormulas?.totalRadiatorWeight}
+                    onChange={(e) => handleInputChange("ez", e.target.value)}
+                  />
+                </td>
+                <td>
+                  <CustomInput
+                    type="text"
+                    value={formState?.cost?.radiatorCostPerKg}
+                    onChange={(e) =>
+                      handleInputChange("cost.radiatorCostPerKg", e.target.value)
+                    }
+                    bgColor="#D7F3FC"
+                    borderColor="0.5px solid #00000033"
+                  />
+                </td>
+                <td>
+                  <CustomInput
+                    type="text"
+                    value={formState?.cost?.totalRadiatorCost}
+                    onChange={(e) => handleInputChange("ez", e.target.value)}
+                  />
+                </td>
+              </tr>
+            )}
           </table>
           {/* <FlexContainer justify="end">
             <TextBtn
