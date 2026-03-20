@@ -12,7 +12,10 @@ const QuarterCircle = ({
     <svg
       width={circleRadius}
       height={circleRadius}
-      style={{ backgroundColor: "white", transform: transform }}
+      style={{
+        backgroundColor: "var(--core-diagram-bg, white)",
+        transform: transform,
+      }}
       className={className}
     >
       <circle
@@ -32,8 +35,12 @@ const QuarterCircle = ({
             y={step.yAxis}
             width={step.width}
             height={step.height}
-            fill={isHighlighted ? "#C3C3C3" : "#fff"}
-            stroke="#213"
+            fill={
+              isHighlighted
+                ? "var(--core-diagram-highlight, #C3C3C3)"
+                : "var(--core-diagram-fill, #fff)"
+            }
+            stroke="var(--core-diagram-stroke, #213)"
           >
             <title>{`Step: ${step.stepNo}, Width: ${step.width}, Stk: ${step.height}`}</title>
           </rect>

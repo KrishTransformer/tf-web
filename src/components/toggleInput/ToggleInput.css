@@ -18,8 +18,9 @@
   border: none;
   /* border: 1px solid transparent;
   background-color: #eeeef1; */
-  border: 0.5px solid #00000033;
-  background-color: #EEEEF1;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #EEEEF1);
+  color: var(--app-input-text, #111111);
   border-radius: 1px;
   padding-left: 6px;
   min-width: 50px;
@@ -31,8 +32,8 @@
   font-weight: 400;
   border-radius: 1px;
   outline: none;
-  border: 0.5px solid #00000033;
-  background-color: #EEEEF1;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #EEEEF1);
 }
 
 .toggle-switch {
@@ -50,14 +51,15 @@
   padding: 3px 7px;
   cursor: pointer;
   border-radius: 3px;
-  background-color: var(--light-white);
+  background-color: var(--app-toggle-track, var(--light-white));
+  color: var(--app-input-text, #111111);
   transition: all 0.3s ease;
 }
 
 .highlight {
-  background-color: #d4ff00;
+  background-color: var(--app-toggle-active, #d4ff00);
   font-weight: bold;
-  color: black;
+  color: var(--app-toggle-active-text, black);
   transition: all 0.3s ease;
 }
 
@@ -77,14 +79,14 @@
     padding: 3px 20px;
     cursor: pointer;
     border-radius: 3px;
-    background-color: var(--light-white);
+    background-color: var(--app-toggle-track, var(--light-white));
     transition: all 0.3s ease;
   }
   
   .highlight {
-    background-color: #d4ff00;
+    background-color: var(--app-toggle-active, #d4ff00);
     font-weight: bold;
-    color: black;
+    color: var(--app-toggle-active-text, black);
     transition: all 0.3s ease;
   }
 }
@@ -106,14 +108,14 @@
     padding: 3px 20px;
     cursor: pointer;
     border-radius: 3px;
-    background-color: var(--light-white);
+    background-color: var(--app-toggle-track, var(--light-white));
     transition: all 0.3s ease;
   }
 
   .highlight {
-    background-color: #d4ff00;
+    background-color: var(--app-toggle-active, #d4ff00);
     font-weight: bold;
-    color: black;
+    color: var(--app-toggle-active-text, black);
     transition: all 0.3s ease;
   }
 }

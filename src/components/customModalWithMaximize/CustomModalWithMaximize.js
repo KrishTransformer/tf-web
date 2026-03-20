@@ -12,8 +12,8 @@ const baseStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "#fff",
-  border: "0.5px solid #000",
+  bgcolor: "var(--app-modal-bg, #fff)",
+  border: "1px solid var(--app-modal-border, #000)",
   boxShadow: 24,
   borderRadius: "10px",
   p: 0,
@@ -39,6 +39,7 @@ const CustomModalWithMaximize = ({
   isMaximized,  
   onToggleMaximize,
 }) => {
+  const isDarkMode = localStorage.getItem("appTheme") === "dark";
   const modalStyle = isMaximized
     ? {
         position: "absolute",
@@ -48,7 +49,7 @@ const CustomModalWithMaximize = ({
         height: "100%",
         borderRadius: 0,
         minWidth: "100%",
-        background: "red", // for 3D viewer background
+        background: isDarkMode ? "#101722" : "#ffffff",
         border: "none",
         p: 0,
         display: "flex",
@@ -76,17 +77,22 @@ const CustomModalWithMaximize = ({
         {/* Header only in normal mode */}
         {!isMaximized && (
           <Box sx={headerStyle}>
-            <TextTypo text={title} id="custom-modal-title" fontSize="20px" />
+            <TextTypo
+              text={title}
+              id="custom-modal-title"
+              fontSize="20px"
+              fontColor={isDarkMode ? "#edf4ff" : "#111111"}
+            />
             <Box>
               <IconButton aria-label="maximize" onClick={onToggleMaximize}>
                 {isMaximized ? (
-                  <MdOutlineFullscreenExit size={20} />
+                  <MdOutlineFullscreenExit size={20} color={isDarkMode ? "#edf4ff" : "#111111"} />
                 ) : (
-                  <MdOutlineFullscreen size={20} />
+                  <MdOutlineFullscreen size={20} color={isDarkMode ? "#edf4ff" : "#111111"} />
                 )}
               </IconButton>
               <IconButton aria-label="close" onClick={onClose}>
-                <IoMdClose color="#333" />
+                <IoMdClose color={isDarkMode ? "#9eb0ca" : "#333"} />
               </IconButton>
             </Box>
           </Box>

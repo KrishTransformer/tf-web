@@ -11,10 +11,12 @@ const Layout = (props) => {
     : "children-container";
 
   return (
-    <div className="d-flex">
+    <div className={`app-layout ${hideSidebar ? "app-layout-parent-height" : ""}`}>
       {/* <TopNav /> */}
       {!hideSidebar && <SideBarThin id={id} />}
-      <div style={hideSidebar ? { width: "100%" } : {}}>
+      <div
+        className={`app-layout-main ${hideSidebar ? "app-layout-main-full" : ""}`}
+      >
         {isThinHeader && (
           <ThinHeader
             onRefresh={() => {

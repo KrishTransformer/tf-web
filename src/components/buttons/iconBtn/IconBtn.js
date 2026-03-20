@@ -6,11 +6,12 @@ const IconBtn = ({
   width="100%",
   fontSize = "16px",
   fontWeight = "600",
-  fontColor = "black",
+  fontColor = "var(--app-label-text, black)",
   bgColor = "transparent",
   padding = "7px 30px",
   borderRadius = "4px",
   gap = "8px",
+  borderColor = "var(--app-input-border, #000000CC)",
   ...props
 }) => {
   const style = {
@@ -22,7 +23,7 @@ const IconBtn = ({
     color: fontColor,
     width,
     backgroundColor: bgColor,
-    border: "0.5px solid #000000CC",
+    border: `0.5px solid ${borderColor}`,
     padding,
     borderRadius,
     cursor: "pointer",

@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&display=swap");
+@import "./HomeTheme.css";
 
 .bar-container {
   display: flex;
@@ -10,12 +11,31 @@
 }
 
 .home-page-wrapper {
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: -10px;
+  margin-bottom: 0;
+  min-height: 100vh;
+  padding: 10px 10px 20px;
+  box-sizing: border-box;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.home-page-wrapper-dark {
+  background:
+    radial-gradient(circle at top right, rgba(109, 140, 255, 0.2), transparent 30%),
+    linear-gradient(180deg, #101722 0%, #172233 100%);
+  color: var(--home-page-text);
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: -10px;
+  margin-bottom: 0;
+  padding-top: 10px;
+  padding-bottom: 20px;
 }
 
 .home-header-divider {
-  border-top: 1px solid #d9d9d9;
+  border-top: 1px solid var(--home-page-divider);
   margin: 8px 2px 10px;
 }
 
@@ -49,21 +69,6 @@
 .controls button:hover {
   background-color: #0056b3;
 }
-
-/* .search-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 8px;
-  background-color: #fff;
-  transition: border-color 0.3s ease;
-}
-
-.search-container:focus-within {
-  border-color: #007bff;
-} */
 
 .bar-container .search-icon {
   color: #888;
@@ -119,6 +124,34 @@
   object-fit: contain;
 }
 
+.home-page-wrapper-dark .search-container .search-icon {
+  color: var(--home-icon-muted);
+}
+
+.home-page-wrapper-dark .search-container .search-input {
+  background-color: var(--home-input-bg);
+  border-color: var(--home-input-border);
+  color: var(--home-input-text);
+}
+
+.home-page-wrapper-dark .search-container .search-input::placeholder {
+  color: var(--home-input-placeholder);
+}
+
+.home-page-wrapper-dark .search-container select.search-input {
+  color: var(--home-input-text);
+}
+
+.home-page-wrapper-dark .search-container select.search-input option {
+  background-color: var(--home-input-bg);
+  color: var(--home-input-text);
+}
+
+.home-page-wrapper-dark .search-container .search-input:focus {
+  border-color: #6ea2ff;
+  box-shadow: 0 0 0 2px rgba(110, 162, 255, 0.15);
+}
+
 .home-header-title {
   font-family: "Philosopher", serif;
   margin: 0;
@@ -126,7 +159,7 @@
   font-weight: 800;
   letter-spacing: 0.2px;
   line-height: 1.2;
-  color: #111;
+  color: var(--home-page-text);
   position: relative;
 }
 
@@ -137,7 +170,7 @@
   top: 100%;
   transform: scaleY(-1);
   transform-origin: top;
-  color: rgba(17, 17, 17, 0.28);
+  color: var(--home-title-reflection);
   line-height: 1.2;
   max-height: 26px;
   overflow: hidden;
@@ -155,21 +188,21 @@
 }
 
 .home-new-design-btn {
-  border: 1px solid #1f1f1f;
-  background: linear-gradient(145deg, #111111, #2d2d2d);
-  color: #ffffff;
+  border: 1px solid var(--home-control-border);
+  background: var(--home-control-surface);
+  color: var(--home-control-text);
   font-size: 15px;
   font-weight: 600;
   border-radius: 10px;
   padding: 9px 20px;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--home-control-shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .home-new-design-btn:hover {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+  box-shadow: var(--home-control-shadow-hover);
 }
 
 .home-settings-menu {
@@ -179,21 +212,21 @@
 .home-settings-btn {
   width: 40px;
   height: 40px;
-  border: 1px solid #1f1f1f;
+  border: 1px solid var(--home-control-border);
   border-radius: 10px;
-  background: linear-gradient(145deg, #111111, #2d2d2d);
-  color: #fff;
+  background: var(--home-control-surface);
+  color: var(--home-control-text);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--home-control-shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .home-settings-btn:hover {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+  box-shadow: var(--home-control-shadow-hover);
 }
 
 .home-settings-icon {
@@ -205,37 +238,84 @@
   top: calc(100% + 10px);
   right: 0;
   min-width: 170px;
-  background: #fff;
-  border: 1px solid #e7e7e7;
+  background: var(--home-page-surface);
+  border: 1px solid var(--home-page-border);
   border-radius: 10px;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  box-shadow: var(--home-page-shadow);
   z-index: 50;
   overflow: hidden;
+}
+
+.home-settings-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--home-page-border-soft);
+}
+
+.home-settings-toggle-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--home-settings-toggle-text);
+}
+
+.home-darkmode-switch {
+  width: 46px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: var(--home-darkmode-switch-track);
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.home-darkmode-switch.active {
+  background: var(--home-darkmode-switch-track-active);
+}
+
+.home-darkmode-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--home-darkmode-switch-knob);
+  box-shadow: var(--home-darkmode-switch-knob-shadow);
+  transform: translateX(0);
+  transition: transform 0.2s ease;
+}
+
+.home-darkmode-switch.active .home-darkmode-knob {
+  transform: translateX(20px);
 }
 
 .home-settings-item {
   width: 100%;
   border: none;
-  background: #fff;
+  background: var(--home-page-surface);
   padding: 10px 12px;
   text-align: left;
   font-size: 14px;
   font-weight: 600;
-  color: #222;
+  color: var(--home-settings-toggle-text);
   cursor: pointer;
 }
 
 .home-settings-item:hover {
-  background: #f6f6f6;
+  background: var(--home-page-surface-muted);
 }
 
 .home-profile-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #111111, #2d2d2d);
-  border: 1px solid #222;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  background: var(--home-control-surface);
+  border: 1px solid var(--home-control-border-strong);
+  box-shadow: var(--home-control-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -244,12 +324,12 @@
 
 .home-profile-avatar:hover {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+  box-shadow: var(--home-control-shadow-hover);
 }
 
 .home-profile-icon {
   font-size: 23px;
-  color: #ffffff;
+  color: var(--home-control-text);
 }
 
 .home-profile-menu {
@@ -261,51 +341,75 @@
   top: calc(100% + 10px);
   right: 0;
   width: 260px;
-  background: #ffffff;
-  border: 1px solid #e7e7e7;
+  background: var(--home-page-surface);
+  border: 1px solid var(--home-page-border);
   border-radius: 12px;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  box-shadow: var(--home-page-shadow);
   z-index: 50;
   overflow: hidden;
 }
 
 .home-profile-card-info {
   padding: 12px 14px;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid var(--home-page-border-soft);
 }
 
 .home-profile-name {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: #111;
+  color: var(--home-page-text);
 }
 
 .home-profile-email {
   margin: 4px 0 0;
   font-size: 13px;
-  color: #666;
+  color: var(--home-page-text-muted);
   word-break: break-word;
 }
 
 .home-logout-btn {
   width: 100%;
   border: none;
-  background: #fff;
+  background: var(--home-page-surface);
   padding: 11px 14px;
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #c62828;
+  color: var(--home-logout-text);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .home-logout-btn:hover {
-  background: #fff1f1;
+  background: var(--home-page-danger-surface);
 }
 
 .home-logout-icon {
   font-size: 18px;
+}
+
+.home-page-wrapper-dark .text-muted {
+  color: var(--home-summary-text) !important;
+}
+
+.home-page-wrapper-dark .pagination .page-link {
+  background-color: var(--home-pagination-bg);
+  border-color: var(--home-pagination-border);
+  color: var(--home-pagination-text) !important;
+}
+
+.home-page-wrapper-dark .pagination .page-item.active .page-link {
+  color: #ffffff !important;
+}
+
+.home-page-wrapper-dark .pagination .page-item.disabled .page-link {
+  color: var(--home-pagination-disabled) !important;
+  background-color: var(--home-pagination-bg);
+  border-color: var(--home-pagination-border);
+}
+
+.home-page-wrapper-dark .pagination .page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(77, 141, 255, 0.2);
 }

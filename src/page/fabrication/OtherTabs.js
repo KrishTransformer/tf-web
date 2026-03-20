@@ -19,6 +19,7 @@ const OtherTabs = ({ formState, handleInputChange }) => {
             text="Core Frame Details"
             fontSize="16px"
             fontWeight="600"
+            fontColor="var(--fab-page-text, var(--app-label-text, #111111))"
           />
           <FlexContainer margin="20px 0px" align="center">
             <CustomFlexInput
@@ -75,6 +76,7 @@ const OtherTabs = ({ formState, handleInputChange }) => {
             text="Foundation Details"
             fontSize="16px"
             fontWeight="600"
+            fontColor="var(--fab-page-text, var(--app-label-text, #111111))"
           />
           <FlexContainer margin="20px 0px" align="center">
             <CustomFlexInput

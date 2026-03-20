@@ -4,7 +4,7 @@ const CustomFlexInput = ({
   type = "text",
   label,
   labelText = "",
-  labelColor = "black",
+  labelColor = "var(--app-label-text, black)",
   options = [],
   value,
   onChange,

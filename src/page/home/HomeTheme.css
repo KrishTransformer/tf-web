@@ -1,0 +1,66 @@
+:root {
+  --home-page-text: #111111;
+  --home-page-text-muted: #666666;
+  --home-page-divider: #d9d9d9;
+  --home-page-surface: #ffffff;
+  --home-page-surface-muted: #f6f6f6;
+  --home-page-border: #e7e7e7;
+  --home-page-border-soft: #ececec;
+  --home-page-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  --home-page-danger-surface: #fff1f1;
+
+  --home-title-reflection: rgba(17, 17, 17, 0.28);
+
+  --home-control-border: #1f1f1f;
+  --home-control-border-strong: #222222;
+  --home-control-surface: linear-gradient(145deg, #111111, #2d2d2d);
+  --home-control-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  --home-control-shadow-hover: 0 10px 18px rgba(0, 0, 0, 0.24);
+  --home-control-text: #ffffff;
+
+  --home-settings-toggle-text: #222222;
+  --home-darkmode-switch-track: #d7dce5;
+  --home-darkmode-switch-track-active: #4d8dff;
+  --home-darkmode-switch-knob: #ffffff;
+  --home-darkmode-switch-knob-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  --home-logout-text: #c62828;
+  --home-profile-dark-accent: #ff9f9f;
+  --home-input-bg: #ffffff;
+  --home-input-border: #cccccc;
+  --home-input-text: #111111;
+  --home-input-placeholder: #6f7782;
+  --home-icon-muted: #474646;
+  --home-pagination-bg: #ffffff;
+  --home-pagination-border: #dee2e6;
+  --home-pagination-text: #1f1f1f;
+  --home-pagination-disabled: #9aa3ad;
+  --home-summary-text: #6c757d;
+}
+
+.home-page-wrapper-dark {
+  --home-page-text: #f3f7ff;
+  --home-page-text-muted: #b9c8df;
+  --home-page-divider: rgba(255, 255, 255, 0.16);
+  --home-page-surface: #1a2534;
+  --home-page-surface-muted: #243246;
+  --home-page-border: rgba(255, 255, 255, 0.08);
+  --home-page-border-soft: rgba(255, 255, 255, 0.08);
+  --home-page-shadow: 0 18px 34px rgba(0, 0, 0, 0.35);
+  --home-page-danger-surface: rgba(198, 40, 40, 0.16);
+
+  --home-title-reflection: rgba(224, 235, 255, 0.26);
+
+  --home-settings-toggle-text: #edf3ff;
+  --home-logout-text: #ff9f9f;
+  --home-input-bg: #223146;
+  --home-input-border: rgba(255, 255, 255, 0.12);
+  --home-input-text: #edf3ff;
+  --home-input-placeholder: #9fb0c7;
+  --home-icon-muted: #9fb0c7;
+  --home-pagination-bg: #223146;
+  --home-pagination-border: rgba(255, 255, 255, 0.12);
+  --home-pagination-text: #edf3ff;
+  --home-pagination-disabled: #6f8097;
+  --home-summary-text: #b9c8df;
+}

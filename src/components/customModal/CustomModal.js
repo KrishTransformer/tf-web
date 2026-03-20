@@ -2,10 +2,9 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import { IoMdClose } from "react-icons/io";
-import FlexContainer from "../flexbox/FlexContainer";
 import TextTypo from "../textTypo/TextTypo";
+import "./CustomModal.css";
 
 const style = {
   position: "absolute",
@@ -13,8 +12,8 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: "fit-content",
-  bgcolor: "#fff",
-  border: "0.5px solid #000",
+  bgcolor: "var(--app-modal-bg, #fff)",
+  border: "1px solid var(--app-modal-border, #000)",
   boxShadow: 24,
   borderRadius: "10px",
   p: 0,
@@ -25,11 +24,11 @@ const headerStyle = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "20px 20px 0px 20px",
+  padding: "24px 24px 8px 24px",
 };
 
 const bodyStyle = {
-  padding: "0px 20px 20px 20px",
+  padding: "8px 24px 24px 24px",
 };
 
 const CustomModal = ({
@@ -40,6 +39,8 @@ const CustomModal = ({
   onModalSubmit,
   showButtons = true,
 }) => {
+  const isDarkMode = localStorage.getItem("appTheme") === "dark";
+
   return (
     <Modal
       keepMounted
@@ -48,29 +49,34 @@ const CustomModal = ({
       aria-labelledby="custom-modal-title"
       aria-describedby="custom-modal-description"
     >
-      <Box sx={style}>
+      <Box sx={style} className="custom-modal-shell">
         <Box sx={headerStyle}>
-          <TextTypo text={title} id="custom-modal-title" fontSize="20px" />
+          <TextTypo
+            text={title}
+            id="custom-modal-title"
+            fontSize="20px"
+            fontColor={isDarkMode ? "#edf4ff" : "#111111"}
+          />
           <IconButton aria-label="close" onClick={onClose}>
-            <IoMdClose color="#333" />
+            <IoMdClose className="custom-modal-close" />
           </IconButton>
         </Box>
         <Box sx={bodyStyle}>{children}</Box>
         {showButtons ? (
-          <FlexContainer justify="end" align="center" margin="20px">
+          <div className="custom-modal-actions">
             <button
-              className="bg-transparent rounded btn-block w-100 py-2"
+              className="custom-modal-btn custom-modal-btn-secondary"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
-              className="btn btn-dark rounded btn-block w-100 py-2"
+              className="custom-modal-btn custom-modal-btn-primary"
               onClick={onModalSubmit}
             >
               OK
             </button>
-          </FlexContainer>
+          </div>
         ) : (
           <></>
         )}

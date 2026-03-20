@@ -9,7 +9,7 @@ export const CancelButton = styled.button({
 });
 export const ModalButton = styled.button(
 	{
-		border: "2px solid #007CB0",
+		border: "2px solid var(--app-modal-btn-primary-border, #007CB0)",
 		// padding: '8px 28px',
 		borderRadius: "4px",
 		fontSize: "16px",
@@ -29,28 +29,44 @@ export const ModalButton = styled.button(
 		height,
 		justifyContent,
 		disabled,
-		color: isCancel || disabled ? "#0067A0" : "#ffffff",
-		background: isCancel || disabled ? "#F1F4F6" : "#0067A0",
+		color:
+			isCancel || disabled
+				? "var(--app-modal-btn-secondary-text, #0067A0)"
+				: "var(--app-modal-btn-primary-text, #ffffff)",
+		background:
+			isCancel || disabled
+				? "var(--app-modal-btn-secondary-bg, #F1F4F6)"
+				: "var(--app-modal-btn-primary-bg, #0067A0)",
+		borderColor:
+			isCancel || disabled
+				? "var(--app-modal-btn-secondary-border, #606C7D)"
+				: "var(--app-modal-btn-primary-border, #007CB0)",
 		pointerEvents: isLoading ? "none" : "auto",
 		cursor: isLoading ? "not-allowed" : "auto",
 		"&:hover": {
-			color: isCancel || disabled ? "#0067A0" : "#ffffff",
-			background: isCancel || disabled ? "#F1F4F6" : "#007CB0",
+			color:
+				isCancel || disabled
+					? "var(--app-modal-btn-secondary-text, #0067A0)"
+					: "var(--app-modal-btn-primary-text, #ffffff)",
+			background:
+				isCancel || disabled
+					? "var(--app-modal-btn-secondary-bg, #F1F4F6)"
+					: "var(--app-modal-btn-primary-border, #007CB0)",
 		},
 		"&:active": {
-			background: "#024B71",
-			color: "#ffffff",
+			background: "var(--app-modal-btn-primary-border, #024B71)",
+			color: "var(--app-modal-btn-primary-text, #ffffff)",
 		},
 	})
 );
 export const ModalTitle = styled.span({
-	color: "#142B3C",
+	color: "var(--app-modal-text, #142B3C)",
 	fontSize: "20px",
 	lineHeight: "24px",
 	fontWeight: 500,
 });
 export const ModalContent = styled.span({
-	color: "#024B71",
+	color: "var(--app-modal-muted, #024B71)",
 	fontSize: "16px",
 	lineHeight: "24px",
 	marginTop: "4px",

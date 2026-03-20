@@ -4,10 +4,11 @@ const OutlinedBtn = ({
   text,
   fontSize = "16px",
   fontWeight = "600",
-  fontColor = "black",
+  fontColor = "var(--app-label-text, black)",
   margin = "0px",
   padding = "7px 30px",
   borderRadius = "10px",
+  borderColor = "var(--app-input-border, #333)",
   ...props
 }) => {
   const style = {
@@ -15,7 +16,7 @@ const OutlinedBtn = ({
     fontWeight: fontWeight,
     color: fontColor,
     backgroundColor: "transparent",
-    border: "1px solid #333",
+    border: `1px solid ${borderColor}`,
     padding: padding,
     borderRadius: borderRadius,
     margin: margin,

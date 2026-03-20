@@ -10,6 +10,8 @@ const FlexContainer = ({
   padding = "0",
   margin = "0",
   width = "",
+  className = "",
+  style = {},
 }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 500);
 
@@ -24,7 +26,7 @@ const FlexContainer = ({
     };
   }, []);
 
-  const style = {
+  const containerStyle = {
     display: isSmallScreen ? "block" : "flex",
     flexDirection: direction,
     justifyContent: justify,
@@ -34,9 +36,10 @@ const FlexContainer = ({
     padding: padding,
     margin: margin,
     width: width,
+    ...style,
   };
 
-  return <div style={style}>{children}</div>;
+  return <div className={className} style={containerStyle}>{children}</div>;
 };
 
 export default FlexContainer;

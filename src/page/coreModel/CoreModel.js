@@ -21,6 +21,9 @@ const CoreModel = () => {
   const { id } = useParams();
   const { twoWindings } = useSelector(selectCalc);
   const { core } = useSelector(selectCore);
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => localStorage.getItem("appTheme") === "dark"
+  );
   const [coreData, setCoreData] = useState(core?.data);
   const [stepsData, setStepsData] = useState(core?.data?.bldStacks);
   //console.log("Core Data:", coreData);
@@ -73,6 +76,21 @@ const CoreModel = () => {
       });
     }
   }, [core]);
+
+  useEffect(() => {
+    const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
+    setIsDarkMode(darkModeEnabled);
+
+    if (darkModeEnabled) {
+      document.body.classList.add("app-dark-mode");
+      document.body.style.backgroundColor = "#101722";
+      document.documentElement.style.backgroundColor = "#101722";
+    } else {
+      document.body.classList.remove("app-dark-mode");
+      document.body.style.backgroundColor = "#ebebeb";
+      document.documentElement.style.backgroundColor = "#ebebeb";
+    }
+  }, []);
 
   const triggerCoreApi = (payload) => {
     let entityId = "";
@@ -219,8 +237,9 @@ console.log("Limited Stacks:", limitedStacks);
         currentPath: twoWindings.data.designId,
       }}
     >
-      <div className="m-3">
-        <Container bgColor="white" padding="20px 30px" borderRadius="2px">
+      <div className={`core-model-page ${isDarkMode ? "core-model-page-dark" : ""}`}>
+        <div className="core-model-shell">
+        <Container className="core-card" bgColor="var(--core-surface)" padding="20px 30px" borderRadius="10px">
           <div className="row align-items-start justify-content-between">
             <div className="col-lg-4">
               {/* <p>{JSON.stringify(formState)}</p> */}
@@ -237,8 +256,8 @@ console.log("Limited Stacks:", limitedStacks);
                   onChange={(e) =>
                     handleInputChange("minimumStepWidth", e.target.value)
                   }
-                  bgColor="#D7F3FC"
-                  borderColor="0.5px solid #00000033"
+                  bgColor="var(--app-input-accent-bg)"
+                  borderColor="var(--app-input-border)"
                 />
                 <CustomInput
                   label="Number Of Steps"
@@ -247,8 +266,8 @@ console.log("Limited Stacks:", limitedStacks);
                   onChange={(e) =>
                     handleInputChange("numberOfSteps", e.target.value)
                   }
-                  bgColor="#D7F3FC"
-                  borderColor="0.5px solid #00000033"
+                  bgColor="var(--app-input-accent-bg)"
+                  borderColor="var(--app-input-border)"
                 />
               </FlexContainer>
               <FlexContainer margin="20px 0px" justify="">
@@ -287,8 +306,9 @@ console.log("Limited Stacks:", limitedStacks);
                 /> */}
               </FlexContainer>
               <Container
+                className="core-card-soft"
                 margin="20px 0px"
-                bgColor="#ebebeb"
+                bgColor="var(--core-surface-soft)"
                 padding="20px"
                 borderRadius="5px"
               >
@@ -350,6 +370,7 @@ console.log("Limited Stacks:", limitedStacks);
                         </>
                       }
                       fontWeight="normal"
+                      fontColor="var(--core-page-text)"
                     />
 
                     <TextTypo
@@ -358,6 +379,7 @@ console.log("Limited Stacks:", limitedStacks);
                           <strong>Total Weight</strong> = {coreData?.coreWeight || 0} kg
                         </>
                       }
+                      fontColor="var(--core-page-text)"
                     />
 
                     <TextTypo
@@ -366,6 +388,7 @@ console.log("Limited Stacks:", limitedStacks);
                           <strong>Flux Density</strong> = {twoWindings?.data?.lvFormulas?.revisedFluxDensity?.toFixed(3)} T
                         </>
                       }
+                      fontColor="var(--core-page-text)"
                     />
 
                     <TextTypo
@@ -374,6 +397,7 @@ console.log("Limited Stacks:", limitedStacks);
                           <strong>Designed Core Area</strong> = {coreData?.designedCoreArea || 0} sqmm
                         </>
                       }
+                      fontColor="var(--core-page-text)"
                     />
 
                     <TextTypo
@@ -385,6 +409,7 @@ console.log("Limited Stacks:", limitedStacks);
                           ).toFixed(3)}
                         </>
                       }
+                      fontColor="var(--core-page-text)"
                     />
 
 
@@ -395,12 +420,7 @@ console.log("Limited Stacks:", limitedStacks);
                 <Container margin="20px 0px">
                   <div style={{ width: "100%" }}>
                     <table
-                      border="1"
-                      style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        padding: "20px",
-                      }}
+                      className="core-table"
                     >
                       <thead>
                         <tr>
@@ -414,13 +434,8 @@ console.log("Limited Stacks:", limitedStacks);
                           <tr
                             key={row.stepNo}
                             onClick={() => handleRowSelect(row.stepNo)}
-                            style={{
-                              cursor: "pointer",
-                              backgroundColor:
-                                selectedStep === row.stepNo
-                                  ? "#f0f0f0"
-                                  : "white",
-                            }}
+                            style={{ cursor: "pointer" }}
+                            className={selectedStep === row.stepNo ? "is-selected" : ""}
                           >
                             <td>{row.stepNo}</td>
                             <td>{row.width}</td>
@@ -448,8 +463,8 @@ console.log("Limited Stacks:", limitedStacks);
                           stack: "",
                         })
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                     <CustomInput
                       label="Stack"
@@ -460,13 +475,13 @@ console.log("Limited Stacks:", limitedStacks);
                           stack: e.target.value,
                         })
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                     <FilledBtn
                       text="Save"
-                      bgColor="#1B1B1B"
-                      fontColor="white"
+                      bgColor="var(--core-btn-bg)"
+                      fontColor="var(--core-btn-text)"
                       padding="10px 20px"
                       borderRadius="5px"
                       onClick={handleSave}
@@ -492,16 +507,16 @@ console.log("Limited Stacks:", limitedStacks);
                 /> */}
                 <FilledBtn
                   text="Print Preview"
-                  bgColor="#1B1B1B"
-                  fontColor="white"
+                  bgColor="var(--core-btn-bg)"
+                  fontColor="var(--core-btn-text)"
                   padding="10px 20px"
                   borderRadius="5px"
                   onClick={() => setIsPreviewOpen(true)}
                 />
                 <FilledBtn
                   text="Calculate"
-                  bgColor="#1B1B1B"
-                  fontColor="white"
+                  bgColor="var(--core-btn-bg)"
+                  fontColor="var(--core-btn-text)"
                   padding="10px 20px"
                   borderRadius="5px"
                   onClick={() => triggerCoreApi(formState)}
@@ -519,6 +534,8 @@ console.log("Limited Stacks:", limitedStacks);
             </div>
           </div>
         </Container>
+        </div>
+      </div>
         <PrintPreview
           open={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
@@ -526,7 +543,6 @@ console.log("Limited Stacks:", limitedStacks);
         >
           core
         </PrintPreview>
-      </div>
     </Layout>
   );
 };

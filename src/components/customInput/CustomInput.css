@@ -25,8 +25,9 @@
   font-weight: 400;
   border: none;
   /* border: 1px solid transparent; */
-  border: 0.5px solid #00000033;
-  background-color: #eeeef1;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #eeeef1);
+  color: var(--app-input-text, #111111);
   /* border-radius: 10px; */
   border-radius: 1px;
 }
@@ -42,6 +43,8 @@
   font-weight: 400;
   border-radius: 1px;
   outline: none;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #eeeef1);
 }
 
 .required-asterisk {
@@ -53,14 +56,24 @@
   padding: 3px;
   border-radius: 1px;
   height: 30px;
-  /* border: none;
-  background-color: #eeeef1; */
-  border: 0.5px solid #00000033;
-  background-color: #eeeef1;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #eeeef1);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--app-input-accent-text, #1400fa) 50%),
+    linear-gradient(135deg, var(--app-input-accent-text, #1400fa) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 8px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
   cursor: pointer;
-  color: #1400fa;
+  color: var(--app-input-accent-text, #1400fa);
   font-size: 14px;
   font-weight: 600;
+  padding-right: 28px;
 }
 .dropdown-select-main.disabled{
   opacity: 0.5;
@@ -70,8 +83,13 @@
 .dropdown-select-main:focus {
   border: none;
   outline: none;
-  border: 0.5px solid #00000033;
-  background-color: #eeeef1;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #eeeef1);
+}
+
+.dropdown-select-main option {
+  background-color: var(--app-input-bg, #eeeef1);
+  color: var(--app-input-text, #111111);
 }
 
 .custominput-inputFeildFlex {
@@ -81,8 +99,9 @@
   border: none;
   /* border: 1px solid transparent;
   background-color: #eeeef1; */
-  border: 0.5px solid #00000033;
-  background-color: #eeeef1;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #eeeef1);
+  color: var(--app-input-text, #111111);
   border-radius: 1px;
   min-width: 50px;
   max-width: 100px;
@@ -91,8 +110,8 @@
 .custominput-inputFeildFlex:focus {
   border: none;
   outline: none;
-  border: 0.5px solid #00000033;
-  background-color: #eeeef1;
+  border: 0.5px solid var(--app-input-border, #00000033);
+  background-color: var(--app-input-bg, #eeeef1);
 }
 
 @media (max-width: 500px) {
@@ -103,8 +122,9 @@
     border: none;
     /* border: 1px solid transparent;
     background-color: #eeeef1; */
-    border: 0.5px solid #00000033;
-    background-color: #eeeef1;
+    border: 0.5px solid var(--app-input-border, #00000033);
+    background-color: var(--app-input-bg, #eeeef1);
+    color: var(--app-input-text, #111111);
     border-radius: 1px;
     min-width: 50%;
     max-width: 50vw;

@@ -22,6 +22,7 @@ import { selectCalc } from "../../selectors/CalcSelector";
 import { selectEntity } from "../../selectors/EntitySelector";
 import { initialState } from "./../../reducers/CalcReducer";
 import { useParams } from "react-router-dom";
+import "./TwoWindingTheme.css";
 const TwoWinding = () => {
   const { id } = useParams();
 
@@ -31,6 +32,9 @@ const TwoWinding = () => {
   const { design } = useSelector(selectEntity);
   const [lockedAttributes, setLockedAttributes] = useState({});
   const [commentText, setCommentText] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => localStorage.getItem("appTheme") === "dark"
+  );
 
 
   const handleHover = (fieldPath) => {
@@ -780,6 +784,21 @@ const TwoWinding = () => {
   }, [twoWindings]);
 
   useEffect(() => {
+    const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
+    setIsDarkMode(darkModeEnabled);
+
+    if (darkModeEnabled) {
+      document.body.classList.add("app-dark-mode");
+      document.body.style.backgroundColor = "#101722";
+      document.documentElement.style.backgroundColor = "#101722";
+    } else {
+      document.body.classList.remove("app-dark-mode");
+      document.body.style.backgroundColor = "#ebebeb";
+      document.documentElement.style.backgroundColor = "#ebebeb";
+    }
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (e) => {
       // Check if Ctrl (or Cmd on Mac) and Enter are pressed
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
@@ -804,6 +823,8 @@ const TwoWinding = () => {
     <Layout id={id} isThinHeader={true} headProps={{
       currentPath: twoWindings.data.designId,
     }}>
+      <div className={`two-winding-page ${isDarkMode ? "two-winding-page-dark" : ""}`}>
+        <div className="two-winding-page-shell">
       <div className="row m-1">
         {/* <p>{JSON.stringify(lockedAttributes)}</p> */}
         {/* <p>{JSON.stringify(formState)}</p>
@@ -828,19 +849,19 @@ const TwoWinding = () => {
             handleMouseLeave={handleMouseLeave} />
           <FlexContainer margin="30px 0px" justify="">
             <button
-              className="btn-outline-dark rounded btn-block w-100 py-2"
+              className="two-winding-action-btn secondary"
               onClick={handleReset}
             >
               Reset
             </button>
             <button
-              className="btn btn-dark rounded btn-block w-100 py-2 btn-calculate"
+              className="two-winding-action-btn primary btn-calculate"
               onClick={handleCalculate}
               disabled={twoWindings?.isLoading}
             >
               {twoWindings?.isLoading ? (
-                <div class="spinner-border" role="status">
-                  <span class="sr-only"></span>
+                <div className="spinner-border" role="status">
+                  <span className="sr-only"></span>
                 </div>
               ) : (
                 "Calculate"
@@ -864,24 +885,28 @@ const TwoWinding = () => {
             /> */}
           </FlexContainer>
           <Container
-            bgColor="white"
+            className="two-winding-card"
+            bgColor="var(--tw-surface)"
             padding="20px"
-            borderRadius="5px"
+            borderRadius="10px"
             margin="20px 0px"
           >
-            <TextTypo text="Comments" />
+            <TextTypo text="Comments" margin="0px 0px 10px 0px" />
             <Container
-              bgColor="#F7F7F7"
+              className="two-winding-comments-box"
+              bgColor="var(--tw-surface-soft)"
               padding="50px"
-              borderRadius="4px"
+              borderRadius="8px"
               margin="20px 0px"
               fontSize="16px"
             >
-              <span style={{ color: "#1400fa" }}>{commentText}</span>
+              <span>{commentText}</span>
               {/* {JSON.stringify(twoWindings?.data?.comments)} - #ff5b1e  - #1400fa */}
             </Container>
           </Container>
         </div>
+      </div>
+      </div>
       </div>
     </Layout>
   );

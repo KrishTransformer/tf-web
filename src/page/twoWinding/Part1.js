@@ -4,20 +4,20 @@ import {
   Container,
   DropDownInput,
   FlexContainer,
-  // InputWithModal,
   ToggleInput,
-  ToggleBtn,
   TextTypo,
-  CustomModal,
-  InputWithModal,
 } from "../../components";
 
 const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttributes, handleHover, handleMouseLeave }) => {
   const isDryType = formState.dryType === true || formState.dryType === "true";
+  const sectionColors = {
+    lvAccent: "var(--tw-accent-blue)",
+    hvAccent: "var(--tw-accent-orange)",
+  };
 
   return (
     <div>
-      <Container bgColor="white" padding="20px" borderRadius="5px">
+      <Container className="two-winding-card" bgColor="var(--tw-surface)" padding="20px" borderRadius="10px">
         <FlexContainer>
           <CustomInput
             type="dropdown"
@@ -74,7 +74,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             onChange={(e) => handleInputChange("kVA", e.target.value)}
           />
           <DropDownInput
-            labelColor="#0081FF"
+            labelColor={sectionColors.lvAccent}
             label="Low Voltage IW"
             options={[
               { label: "Helical", value: "HELICAL" },
@@ -90,7 +90,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             }
           />
           <DropDownInput
-            labelColor="#FF5B1E"
+            labelColor={sectionColors.hvAccent}
             label="High Voltage OW"
             options={[
               { label: "Helical", value: "HELICAL" },
@@ -111,8 +111,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             label="Frequency"
             value={formState.frequency}
             onChange={(e) => handleInputChange("frequency", e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg)"
+            borderColor="var(--app-input-border)"
           />
           {/* <InputWithModal
             label="Frequency"
@@ -122,7 +122,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             borderColor="0.5px solid #00000033"
           /> */}
           <ToggleInput
-            labelColor="#0081FF"
+            labelColor={sectionColors.lvAccent}
             label="LV Current Density"
             value={formState.lvCurrentDensity}
             valueOfToggle={formState.lVConductorMaterial}
@@ -135,7 +135,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             formState={formState}
           />
           <ToggleInput
-            labelColor="#FF5B1E"
+            labelColor={sectionColors.hvAccent}
             label="HV Current Density"
             value={formState.hvCurrentDensity}
             valueOfToggle={formState.hVConductorMaterial}
@@ -282,9 +282,10 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
         </FlexContainer>
       </Container>
       <Container
-        bgColor="white"
+        className="two-winding-card two-winding-summary-card"
+        bgColor="var(--tw-surface-soft)"
         padding="20px"
-        borderRadius="5px"
+        borderRadius="10px"
         margin="20px 0px"
       >
         {/* <TextTypo
@@ -294,15 +295,16 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
           margin="0px 0px 15px"
         /> */}
         <FlexContainer align="center">
-          <TextTypo text={`Volts per Turns :  ${formState?.voltsPerTurn}`} />
+          <TextTypo text={`Volts per Turns :  ${formState?.voltsPerTurn}`} fontColor="var(--tw-page-text)" />
           {/* <TextTypo text={`Turns per Tap :  ${formState?.turnsPerTap}`} /> */}
           {/* <TextTypo text={`kValue :  ${formState.kValue}`}/> */}
         </FlexContainer>
       </Container>
       <Container
-        bgColor="white"
+        className="two-winding-card"
+        bgColor="var(--tw-surface)"
         padding="20px"
-        borderRadius="5px"
+        borderRadius="10px"
         margin="20px 0px"
       >
         <FlexContainer>
@@ -311,8 +313,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             type="text"
             value={formState.core?.coreType}
             onChange={(e) => handleInputChange("core.coreType", e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg)"
+            borderColor="var(--app-input-border)"
           /> */}
           <CustomInput
             label="Core Diameter"
@@ -320,8 +322,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             value={formState.core?.coreDia}
             attributeName="core.coreDia"
             onChange={(e) => handleInputChange(`core.coreDia`, e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg)"
+            borderColor="var(--app-input-border)"
             showUnlockIcon={true}
             handleToggleLock={(e) => handleToggleLock(`coreLock.coreDia`, lockedAttributes?.coreLock?.coreDia)}
             isLocked={lockedAttributes?.coreLock?.coreDia}
@@ -333,8 +335,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             value={formState.core?.limbHt}
             attributeName="core.limbHt"
             onChange={(e) => handleInputChange('core.limbHt', e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg)"
+            borderColor="var(--app-input-border)"
             showUnlockIcon={true}
             handleToggleLock={(e) => handleToggleLock(`coreLock.limbHt`, lockedAttributes?.coreLock?.limbHt)}
             isLocked={lockedAttributes?.coreLock?.limbHt}
@@ -346,14 +348,14 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             value={formState.core?.limbHt}
             onChange={(e) => handleInputChange("core.limbHt", e.target.value)}
             bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            borderColor="var(--app-input-border)"
           /> */}
           <CustomInput
             label="Cen Dist"
             type="text"
             value={formState.core?.cenDist}
             onChange={(e) => handleInputChange("", e.target.value)}
-            borderColor="0.5px solid #00000033"
+            borderColor="var(--app-input-border)"
           />
         </FlexContainer>
         <FlexContainer>
@@ -362,8 +364,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             type="text"
             value={formState.core?.area}
             onChange={(e) => handleInputChange("core.area", e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg)"
+            borderColor="var(--app-input-border)"
           />
           {/* <CustomInput
             label="Blade"
@@ -406,7 +408,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
           /> */}
         </FlexContainer>
       </Container>
-      <Container bgColor="white" padding="20px" borderRadius="5px">
+      <Container className="two-winding-card" bgColor="var(--tw-surface)" padding="20px" borderRadius="10px">
         <FlexContainer>
           {/* commented for now */}
           {/* <CustomInput
@@ -431,8 +433,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
               type="text"
               value={formState.tank?.tankLoss}
               onChange={(e) => handleInputChange("tank.tankLoss", e.target.value)}
-              bgColor="#D7F3FC"
-              borderColor="0.5px solid #00000033"
+              bgColor="var(--app-input-accent-bg)"
+              borderColor="var(--app-input-border)"
             />
           )}
           <CustomInput
@@ -456,8 +458,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             type="text"
             value={formState.limitEz}
             onChange={(e) => handleInputChange("limitEz", e.target.value)}
-            bgColor="#D7F3FC"
-            borderColor="0.5px solid #00000033"
+            bgColor="var(--app-input-accent-bg)"
+            borderColor="var(--app-input-border)"
           />
           <CustomInput
             label="EZ"

@@ -53,6 +53,42 @@ const CustomStepper = ({
       }
     }
 
+    const controlShellStyle = {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "10px",
+      borderRadius: "16px",
+      border: "1px solid var(--app-input-border, #00000033)",
+      background:
+        "linear-gradient(135deg, var(--app-input-bg, #eeeef1), var(--app-input-accent-bg, #d7f3fc))",
+      minWidth: "124px",
+      minHeight: "46px",
+      padding: "6px",
+      boxShadow: "0 10px 20px rgba(15, 23, 42, 0.08)",
+    }
+
+    const buttonStyle = (isDisabled) => ({
+      background: isDisabled
+        ? "transparent"
+        : "var(--app-toggle-track, rgba(255, 255, 255, 0.75))",
+      border: "1px solid var(--app-input-border, #00000033)",
+      color: isDisabled ? "#c0c0c0" : "var(--app-input-text, #222)",
+      fontSize: "20px",
+      fontWeight: 700,
+      cursor: isDisabled ? "not-allowed" : "pointer",
+      width: "34px",
+      height: "34px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+      outline: "none",
+      boxShadow: "none",
+      padding: 0,
+      borderRadius: "10px",
+      flexShrink: 0,
+    })
+
     
   
     return (
@@ -62,7 +98,7 @@ const CustomStepper = ({
             <label
               style={{
                 marginBottom: 0,
-                color: "#000000",
+                color: "var(--app-label-text, #000000)",
                 fontSize: "14px",
                 fontWeight: "500",
                 display: "inline-block",
@@ -75,40 +111,13 @@ const CustomStepper = ({
           )}
   
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              borderRadius: "12px",
-              //border: "2px solid #2a2ad1",
-              backgroundColor: "#eeeef1",
-              width: "fit-content",
-              minWidth: "100px",
-              height: "40px",
-              overflow: "hidden",
-              padding: "0 8px",
-            }}
+            style={controlShellStyle}
           >
             <button
               type="button"
               onClick={handleDecrement}
               disabled={disabled || currentValue <= min}
-              style={{
-                background: "none",
-                border: "none",
-                color: disabled || currentValue <= min ? "#c0c0c0" : "#222",
-                fontSize: "22px",
-                fontWeight: 700,
-                cursor: disabled || currentValue <= min ? "not-allowed" : "pointer",
-                width: "32px",
-                height: "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "color 0.2s ease",
-                outline: "none",
-                boxShadow: "none",
-                padding: 0,
-              }}
+              style={buttonStyle(disabled || currentValue <= min)}
               tabIndex={-1}
             >
               -
@@ -120,17 +129,19 @@ const CustomStepper = ({
               value={currentValue}
               onChange={handleInputChange}
               style={{
-                border: "none",
+                border: "1px solid var(--app-input-border, #00000033)",
                 outline: "none",
                 textAlign: "center",
                 fontSize: "16px",
                 fontWeight: 700,
-                padding: "0 8px",
-                width: "32px",
-                backgroundColor: "transparent",
-                color: "#1400fa",
+                padding: "0 10px",
+                width: "40px",
+                height: "34px",
+                backgroundColor: "rgba(255, 255, 255, 0.18)",
+                color: "var(--app-input-accent-text, #1400fa)",
                 opacity: disabled ? 0.5 : 1,
-                flex: 1,
+                borderRadius: "10px",
+                flex: "0 0 auto",
                 pointerEvents: disabled || props.readOnly ? "none" : "auto",
               }}
               min={min}
@@ -143,23 +154,7 @@ const CustomStepper = ({
               type="button"
               onClick={handleIncrement}
               disabled={disabled || currentValue >= max}
-              style={{
-                background: "none",
-                border: "none",
-                color: disabled || currentValue >= max ? "#c0c0c0" : "#222",
-                fontSize: "22px",
-                fontWeight: 700,
-                cursor: disabled || currentValue >= max ? "not-allowed" : "pointer",
-                width: "32px",
-                height: "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "color 0.2s ease",
-                outline: "none",
-                boxShadow: "none",
-                padding: 0,
-              }}
+              style={buttonStyle(disabled || currentValue >= max)}
               tabIndex={-1}
             >
               +

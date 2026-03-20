@@ -14,7 +14,7 @@ const Part2 = ({ formState, handleInputChange }) => {
   //console.log("formState.bot_Chnl.isRoller", formState.bot_Chnl.isRoller);
   return (
     <Container>
-      <Container bgColor="white" padding="20px" borderRadius="5px">
+      <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="20px" borderRadius="10px">
         <TextTypo
           text="Lid and Conservator Details:"
           fontSize="18px"
@@ -210,7 +210,7 @@ const Part2 = ({ formState, handleInputChange }) => {
         </FlexContainer>
       </Container> */}
 
-      <Container bgColor="white" padding="20px" borderRadius="5px" margin="20px 0px">
+      <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="20px" borderRadius="10px" margin="20px 0px">
         <NavTabs
           tabs={[
             {
@@ -218,9 +218,9 @@ const Part2 = ({ formState, handleInputChange }) => {
               label: "Active Part",
               content: (
                 <Container
-                  bgColor="white"
+                  bgColor="var(--fab-surface)"
                   padding="5px"
-                  borderRadius="5px"
+                  borderRadius="10px"
                   margin="20px 0px"
                 >
                   <TextTypo
@@ -288,9 +288,9 @@ const Part2 = ({ formState, handleInputChange }) => {
               label: "Tank",
               content: (
                 <Container
-                  bgColor="white"
+                  bgColor="var(--fab-surface)"
                   padding="5px"
-                  borderRadius="5px"
+                  borderRadius="10px"
                   margin="20px 0px"
                 >
                   <TextTypo

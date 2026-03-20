@@ -1,0 +1,205 @@
+.two-winding-page {
+  --tw-page-text: #111827;
+  --tw-page-muted: #5f6b7a;
+  --tw-surface: #ffffff;
+  --tw-surface-soft: #f7fafc;
+  --tw-surface-strong: #eef4fb;
+  --tw-border: rgba(15, 23, 42, 0.12);
+  --tw-border-strong: rgba(15, 23, 42, 0.18);
+  --tw-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  --tw-accent-blue: #0081ff;
+  --tw-accent-orange: #ff5b1e;
+  --tw-comment-text: #1400fa;
+  --tw-page-bg: transparent;
+
+  --app-input-bg: #eef1f5;
+  --app-input-accent-bg: #d7f3fc;
+  --app-input-border: rgba(15, 23, 42, 0.18);
+  --app-input-text: #111827;
+  --app-input-accent-text: #1400fa;
+  --app-label-text: #111827;
+  --app-toggle-track: #ffffff;
+  --app-toggle-active: #d4ff00;
+  --app-toggle-active-text: #111111;
+  --app-tab-text: rgba(17, 24, 39, 0.55);
+  --app-tab-active-text: #111827;
+  --app-tab-active-border: #111827;
+  --app-modal-bg: #ffffff;
+  --app-modal-border: rgba(15, 23, 42, 0.18);
+  --app-modal-text: #111827;
+  --app-modal-muted: #4b5563;
+  --app-modal-btn-secondary-bg: #f8fafc;
+  --app-modal-btn-secondary-border: rgba(15, 23, 42, 0.18);
+  --app-modal-btn-secondary-text: #111827;
+  --app-modal-btn-primary-bg: #111827;
+  --app-modal-btn-primary-border: #111827;
+  --app-modal-btn-primary-text: #ffffff;
+
+  color: var(--tw-page-text);
+}
+
+body.app-dark-mode .two-winding-page {
+  --tw-page-text: #edf4ff;
+  --tw-page-muted: #9eb0ca;
+  --tw-surface: #172233;
+  --tw-surface-soft: #1d2b40;
+  --tw-surface-strong: #22344b;
+  --tw-border: rgba(255, 255, 255, 0.08);
+  --tw-border-strong: rgba(143, 181, 255, 0.28);
+  --tw-shadow: 0 20px 42px rgba(2, 10, 24, 0.42);
+  --tw-comment-text: #9fc5ff;
+  --tw-page-bg:
+    radial-gradient(circle at top right, rgba(77, 141, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, #101722 0%, #162233 100%);
+
+  --app-input-bg: #203147;
+  --app-input-accent-bg: #233952;
+  --app-input-border: rgba(255, 255, 255, 0.12);
+  --app-input-text: #edf4ff;
+  --app-input-accent-text: #9fc5ff;
+  --app-label-text: #dfe9f8;
+  --app-toggle-track: #2b3e56;
+  --app-toggle-active: #8bc34a;
+  --app-toggle-active-text: #0d1608;
+  --app-tab-text: rgba(223, 233, 248, 0.62);
+  --app-tab-active-text: #edf4ff;
+  --app-tab-active-border: #8fb5ff;
+  --app-modal-bg: #172233;
+  --app-modal-border: rgba(255, 255, 255, 0.12);
+  --app-modal-text: #edf4ff;
+  --app-modal-muted: #9eb0ca;
+  --app-modal-btn-secondary-bg: #1f3147;
+  --app-modal-btn-secondary-border: rgba(255, 255, 255, 0.12);
+  --app-modal-btn-secondary-text: #edf4ff;
+  --app-modal-btn-primary-bg: #3b82f6;
+  --app-modal-btn-primary-border: #3b82f6;
+  --app-modal-btn-primary-text: #ffffff;
+}
+
+.two-winding-page-shell {
+  margin: 0 -10px -10px;
+  min-height: 100vh;
+  padding: 10px;
+  background: var(--tw-page-bg);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.two-winding-card {
+  background: var(--tw-surface);
+  border: 1px solid var(--tw-border);
+  border-radius: 10px;
+  box-shadow: var(--tw-shadow);
+}
+
+.two-winding-summary-card {
+  background: var(--tw-surface-soft);
+}
+
+.two-winding-comments-box {
+  background: var(--tw-surface-soft);
+  color: var(--tw-comment-text);
+  border: 1px solid var(--tw-border);
+}
+
+.two-winding-page h5,
+.two-winding-page h1,
+.two-winding-page label,
+.two-winding-page p,
+.two-winding-page span,
+.two-winding-page td,
+.two-winding-page th,
+.two-winding-page button {
+  color: inherit;
+}
+
+.two-winding-accordion-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.two-winding-accordion-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.two-winding-icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--tw-page-text);
+  font-size: 16px;
+}
+
+.two-winding-action-btn {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid var(--tw-border-strong);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.two-winding-action-btn.secondary {
+  background: transparent;
+  color: var(--tw-page-text);
+}
+
+.two-winding-action-btn.primary {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+}
+
+body.app-dark-mode .two-winding-action-btn.primary {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.two-winding-comments-title {
+  margin-bottom: 10px;
+}
+
+.two-winding-page .row > [class*="col-"] {
+  color: var(--tw-page-text);
+}
+
+.two-winding-page .tableTabs,
+.two-winding-page .tableTabsGeneral {
+  color: var(--tw-page-text);
+}
+
+.two-winding-page .tableTabs td,
+.two-winding-page .tableTabsGeneral td {
+  border-bottom: 1px solid rgba(127, 146, 174, 0.12);
+}
+
+.two-winding-page .tableTabs tr:last-child td,
+.two-winding-page .tableTabsGeneral tr:last-child td {
+  border-bottom: none;
+}
+
+.two-winding-page .custominput-label,
+.two-winding-page .dropdown-label,
+.two-winding-page .tgi2-label,
+.two-winding-page .toggle-label,
+.two-winding-page .form-check-label {
+  color: var(--app-label-text);
+}
+
+.two-winding-page .form-check-input {
+  background-color: var(--app-input-bg);
+  border-color: var(--app-input-border);
+}
+
+.two-winding-page .form-check-input:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.two-winding-page .spinner-border {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-width: 0.15em;
+}

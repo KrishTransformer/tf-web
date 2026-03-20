@@ -8,8 +8,11 @@ const Container = ({
   bgColor = "transparent",
   border = "none",
   borderRadius="0px",
+  boxShadow = "none",
+  className = "",
+  style = {},
 }) => {
-  const style = {
+  const containerStyle = {
     margin: margin,
     padding: padding,
     width: width,
@@ -17,9 +20,11 @@ const Container = ({
     backgroundColor: bgColor,
     border: border,
     borderRadius: borderRadius,
+    boxShadow: boxShadow,
+    ...style,
   };
 
-  return <div style={style}>{children}</div>;
+  return <div className={className} style={containerStyle}>{children}</div>;
 };
 
 export default Container;

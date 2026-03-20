@@ -19,38 +19,6 @@ import { useSelector } from "react-redux";
 import { selectCalc } from "../../selectors/CalcSelector";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "60vw",
-  height: "90vh",
-  bgcolor: "#fff",
-  border: "0.5px solid #000",
-  boxShadow: 24,
-  borderRadius: "10px",
-  pr: 0,
-  minWidth: 500,
-
-};
-
-const headerStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "10px 10px 0px 20px",
-};
-
-const bodyStyle = {
-  paddingBottom: "10px",
-  margin: "5px 20px",
-  bgcolor: "#fff",
-  //   borderRadius: "10px",
-  position: "relative",
-  // overflow: "hidden",
-  overflowY: "auto"
-};
 
 const PrintPreview = ({
   open,
@@ -60,6 +28,56 @@ const PrintPreview = ({
   coreData,
 }) => {
   const { twoWindings } = useSelector(selectCalc);
+  const isDarkMode = localStorage.getItem("appTheme") === "dark";
+  const previewTheme = {
+    modalBg: isDarkMode ? "#172233" : "#ffffff",
+    modalBorder: isDarkMode ? "rgba(255, 255, 255, 0.12)" : "#000000",
+    text: isDarkMode ? "#edf4ff" : "#111111",
+    mutedText: isDarkMode ? "#9eb0ca" : "#333333",
+    summaryBg: isDarkMode ? "#203147" : "#ebebeb",
+    sectionBg: isDarkMode ? "#172233" : "#ffffff",
+    tableHeadBg: isDarkMode ? "#263a54" : "#f4f4f4",
+    tableHeadCellBg: isDarkMode ? "#304865" : "#e0e0e0",
+    tableRowAlt: isDarkMode ? "#1d2b40" : "#f9f9f9",
+    tableRow: isDarkMode ? "#172233" : "#ffffff",
+    tableTotalBg: isDarkMode ? "#25476b" : "#d9edf7",
+    tableBorder: isDarkMode ? "rgba(255, 255, 255, 0.16)" : "#000000",
+  };
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "90vw",
+    height: "92vh",
+    bgcolor: previewTheme.modalBg,
+    border: `0.5px solid ${previewTheme.modalBorder}`,
+    boxShadow: 24,
+    borderRadius: "10px",
+    pr: 0,
+    minWidth: 500,
+    display: "flex",
+    flexDirection: "column",
+    color: previewTheme.text,
+  };
+
+  const headerStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 10px 0px 20px",
+  };
+
+  const bodyStyle = {
+    flex: 1,
+    minHeight: 0,
+    paddingBottom: "10px",
+    margin: "5px 20px",
+    bgcolor: previewTheme.modalBg,
+    color: previewTheme.text,
+    position: "relative",
+    overflowY: "auto",
+  };
 
   const table1Stacking = coreData?.centerLimbStacking;
   const table2Stacking = coreData?.eCoreBladeType === "CRUSI_3" || coreData?.eCoreBladeType === "BLADE_3"
@@ -99,57 +117,36 @@ const PrintPreview = ({
     >
       <Box sx={style}>
         <Box sx={headerStyle}>
-          <TextTypo
-            text="PDF VIEWER"
-            id="custom-modal-title"
-            fontSize="20px"
-            fontColor="white"
-          />
-          <TextTypo
-            text="Zoom in"
-            id="custom-modal-title"
-            fontSize="20px"
-            fontColor="white"
-          />
-          <TextTypo
-            text="Zoom out"
-            id="custom-modal-title"
-            fontSize="20px"
-            fontColor="white"
-          />
-          <TextTypo
-            text="Download Options"
-            id="custom-modal-title"
-            fontSize="20px"
-            fontColor="white"
-          />
+          <div id="custom-modal-title" />
           <IconButton aria-label="close" onClick={onClose}>
-            <IoMdClose color="#000" />
+            <IoMdClose color={previewTheme.text} />
           </IconButton>
         </Box>
         <Box sx={bodyStyle}>
           <Container
             margin="0px 0px"
-            bgColor="#ebebeb"
+            bgColor={previewTheme.summaryBg}
             padding="20px"
             borderRadius="5px"
           >
             <FlexContainer align="center" direction="column">
               <FlexContainer align="center" direction="column">
-                <TextTypo text={`CORE Details for Transformer`} />
+                <TextTypo text={`CORE Details for Transformer`} fontColor={previewTheme.text} />
                 <TextTypo
                   text={`Voltage : ${twoWindings?.data?.lowVoltage}V / 
                                 ${twoWindings?.data?.highVoltage}V,    Frequency : ${twoWindings?.data?.frequency}Hz`}
+                  fontColor={previewTheme.text}
                 />
                 <TextTypo
                   text={`Core Size : ${twoWindings?.data?.core?.coreDia} / 
                                 ${twoWindings?.data?.core?.limbHt} / 
                                 ${twoWindings?.data?.core?.cenDist},    kVA : ${twoWindings?.data?.kVA}`}
+                  fontColor={previewTheme.text}
                 />
               </FlexContainer>
             </FlexContainer>
           </Container>
-          <div style={{ height: "40vh", padding: "30px" }}>
+          <div style={{ width: "100%", minHeight: "100%", padding: "30px", boxSizing: "border-box" }}>
 
             {/* table1 */}
             <div className="d-flex" style={{ marginTop: "30px", alignItems: "center", gap: "30px", flexWrap: "wrap", }} >
@@ -161,15 +158,15 @@ const PrintPreview = ({
 
               <div style={{ flex: 1, minWidth: "300px" }}>
                 <table border="1" style={{ width: "100%", borderCollapse: "collapse", }} >
-                  <thead style={{ backgroundColor: "#f4f4f4", color: "#333", }}>
+                  <thead style={{ backgroundColor: previewTheme.tableHeadBg, color: previewTheme.text }}>
                     <tr>
                       {tableHead.map((head, index) => (
                         <th
                           key={index}
                           style={{
                             padding: "10px",
-                            border: "1px solid black",
-                            backgroundColor: "#e0e0e0",
+                            border: `1px solid ${previewTheme.tableBorder}`,
+                            backgroundColor: previewTheme.tableHeadCellBg,
                             whiteSpace: "pre-line",
                           }}
                         >
@@ -188,13 +185,14 @@ const PrintPreview = ({
                           key={index}
                           style={{
                             cursor: "pointer",
-                            backgroundColor: index % 2 === 0 ? "#f9f9f9" : "white",
+                            backgroundColor: index % 2 === 0 ? previewTheme.tableRowAlt : previewTheme.tableRow,
+                            color: previewTheme.text,
                           }}
                         >
                           {row.map((cell, cellIndex) => (
                             <td
                               key={cellIndex}
-                              style={{ padding: "8px", border: "1px solid black" }}
+                              style={{ padding: "8px", border: `1px solid ${previewTheme.tableBorder}` }}
                             >
                               {cell}
                             </td>
@@ -202,12 +200,12 @@ const PrintPreview = ({
                         </tr>
                       ))}
                     {/* Grand Total Row */}
-                    <tr style={{ fontWeight: "bold", backgroundColor: "#d9edf7" }}>
+                    <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                       <td
                         colSpan="6"
                         style={{
                           padding: "8px",
-                          border: "1px solid black",
+                          border: `1px solid ${previewTheme.tableBorder}`,
                           textAlign: "right",
                           paddingRight: "15px",
                         }}
@@ -240,8 +238,8 @@ const PrintPreview = ({
                 >
                   <thead
                     style={{
-                      backgroundColor: "#f4f4f4",
-                      color: "#333",
+                      backgroundColor: previewTheme.tableHeadBg,
+                      color: previewTheme.text,
                     }}
                   >
                     <tr>
@@ -250,8 +248,8 @@ const PrintPreview = ({
                           key={index}
                           style={{
                             padding: "10px",
-                            border: "1px solid black",
-                            backgroundColor: "#e0e0e0",
+                            border: `1px solid ${previewTheme.tableBorder}`,
+                            backgroundColor: previewTheme.tableHeadCellBg,
                             whiteSpace: "pre-line",
                           }}
                         >
@@ -270,25 +268,26 @@ const PrintPreview = ({
                           key={index}
                           style={{
                             cursor: "pointer",
-                            backgroundColor: index % 2 === 0 ? "#f9f9f9" : "white",
+                            backgroundColor: index % 2 === 0 ? previewTheme.tableRowAlt : previewTheme.tableRow,
+                            color: previewTheme.text,
                           }}
                         >
                           {row.map((cell, cellIndex) => (
                             <td
                               key={cellIndex}
-                              style={{ padding: "8px", border: "1px solid black" }}
+                              style={{ padding: "8px", border: `1px solid ${previewTheme.tableBorder}` }}
                             >
                               {cell}
                             </td>
                           ))}
                         </tr>
                       ))}
-                    <tr style={{ fontWeight: "bold", backgroundColor: "#d9edf7" }}>
+                    <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                       <td
                         colSpan="6"
                         style={{
                           padding: "8px",
-                          border: "1px solid black",
+                          border: `1px solid ${previewTheme.tableBorder}`,
                           textAlign: "right",
                           paddingRight: "15px",
                         }}
@@ -322,8 +321,8 @@ const PrintPreview = ({
                 >
                   <thead
                     style={{
-                      backgroundColor: "#f4f4f4",
-                      color: "#333",
+                      backgroundColor: previewTheme.tableHeadBg,
+                      color: previewTheme.text,
                     }}
                   >
                     <tr>
@@ -332,8 +331,8 @@ const PrintPreview = ({
                           key={index}
                           style={{
                             padding: "10px",
-                            border: "1px solid black",
-                            backgroundColor: "#e0e0e0",
+                            border: `1px solid ${previewTheme.tableBorder}`,
+                            backgroundColor: previewTheme.tableHeadCellBg,
                             whiteSpace: "pre-line",
                           }}
                         >
@@ -352,25 +351,26 @@ const PrintPreview = ({
                           key={index}
                           style={{
                             cursor: "pointer",
-                            backgroundColor: index % 2 === 0 ? "#f9f9f9" : "white",
+                            backgroundColor: index % 2 === 0 ? previewTheme.tableRowAlt : previewTheme.tableRow,
+                            color: previewTheme.text,
                           }}
                         >
                           {row.map((cell, cellIndex) => (
                             <td
                               key={cellIndex}
-                              style={{ padding: "8px", border: "1px solid black" }}
+                              style={{ padding: "8px", border: `1px solid ${previewTheme.tableBorder}` }}
                             >
                               {cell}
                             </td>
                           ))}
                         </tr>
                       ))}
-                    <tr style={{ fontWeight: "bold", backgroundColor: "#d9edf7" }}>
+                    <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                       <td
                         colSpan="6"
                         style={{
                           padding: "8px",
-                          border: "1px solid black",
+                          border: `1px solid ${previewTheme.tableBorder}`,
                           textAlign: "right",
                           paddingRight: "15px",
                         }}
@@ -416,8 +416,8 @@ const PrintPreview = ({
                   >
                     <thead
                       style={{
-                        backgroundColor: "#f4f4f4",
-                        color: "#333",
+                        backgroundColor: previewTheme.tableHeadBg,
+                        color: previewTheme.text,
                       }}
                     >
                       <tr>
@@ -426,8 +426,8 @@ const PrintPreview = ({
                             key={index}
                             style={{
                               padding: "10px",
-                              border: "1px solid black",
-                              backgroundColor: "#e0e0e0",
+                              border: `1px solid ${previewTheme.tableBorder}`,
+                              backgroundColor: previewTheme.tableHeadCellBg,
                               whiteSpace: "pre-line",
                             }}
                           >
@@ -449,25 +449,26 @@ const PrintPreview = ({
                             key={index}
                             style={{
                               cursor: "pointer",
-                              backgroundColor: index % 2 === 0 ? "#f9f9f9" : "white",
+                              backgroundColor: index % 2 === 0 ? previewTheme.tableRowAlt : previewTheme.tableRow,
+                              color: previewTheme.text,
                             }}
                           >
                             {row.map((cell, cellIndex) => (
                               <td
                                 key={cellIndex}
-                                style={{ padding: "8px", border: "1px solid black" }}
+                                style={{ padding: "8px", border: `1px solid ${previewTheme.tableBorder}` }}
                               >
                                 {cell}
                               </td>
                             ))}
                           </tr>
                         ))}
-                      <tr style={{ fontWeight: "bold", backgroundColor: "#d9edf7" }}>
+                      <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                         <td
                           colSpan="6"
                           style={{
                             padding: "8px",
-                            border: "1px solid black",
+                            border: `1px solid ${previewTheme.tableBorder}`,
                             textAlign: "right",
                             paddingRight: "15px",
                           }}
@@ -481,7 +482,7 @@ const PrintPreview = ({
               </div>
             )}
 
-            <div style={{ marginTop: "20px", fontWeight: "bold", textAlign: "center", fontSize: "16px" }}>
+            <div style={{ marginTop: "20px", fontWeight: "bold", textAlign: "center", fontSize: "16px", color: previewTheme.text }}>
               Total Weight: {totalWeight} kg
             </div>
 

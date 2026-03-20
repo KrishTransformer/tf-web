@@ -90,7 +90,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
       label: isDryType ? "Enclosure & Temp" : "Tank & Cooling",
       content: (
         <div>
-          <table class="tableTabsGeneral">
+          <table className="tableTabsGeneral">
             <tr>
               <td>Overall Dimensions:</td>
               <td>{formState.tank?.overallDimension}</td>
@@ -106,8 +106,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               type="text"
               value={formState?.windingTemp}
               onChange={(e) => handleInputChange("windingTemp", e.target.value)}
-              bgColor="#D7F3FC"
-              borderColor="0.5px solid #00000033"
+              bgColor="var(--app-input-accent-bg)"
+              borderColor="var(--app-input-border)"
             />
 
             {!isDryType && (
@@ -116,8 +116,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                 type="text"
                 value={formState?.topOilTemp}
                 onChange={(e) => handleInputChange("topOilTemp", e.target.value)}
-                bgColor="#D7F3FC"
-                borderColor="0.5px solid #00000033"
+                bgColor="var(--app-input-accent-bg)"
+                borderColor="var(--app-input-border)"
               />
             )}
 
@@ -126,8 +126,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               type="text"
               value={formState?.ambientTemp}
               onChange={(e) => handleInputChange("ambientTemp", e.target.value)}
-              bgColor="#D7F3FC"
-              borderColor="0.5px solid #00000033"
+              bgColor="var(--app-input-accent-bg)"
+              borderColor="var(--app-input-border)"
             />
           </FlexContainer>
           {!isDryType && (
@@ -170,7 +170,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               >
                 <TextTypo
                   text={formState?.tankAndOilFormulas?.coolingStatement}
-                  fontColor="black"
+                  fontColor="var(--tw-page-text)"
                 />
               </Container>
             </>
@@ -189,10 +189,12 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               <TextTypo
                 text={`Conservator Dia :  ${formState.tankAndOilFormulas?.conservatorDia}`}
                 fontWeight="600"
+                fontColor="var(--tw-page-text)"
               />
               <TextTypo
                 text={`Conservator Length :  ${formState.tankAndOilFormulas?.conservatorLength}`}
                 fontWeight="600"
+                fontColor="var(--tw-page-text)"
               />
             </FlexContainer>
           ) : (
@@ -211,9 +213,10 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
             textAlign="center"
             fontSize="16px"
             fontWeight="600"
+            fontColor="var(--tw-page-text)"
           />
           <FlexContainer margin="20px 0px 0px 0px">
-            <table class="tableTabs">
+            <table className="tableTabs">
               <tr>
                 <td>Core Dia:</td>
                 <td>{formState.coilDimensions?.coreDia}</td>
@@ -235,7 +238,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                 <td>{formState.coilDimensions?.lvod}</td>
               </tr>
             </table>
-            <table class="tableTabs">
+            <table className="tableTabs">
               <tr>
                 <td>LV-HV Gap x 2:</td>
                 <td>{formState.coilDimensions?.lvhvgap}</td>
@@ -259,7 +262,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
             </table>
           </FlexContainer>
           <FlexContainer>
-            <table class="tableTabsGeneral">
+            <table className="tableTabsGeneral">
               <tr>
                 <td>Active Part Size:</td>
                 <td>{formState.coilDimensions?.activePartSize}</td>
@@ -275,7 +278,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
       content: (
         <div>
           {/* <CustomInput type="checkbox" label="Cost Iteration" margin="10px" /> */}
-          <table class="tableTabsGeneral" style={{ width: "65%" }}>
+          <table className="tableTabsGeneral" style={{ width: "65%" }}>
             <tr>
               <td> Major material cost:</td>
               <td>{formState?.cost?.capitalCost}</td>
@@ -297,7 +300,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
               <td></td>
             </tr>
           </table>
-          <table class="tableTabs">
+          <table className="tableTabs">
             <tr>
               <td></td>
               <td>Weight</td>
@@ -327,8 +330,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                           e.target.value
                         )
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                   ) : (
                     <CustomInput
@@ -340,8 +343,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                           e.target.value
                         )
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                   )}
                 </td>
@@ -377,8 +380,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                           e.target.value
                         )
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                   ) : (
                     <CustomInput
@@ -390,8 +393,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                           e.target.value
                         )
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                   )}
                   </td>
@@ -425,8 +428,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                           e.target.value
                         )
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                   ) : (
                     <CustomInput
@@ -438,8 +441,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                           e.target.value
                         )
                       }
-                      bgColor="#D7F3FC"
-                      borderColor="0.5px solid #00000033"
+                      bgColor="var(--app-input-accent-bg)"
+                      borderColor="var(--app-input-border)"
                     />
                   )}
                   </td>
@@ -470,8 +473,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                   onChange={(e) =>
                     handleInputChange("cost.coreCostPerKg", e.target.value)
                   }
-                  bgColor="#D7F3FC"
-                  borderColor="0.5px solid #00000033"
+                  bgColor="var(--app-input-accent-bg)"
+                  borderColor="var(--app-input-border)"
                 />
               </td>
               <td>
@@ -498,8 +501,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                   onChange={(e) =>
                     handleInputChange("cost.steelCostPerKg", e.target.value)
                   }
-                  bgColor="#D7F3FC"
-                  borderColor="0.5px solid #00000033"
+                  bgColor="var(--app-input-accent-bg)"
+                  borderColor="var(--app-input-border)"
                 />
               </td>
               <td>
@@ -527,8 +530,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                     onChange={(e) =>
                       handleInputChange("cost.oilCostPerKg", e.target.value)
                     }
-                    bgColor="#D7F3FC"
-                    borderColor="0.5px solid #00000033"
+                    bgColor="var(--app-input-accent-bg)"
+                    borderColor="var(--app-input-border)"
                   />
                 </td>
                 <td>
@@ -559,8 +562,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                       e.target.value
                     )
                   }
-                  bgColor="#D7F3FC"
-                  borderColor="0.5px solid #00000033"
+                  bgColor="var(--app-input-accent-bg)"
+                  borderColor="var(--app-input-border)"
                 />
               </td>
               <td>
@@ -588,8 +591,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
                     onChange={(e) =>
                       handleInputChange("cost.radiatorCostPerKg", e.target.value)
                     }
-                    bgColor="#D7F3FC"
-                    borderColor="0.5px solid #00000033"
+                    bgColor="var(--app-input-accent-bg)"
+                    borderColor="var(--app-input-border)"
                   />
                 </td>
                 <td>
@@ -614,7 +617,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
     },
   ];
   return (
-    <div>
+    <div className="two-winding-tabs-panel">
       <NavTabs tabs={tabs} />
       <CustomModal
         open={isRadiatorWidthModalOpen}
@@ -625,7 +628,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
         <TextTypo
           text="Enter radiator width. Common values are 226, 300, and 520."
           margin="20px 0px"
-          fontColor="grey"
+          fontColor="var(--tw-page-muted)"
         />
         <CustomInput
           label="Radiator Width"
@@ -633,8 +636,8 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
           onChange={(e) =>
             setCustomRadiatorWidth(e.target.value.replace(/\D/g, ""))
           }
-          bgColor="#D7F3FC"
-          borderColor="0.5px solid #00000033"
+          bgColor="var(--app-input-accent-bg)"
+          borderColor="var(--app-input-border)"
         />
       </CustomModal>
     </div>

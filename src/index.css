@@ -6,6 +6,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #ebebeb !important;
+  scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
 }
 
 :root {
@@ -15,6 +16,50 @@ body {
   --light-white: #ffffff;
   --ink-blue: #007bff;
   --label-blue:#1400FA;
+  --app-topbar-bg: #ffffff;
+  --app-topbar-text: #4c596d;
+  --app-topbar-current: #6f8eb3;
+  --app-topbar-border: rgba(15, 23, 42, 0.08);
+  --app-scrollbar-track: #dfe6ef;
+  --app-scrollbar-thumb: #a8b7ca;
+  --app-scrollbar-thumb-hover: #7f93aa;
+}
+
+body.app-dark-mode {
+  --app-topbar-bg: #172233;
+  --app-topbar-text: #c1d1e8;
+  --app-topbar-current: #edf4ff;
+  --app-topbar-border: rgba(255, 255, 255, 0.08);
+  --app-scrollbar-track: #162233;
+  --app-scrollbar-thumb: #38506d;
+  --app-scrollbar-thumb-hover: #52739b;
+}
+
+body::-webkit-scrollbar,
+.children-container::-webkit-scrollbar,
+.children-container-full::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body::-webkit-scrollbar-track,
+.children-container::-webkit-scrollbar-track,
+.children-container-full::-webkit-scrollbar-track {
+  background: var(--app-scrollbar-track);
+}
+
+body::-webkit-scrollbar-thumb,
+.children-container::-webkit-scrollbar-thumb,
+.children-container-full::-webkit-scrollbar-thumb {
+  background: var(--app-scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid var(--app-scrollbar-track);
+}
+
+body::-webkit-scrollbar-thumb:hover,
+.children-container::-webkit-scrollbar-thumb:hover,
+.children-container-full::-webkit-scrollbar-thumb:hover {
+  background: var(--app-scrollbar-thumb-hover);
 }
 
 a {
@@ -78,16 +123,48 @@ a {
 }
 
 .children-container{
-  flex-grow: 1;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
   transition: width 0.3s ease;
-  /* padding: 10px; */
-  width: 95vw;
-  height: 100vh;
-  overflow-y: scroll;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .children-container-full {
   width: 100%;
+  min-height: 0;
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-layout-parent-height {
+  min-height: 100%;
+  height: 100%;
+}
+
+.app-layout-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-layout-main-full {
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
 }
 
 /* global.css */

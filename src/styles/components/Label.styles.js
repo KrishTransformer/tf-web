@@ -7,18 +7,18 @@ export const PathBreadCrumbText = styled.label(
 		lineHeight: "18px",
 		fontStyle: "normal",
 		fontWeight: "400",
-		color: color.pathColor,
+		color: "var(--app-topbar-text, #4C596D)",
 		cursor: "pointer",
 		"&:hover": {
 			textDecoration: "underline",
-			textDecorationColor: "#4C596D",
+			textDecorationColor: "var(--app-topbar-text, #4C596D)",
 		},
 	},
 	({ isCurrentPage, isLarge }) => {
 		let styles = {};
 		if (isCurrentPage) {
 			styles = {
-				color: color.supportLighten35,
+				color: "var(--app-topbar-current, #6f8eb3)",
 				textDecoration: "none",
 			};
 		}

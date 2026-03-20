@@ -51,8 +51,8 @@ const InputWithModal = ({
           label={label}
           value={value}
           onClick={handleInputClick}
-          bgColor="#D7F3FC"
-          borderColor="0.5px solid #00000033"
+          bgColor="var(--app-input-accent-bg, #D7F3FC)"
+          borderColor="var(--app-input-border, #00000033)"
           readOnly={isLocked} // Input is read-only when locked
           showUnlockIcon={showUnlockIcon}
           handleToggleLock={handleToggleLock}
@@ -71,8 +71,8 @@ const InputWithModal = ({
           label={label ? label : modalLabel}
           value={modalValue}
           onChange={(e) => setModalValue(e.target.value)}
-          bgColor="#D7F3FC"
-          borderColor="0.5px solid #00000033"
+          bgColor="var(--app-input-accent-bg, #D7F3FC)"
+          borderColor="var(--app-input-border, #00000033)"
         />
       </CustomModal>
     </div>
