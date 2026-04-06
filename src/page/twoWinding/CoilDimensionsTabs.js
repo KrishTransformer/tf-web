@@ -90,14 +90,48 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
       label: isDryType ? "Enclosure & Temp" : "Tank & Cooling",
       content: (
         <div>
+          {!isDryType && (
+            <FlexContainer>
+              <CustomInput
+                label="Wdg-Tank Gap"
+                type="text"
+                value={formState?.tank?.wdgToTankGap}
+                onChange={(e) =>
+                  handleInputChange("tank.wdgToTankGap", e.target.value)
+                }
+                bgColor="var(--app-input-accent-bg)"
+                borderColor="var(--app-input-border)"
+              />
+              <CustomInput
+                label="Connection Gap"
+                type="text"
+                value={formState?.tank?.connectionGap}
+                onChange={(e) =>
+                  handleInputChange("tank.connectionGap", e.target.value)
+                }
+                bgColor="var(--app-input-accent-bg)"
+                borderColor="var(--app-input-border)"
+              />
+              <CustomInput
+                label="Top Yoke - Cover"
+                type="text"
+                value={formState?.tank?.topYokeToCoverGap}
+                onChange={(e) =>
+                  handleInputChange("tank.topYokeToCoverGap", e.target.value)
+                }
+                bgColor="var(--app-input-accent-bg)"
+                borderColor="var(--app-input-border)"
+              />
+            </FlexContainer>
+          )}
           <table className="tableTabsGeneral">
-            <tr>
-              <td>Overall Dimensions:</td>
-              <td>{formState.tank?.overallDimension}</td>
-            </tr>
             <tr>
               <td>{isDryType ? "Enclosure (L x B x H):" : "Tank (L x B x H):"}</td>
               <td>{formState.tank?.tankDimension} </td>
+            </tr>
+            <tr>
+              <td>Overall Dimensions:</td>
+              <td>{formState.tank?.overallDimension}</td>
             </tr>
           </table>
           <FlexContainer>
