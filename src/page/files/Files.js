@@ -196,14 +196,14 @@ const Files = () => {
     deleteDataFromLom,
     addEntity,
     addCustomer,
+    fetchEntity,
   });
 
   const [coreData, setCoreData] = useState(core?.data);
 
   const [openAccordions, setOpenAccordions] = useState({
-    generals: false,
-    specifications: false,
-    documents: false,
+    LOM: true,
+    CCC: false,
   });
 
   const toggleAccordion = (key) => {
@@ -346,8 +346,14 @@ const Files = () => {
   const lomRateKeySignature = lomRateKeys.join("|");
 
   useEffect(() => {
+    if (!lomMaterial?.isLoading && materialData.length === 0) {
+      actions.fetchEntity("lomMaterial", "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC");
+    }
+  }, [lomMaterial?.isLoading, materialData.length]);
+
+  useEffect(() => {
     actions.fetchFile(lomPayload);
-  }, [fabrication, twoWindings, lomMaterial, rateOverrides]);
+  }, [fabrication, twoWindings, lomMaterial?.data, materialData.length, rateOverrides]);
 
 
   console.log("customer:", customer);
@@ -485,7 +491,7 @@ const Files = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {
+            {tableRows.length > 0 ? (
               tableRows.map((row, index) => {
                 return (
                   <TableRow
@@ -541,7 +547,21 @@ const Files = () => {
                   </TableRow>
                 )
               })
-            }
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  sx={{
+                    ...styleRow,
+                    textAlign: "center",
+                    color: filesTheme.muted,
+                    padding: "20px",
+                  }}
+                >
+                  {lom.isLoading ? "Loading LOM items..." : "No LOM items available yet."}
+                </TableCell>
+              </TableRow>
+            )}
 
             {showInputRow && (
               <TableRow>
