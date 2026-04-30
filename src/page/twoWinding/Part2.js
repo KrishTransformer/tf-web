@@ -31,6 +31,8 @@ const Part2 = ({
     bgColorLV: sectionColors.fieldHighlight,
     bgColorHV: sectionColors.fieldHighlight,
   };
+  const showDiscDuctSizeRow =
+    formState?.lvWindingType === "DISC" || formState?.hvWindingType === "DISC";
   const fieldData = [
     {
       key: "turnsPerPhase",
@@ -104,6 +106,11 @@ const Part2 = ({
       key2: "ductSize",
       description: "Enter no of Ducts and Width",
     },
+    {
+      key: "discDuctSize",
+      label: "Disc Duct Size (mm)",
+      ...highlightedFieldColors,
+    },
     { key: "turnsLayers", label: "Turns / Layers" },
     {
       key: "endClearances",
@@ -116,10 +123,12 @@ const Part2 = ({
     { key: "loadLoss", label: "Load Loss (W)" },
     // { key: "terminal", label: "Terminal" },
     // { key: "commRawCond", label: "Comm. Raw Cond." },
-  ].map((field) => ({
-    ...defaultFieldColors,
-    ...field,
-  }));
+  ]
+    .filter((field) => field.key !== "discDuctSize" || showDiscDuctSizeRow)
+    .map((field) => ({
+      ...defaultFieldColors,
+      ...field,
+    }));
 
   return (
     <Container className="two-winding-card" bgColor="var(--tw-surface)" padding="30px 20px" borderRadius="10px">

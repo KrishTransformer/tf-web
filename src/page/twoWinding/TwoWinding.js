@@ -36,6 +36,26 @@ const TwoWinding = () => {
     () => localStorage.getItem("appTheme") === "dark"
   );
 
+  const getDiscWindingComment = () => {
+    const discComments = [];
+
+    if (formState?.lvWindingType === "DISC") {
+      discComments.push(
+        `LV Wdg - Spacer Width: ${formState?.lvFormulas?.lvWidthOfSpacer || "-"}, No. of Spacers: ${formState?.lvFormulas?.lvNoOfSpacers || "-"}`
+      );
+    }
+
+    if (formState?.hvWindingType === "DISC") {
+      discComments.push(
+        `HV Wdg - Spacer Width: ${formState?.hvFormulas?.hvWidthOfSpacer || "-"}, No. of Spacers: ${formState?.hvFormulas?.hvNoOfSpacers || "-"}`
+      );
+    }
+
+    return discComments.join("\n");
+  };
+  const persistentCommentText = getDiscWindingComment();
+  const hasPersistentComments = Boolean(persistentCommentText);
+  const hasHoverComment = Boolean(commentText);
 
   const handleHover = (fieldPath) => {
     setCommentText(formState?.comments?.[fieldPath] || "");
@@ -891,16 +911,51 @@ const TwoWinding = () => {
             borderRadius="10px"
             margin="20px 0px"
           >
-            <TextTypo text="Comments" margin="0px 0px 10px 0px" />
+            <TextTypo text="Comments" fontWeight="700" margin="0px 0px 10px 0px" />
             <Container
               className="two-winding-comments-box"
               bgColor="var(--tw-surface-soft)"
-              padding="50px"
+              padding="24px"
               borderRadius="8px"
               margin="20px 0px"
               fontSize="16px"
             >
-              <span>{commentText}</span>
+              <div
+                className={`two-winding-comments-stack${
+                  !hasPersistentComments && !hasHoverComment ? " is-empty" : ""
+                }`}
+              >
+                {hasPersistentComments && (
+                  <div className="two-winding-comment-section accent">
+                    <div className="two-winding-comment-label">Disc Winding Notes</div>
+                    <div
+                      className="two-winding-comment-body"
+                      style={{ whiteSpace: "pre-line" }}
+                    >
+                      {persistentCommentText}
+                    </div>
+                  </div>
+                )}
+
+                {hasHoverComment && (
+                  <div className="two-winding-comment-section">
+                    <div className="two-winding-comment-label">Hovered Field Note</div>
+                    <div
+                      className="two-winding-comment-body"
+                      style={{ whiteSpace: "pre-line" }}
+                    >
+                      {commentText}
+                    </div>
+                  </div>
+                )}
+
+                {!hasPersistentComments && !hasHoverComment && (
+                  <div className="two-winding-comments-empty">
+                    Hover fields like conductor insulation, duct width, and end clearances to
+                    inspect contextual notes here.
+                  </div>
+                )}
+              </div>
               {/* {JSON.stringify(twoWindings?.data?.comments)} - #ff5b1e  - #1400fa */}
             </Container>
           </Container>
