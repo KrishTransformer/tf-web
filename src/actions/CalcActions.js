@@ -1,5 +1,17 @@
 import * as constants from "../constants/CalcConstants";
 
+const normalizeCalcName = (calcName) => {
+  if (calcName === "2windings") {
+    return "twoWindings";
+  }
+
+  if (calcName === "multiwindings") {
+    return "multiWindings";
+  }
+
+  return calcName;
+};
+
 export const generate3DRequest = (payload, params, calcName) => {
   return {
     type: constants.GENERATE_3D,
@@ -49,14 +61,14 @@ export const addCalc = (jsonBody, calcName, bodyType, id, metadata) => ({
 
 export const addCalcFullfiled = (calcName, response, metadata) => ({
   type: constants.ADD_CALC_FULFILLED,
-  calcName: calcName == "2windings" ? "twoWindings" : calcName,
+  calcName: normalizeCalcName(calcName),
   response,
   metadata,
 });
 
 export const addCalcFailed = (calcName) => ({
   type: constants.ADD_CALC_FAILED,
-  calcName: calcName == "2windings" ? "twoWindings" : calcName,
+  calcName: normalizeCalcName(calcName),
 });
 
 export const clearCalc = () => ({

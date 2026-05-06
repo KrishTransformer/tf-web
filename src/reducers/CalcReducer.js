@@ -1135,6 +1135,8 @@ export const initialState = {
   // Initialize more calc states here as necessary...
 };
 
+initialState.multiWindings = JSON.parse(JSON.stringify(initialState.twoWindings));
+
 const calcReducer = (state = initialState, action) => {
   switch (action.type) {
     case constants.ADD_CALC:

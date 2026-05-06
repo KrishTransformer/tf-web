@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   CheckedTable,
   Container,
+  CustomModal,
   FlexContainer,
   Layout,
   SearchInput,
@@ -39,6 +40,7 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDesigns, setSelectedDesigns] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [designTypeModalOpen, setDesignTypeModalOpen] = useState(false);
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -174,12 +176,22 @@ const Home = () => {
   };
 
   const handleNewDesignClick = () => {
-    console.log("new design click")
+    setDesignTypeModalOpen(true);
+  };
+
+  const handleDesignTypeSelection = (designType) => {
+    sessionStorage.setItem("newDesignType", designType);
     actions.fetchEntity("lomMaterial", `offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC`);
     actions.clearCalc();
     actions.resetCustomerData();
-    navigate("/2windings/new");
+    setDesignTypeModalOpen(false);
 
+    if (designType === "multi") {
+      navigate("/multiwindings/new");
+      return;
+    }
+
+    navigate("/2windings/new");
   };
 
   const handleTrashClose = () => setDeleteConfirmOpen(false);
@@ -392,6 +404,60 @@ const Home = () => {
           handleAgree={handleDeleteEntities}
           message="This cannot be undone and the item gets deleted permanently."
         />
+
+        <CustomModal
+          open={designTypeModalOpen}
+          onClose={() => setDesignTypeModalOpen(false)}
+          title="Create New Design"
+          showButtons={false}
+        >
+          <div className="home-design-type-modal">
+            <div className="home-design-type-grid">
+              <button
+                type="button"
+                className="home-design-type-card"
+                onClick={() => handleDesignTypeSelection("two")}
+              >
+                <div className="home-design-type-card-top">
+                  <span className="home-design-type-badge">2W</span>
+                  <span className="home-design-type-tag">Production Flow</span>
+                </div>
+                <span className="home-design-type-title">2 Winding</span>
+                <span className="home-design-type-description">
+                  Start the current two-winding design workflow with the full
+                  calculation page.
+                </span>
+                <div className="home-design-type-features">
+                  <span className="home-design-type-feature">Oil Type</span>
+                  <span className="home-design-type-feature">Dry Type</span>
+                  <span className="home-design-type-feature">Mechanical Design</span>
+                </div>
+                <span className="home-design-type-cta">Open 2 Winding</span>
+              </button>
+              <button
+                type="button"
+                className="home-design-type-card"
+                onClick={() => handleDesignTypeSelection("multi")}
+              >
+                <div className="home-design-type-card-top">
+                  <span className="home-design-type-badge">MW</span>
+                  <span className="home-design-type-tag alt">New Workspace</span>
+                </div>
+                <span className="home-design-type-title">Multi Winding</span>
+                <span className="home-design-type-description">
+                  Open the multi-winding workspace prepared for the next design
+                  flow we are building out.
+                </span>
+                <div className="home-design-type-features">
+                  <span className="home-design-type-feature">Tap Winding</span>
+                  <span className="home-design-type-feature">Edge Winding</span>
+                  <span className="home-design-type-feature">Ideal for 33kV and above</span>
+                </div>
+                <span className="home-design-type-cta">Open Multi Winding</span>
+              </button>
+            </div>
+          </div>
+        </CustomModal>
 
         <Pagination
           currentPage={currentPage}

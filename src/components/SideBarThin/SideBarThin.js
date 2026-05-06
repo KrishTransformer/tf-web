@@ -11,6 +11,16 @@ import logo from "./../../assets/dstar-electric-logo.png";
 
 const SideBarThin = ({ id }) => {
   const location = useLocation();
+  const isTwoWindingRoute = location.pathname.startsWith("/2windings");
+  const isMultiWindingRoute = location.pathname.startsWith("/multiwindings");
+  const isNewDesign = id === "new";
+  const selectedNewDesignType = sessionStorage.getItem("newDesignType");
+
+  const showTwoWindingLink =
+    isTwoWindingRoute || (isNewDesign && selectedNewDesignType === "two");
+  const showMultiWindingLink =
+    isMultiWindingRoute || (isNewDesign && selectedNewDesignType === "multi");
+
   return (
     <div className="sideBar-thin-main">
       <div className="sideBar-thin-icons">
@@ -31,15 +41,28 @@ const SideBarThin = ({ id }) => {
                   <IoArrowBack />
                 </div>
               </NavLink> */}
-              <NavLink
-                to={`/2windings/${id}`}
-                className={({ isActive }) => (isActive ? "active" : "inactive")}
-              >
-                <div className="icon-container">
-                  <IoCalculatorOutline />
-                  <span>2Wdg</span>
-                </div>
-              </NavLink>
+              {showTwoWindingLink && (
+                <NavLink
+                  to={`/2windings/${id}`}
+                  className={({ isActive }) => (isActive ? "active" : "inactive")}
+                >
+                  <div className="icon-container">
+                    <IoCalculatorOutline />
+                    <span>2Wdg</span>
+                  </div>
+                </NavLink>
+              )}
+              {showMultiWindingLink && (
+                <NavLink
+                  to={`/multiwindings/${id}`}
+                  className={({ isActive }) => (isActive ? "active" : "inactive")}
+                >
+                  <div className="icon-container">
+                    <IoCalculatorOutline />
+                    <span>MWdg</span>
+                  </div>
+                </NavLink>
+              )}
               <NavLink
                 to={`/core/${id}`}
                 className={({ isActive }) => (isActive ? "active" : "inactive")}
