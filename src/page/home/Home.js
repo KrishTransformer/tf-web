@@ -46,6 +46,7 @@ const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("appTheme") === "dark";
   });
+  const showMultiWdgOption = false;
   const profileMenuRef = useRef(null);
   const settingsMenuRef = useRef(null);
 
@@ -180,6 +181,10 @@ const Home = () => {
   };
 
   const handleDesignTypeSelection = (designType) => {
+    if (designType === "multi" && !showMultiWdgOption) {
+      return;
+    }
+
     sessionStorage.setItem("newDesignType", designType);
     actions.fetchEntity("lomMaterial", `offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC`);
     actions.clearCalc();
@@ -434,27 +439,29 @@ const Home = () => {
                 </div>
                 <span className="home-design-type-cta">Open 2 Winding</span>
               </button>
-              <button
-                type="button"
-                className="home-design-type-card"
-                onClick={() => handleDesignTypeSelection("multi")}
-              >
-                <div className="home-design-type-card-top">
-                  <span className="home-design-type-badge">MW</span>
-                  <span className="home-design-type-tag alt">New Workspace</span>
-                </div>
-                <span className="home-design-type-title">Multi Winding</span>
-                <span className="home-design-type-description">
-                  Open the multi-winding workspace prepared for the next design
-                  flow we are building out.
-                </span>
-                <div className="home-design-type-features">
-                  <span className="home-design-type-feature">Tap Winding</span>
-                  <span className="home-design-type-feature">Edge Winding</span>
-                  <span className="home-design-type-feature">Ideal for 33kV and above</span>
-                </div>
-                <span className="home-design-type-cta">Open Multi Winding</span>
-              </button>
+              {showMultiWdgOption && (
+                <button
+                  type="button"
+                  className="home-design-type-card"
+                  onClick={() => handleDesignTypeSelection("multi")}
+                >
+                  <div className="home-design-type-card-top">
+                    <span className="home-design-type-badge">MW</span>
+                    <span className="home-design-type-tag alt">New Workspace</span>
+                  </div>
+                  <span className="home-design-type-title">Multi Winding</span>
+                  <span className="home-design-type-description">
+                    Open the multi-winding workspace prepared for the next design
+                    flow we are building out.
+                  </span>
+                  <div className="home-design-type-features">
+                    <span className="home-design-type-feature">Tap Winding</span>
+                    <span className="home-design-type-feature">Edge Winding</span>
+                    <span className="home-design-type-feature">Ideal for 33kV and above</span>
+                  </div>
+                  <span className="home-design-type-cta">Open Multi Winding</span>
+                </button>
+              )}
             </div>
           </div>
         </CustomModal>
