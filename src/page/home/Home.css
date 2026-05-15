@@ -205,6 +205,183 @@
   box-shadow: var(--home-control-shadow-hover);
 }
 
+.home-design-type-modal {
+  display: grid;
+  gap: 20px;
+  min-width: 620px;
+}
+
+.home-design-type-copy {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--home-page-text-muted);
+}
+
+.home-design-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.home-design-type-card {
+  display: grid;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 18px 18px 20px;
+  text-align: left;
+  border-radius: 18px;
+  border: 1px solid var(--home-page-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(246, 246, 246, 0.96) 100%);
+  color: var(--home-page-text);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.home-design-type-card::before {
+  content: "";
+  position: absolute;
+  top: -36px;
+  right: -28px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(77, 141, 255, 0.12);
+  transition: transform 0.22s ease, background-color 0.22s ease;
+}
+
+.home-design-type-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(77, 141, 255, 0.45);
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.14);
+}
+
+.home-design-type-card:hover::before {
+  transform: scale(1.08);
+  background: rgba(77, 141, 255, 0.18);
+}
+
+.home-design-type-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home-design-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #111111, #343434);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 12px 24px rgba(17, 17, 17, 0.2);
+}
+
+.home-design-type-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.08);
+  color: var(--home-page-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-design-type-tag.alt {
+  background: rgba(77, 141, 255, 0.12);
+  color: #1f5fbf;
+}
+
+.home-design-type-title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.home-design-type-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--home-page-text-muted);
+}
+
+.home-design-type-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.home-design-type-feature {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(77, 141, 255, 0.08);
+  color: var(--home-page-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.home-design-type-cta {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #1f5fbf;
+}
+
+.home-design-type-footnote {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--home-page-text-muted);
+}
+
+.home-page-wrapper-dark .home-design-type-tag {
+  background: rgba(255, 255, 255, 0.08);
+  color: #edf3ff;
+}
+
+.home-page-wrapper-dark .home-design-type-tag.alt {
+  background: rgba(77, 141, 255, 0.18);
+  color: #b8d4ff;
+}
+
+.home-page-wrapper-dark .home-design-type-card {
+  background:
+    linear-gradient(180deg, rgba(36, 50, 70, 0.98) 0%, rgba(26, 37, 52, 1) 100%);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.26);
+}
+
+.home-page-wrapper-dark .home-design-type-card::before {
+  background: rgba(143, 181, 255, 0.14);
+}
+
+.home-page-wrapper-dark .home-design-type-card:hover {
+  border-color: rgba(143, 181, 255, 0.42);
+  box-shadow: 0 22px 36px rgba(0, 0, 0, 0.34);
+}
+
+.home-page-wrapper-dark .home-design-type-feature {
+  background: rgba(143, 181, 255, 0.12);
+  color: #edf3ff;
+}
+
+.home-page-wrapper-dark .home-design-type-cta {
+  color: #8fb5ff;
+}
+
 .home-settings-menu {
   position: relative;
 }
@@ -412,4 +589,14 @@
 
 .home-page-wrapper-dark .pagination .page-link:focus {
   box-shadow: 0 0 0 0.2rem rgba(77, 141, 255, 0.2);
+}
+
+@media (max-width: 700px) {
+  .home-design-type-modal {
+    min-width: 0;
+  }
+
+  .home-design-type-grid {
+    grid-template-columns: 1fr;
+  }
 }

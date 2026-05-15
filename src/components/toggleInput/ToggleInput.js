@@ -53,13 +53,10 @@ const ToggleInput = ({
   }, [formState.dryType, formState.eTransCostType, formState.dryTempClass, valueOfToggle]);
 
   const handleToggle = (input) => {
-    console.log(isAl);
     setIsAl(!isAl);
-    console.log(input);
     onValueChange(currentDensityValue(formState.dryType, formState.eTransCostType, formState.dryTempClass, input));
     onLabelChange(input);
   };
-  console.log("formState in toggleInput:", formState);
 
   return (
     <div className="toggle-container">
@@ -86,12 +83,16 @@ const ToggleInput = ({
         <div className="toggle-switch">
           <span
             className={`toggle-option ${isAl ? "highlight" : ""}`}
+            role="button"
+            aria-pressed={isAl}
             onClick={() => handleToggle("Al")}
           >
             Al
           </span>
           <span
             className={`toggle-option ${!isAl ? "highlight" : ""}`}
+            role="button"
+            aria-pressed={!isAl}
             onClick={() => handleToggle("Cu")}
           >
             Cu

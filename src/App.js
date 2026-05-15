@@ -5,6 +5,7 @@ import "./../node_modules/jquery/dist/jquery.js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./page/home/Home.js";
 import TwoWinding from "./page/twoWinding/TwoWinding";
+import MultiWinding from "./page/multiWinding/MultiWinding";
 import Fabrication from "./page/fabrication/Fabrication.js";
 import Login from "./components/signin/Signin.js";
 import RequestOtp from "./components/sendOtp/index.js";
@@ -27,6 +28,7 @@ function App() {
         <Route element={<PrivateRoutes />}>
           <Route path="/home" element={<Home />} />
           <Route path="/2windings/:id" element={<TwoWinding />} />
+          <Route path="/multiwindings/:id" element={<MultiWinding />} />
           <Route path="/fabrication/:id" element={<Fabrication />} />
           <Route path="/files/:id" element={<Files />} />
           <Route path="/core/:id" element={<CoreModel />} />

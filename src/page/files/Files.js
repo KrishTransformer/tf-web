@@ -612,8 +612,25 @@ const Files = () => {
   }
 
   registerDejaVuSansFont(jsPDF);
+  const isDryTypeDesign = (dryType) => {
+    if (dryType === true || dryType === "true") {
+      return true;
+    }
+
+    return String(dryType || "").toLowerCase().includes("dry");
+  };
+
+  const formatPdfValue = (value, fallback = "-") => {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
+
+    return String(value);
+  };
+
   const desGeneratePDF = () => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const isDryType = isDryTypeDesign(twoWindings?.data?.dryType);
 
     const commonStyles = {
       fontSize: 8,
@@ -624,6 +641,18 @@ const Files = () => {
       lineWidth: 0.25,
       textColor: 20
     };
+    const displayTemperature = isDryType
+      ? `${formatPdfValue(twoWindings?.data?.ambientTemp, "-")}/${formatPdfValue(twoWindings?.data?.windingTemp, "-")}`
+      : `${formatPdfValue(twoWindings?.data?.windingTemp, "-")}/${formatPdfValue(twoWindings?.data?.topOilTemp, "-")}`;
+    const displayCooling = isDryType
+      ? formatPdfValue(twoWindings?.data?.coolingType, "AN")
+      : "ONAN";
+    const ductLabel = isDryType ? "Air Duct (mm)" : "Oil Duct (mm)";
+    const ductSuffix = isDryType ? " air" : " oil";
+    const overallDimensionParts = formatPdfValue(twoWindings?.data?.tank?.overallDimension, "").split(" x ");
+    const overallDimensions = overallDimensionParts.length === 3
+      ? overallDimensionParts.map((v, i) => `${(parseFloat(v) / 1000).toFixed(2)}${['L', 'B', 'H'][i]}`).join(" x ")
+      : formatPdfValue(twoWindings?.data?.tank?.overallDimension, "-");
 
     let currentY = 5;
     const spacing = 3;
@@ -686,8 +715,8 @@ const Files = () => {
         "Flux Density: " + twoWindings.data.lvFormulas.revisedFluxDensity.toFixed(3) + "T",
         "Frequency: " + twoWindings.data.frequency + "Hz"],
         ["Volts/Turn: " + twoWindings.data.lvFormulas.revisedVoltsPerTurn,
-        "Temperature: " + twoWindings.data.windingTemp + "/" + twoWindings.data.topOilTemp,
-        "Cooling: " + "ONAN",
+        "Temperature: " + displayTemperature,
+        "Cooling: " + displayCooling,
         "Vector Group: " + twoWindings.data.vectorGroup]
       ]
     });
@@ -749,7 +778,7 @@ const Files = () => {
         ["Turns/Layer", twoWindings?.data?.lvWindingType === "DISC" ? 1 : twoWindings.data.innerWindings.turnsPerLayer,
           twoWindings?.data?.hvWindingType === "DISC" ? 1 : `${parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10)} X ${twoWindings.data.hvFormulas.hvTurnsPerLayer} + ${(twoWindings.data.hvFormulas.hvTurnsAtHighest - (parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10) * twoWindings.data.hvFormulas.hvTurnsPerLayer)).toFixed(0)}`],
         ["Insu. b/w layer (mm)", `${twoWindings.data.innerWindings.interLayerInsulation} (${Math.round(twoWindings.data.innerWindings.interLayerInsulation / 0.0254)} mil)`, `${twoWindings.data.outerWindings.interLayerInsulation} (${Math.round(twoWindings.data.outerWindings.interLayerInsulation / 0.0254)} mil)`],
-        ["Oil Duct (mm)", twoWindings.data.innerWindings.noOfDuctsWidth.replace(" / ", " x ") + " oil", twoWindings.data.outerWindings.noOfDuctsWidth.replace(" / ", " x ") + " oil"],
+        [ductLabel, twoWindings.data.innerWindings.noOfDuctsWidth.replace(" / ", " x ") + ductSuffix, twoWindings.data.outerWindings.noOfDuctsWidth.replace(" / ", " x ") + ductSuffix],
         ["Conductor (mm)",
           twoWindings.data.innerWindings.conductorSizes + (twoWindings.data.innerWindings.isEnamel ? "SE" : "P") + " " + twoWindings.data.lvFormulas.lvConductorInsulation,
           twoWindings.data.outerWindings.conductorSizes.replace("Round", "Ø") + (twoWindings.data.outerWindings.isEnamel ? "SE" : "P") + " " + twoWindings.data.hvFormulas.hvConductorInsulation],
@@ -917,9 +946,9 @@ const Files = () => {
     // ==Tank Clearances Table==
     const rightTables4 = [
       {
-        title: "Tank Clearances:",
-        rows: [["Yoke- Cover:", twoWindings.data.tankAndOilFormulas.topYokeCoverGap],
-        ["Wdg-Tank:", twoWindings.data.tankAndOilFormulas.wdgTankGap],
+        title: isDryType ? "Enclosure Clearances:" : "Tank Clearances:",
+        rows: [[isDryType ? "Yoke-Encl.:" : "Yoke- Cover:", twoWindings.data.tankAndOilFormulas.topYokeCoverGap],
+        [isDryType ? "Wdg-Encl.:" : "Wdg-Tank:", twoWindings.data.tankAndOilFormulas.wdgTankGap],
         ["Wdg-Leads:", twoWindings.data.tankAndOilFormulas.connectionGap],
         ]
       }
@@ -973,7 +1002,17 @@ const Files = () => {
       bodyStyles: {
         cellPadding: { left: 2, top: 0.8, right: 0.8, bottom: 0.8 }
       },
-      body: [
+      body: isDryType ? [
+        ["Side sheet: " + twoWindings.data.tank.tankWallThickness,
+        "Bot. Sheet: " + twoWindings.data.tank.tankBottomThickness,
+        "Lid Sheet: " + twoWindings.data.tank.tankLidThickness,
+        "Frame: " + twoWindings.data.tank.frameThickness],
+
+        ["Enclosure Size: (mm)",
+          "Length: " + twoWindings.data.tank.tankLength,
+          "Width: " + twoWindings.data.tank.tankWidth,
+          "Height: " + twoWindings.data.tank.tankHeight]
+      ] : [
         ["Side sheet: " + twoWindings.data.tank.tankWallThickness,
         "Bot. Sheet: " + twoWindings.data.tank.tankBottomThickness,
         "Lid Sheet: " + twoWindings.data.tank.tankLidThickness,
@@ -995,7 +1034,7 @@ const Files = () => {
           "Volume: " + Math.round(twoWindings.data.tankAndOilFormulas.conservatorCapacity) + " Liters"]
       ],
       didParseCell: function (data) {
-        if (data.column.index === 0 && (data.row.index === 1 || data.row.index === 2 || data.row.index === 3)) {
+        if (data.column.index === 0 && data.row.index > 0) {
           data.cell.styles.fontStyle = "bold";
         }
       },
@@ -1010,16 +1049,36 @@ const Files = () => {
       cond: `${twoWindings.data.lvFormulas.lvProcurementWeight} + ${twoWindings.data.hvFormulas.hvProcurementWeight} + ${(twoWindings.data.tankAndOilFormulas.totalConnectionWeight)}`,
       oilWeight: twoWindings.data.tankAndOilFormulas.oilWeight,
       weightCore: twoWindings?.data?.tankAndOilFormulas?.weightCore,
+      transformerWeight: twoWindings?.data?.tankAndOilFormulas?.transformerWeight ||
+        twoWindings?.data?.transformer_Weight,
       total: (twoWindings.data.tankAndOilFormulas.weightsOfActivePart +
         twoWindings.data.tankAndOilFormulas.weightOfTankAndAcc +
         twoWindings.data.tankAndOilFormulas.oilWeight
       ),
       insulation: twoWindings.data.tankAndOilFormulas.insulationWeight,
-      overallDimensions: twoWindings.data.tank.overallDimension.split(" x ").
-        map((v, i) => `${(parseFloat(v) / 1000).toFixed(2)}${['L', 'B', 'H'][i]}`).join(" x "),
+      overallDimensions,
       steel: twoWindings.data.tankAndOilFormulas.totalSteelWeight,
       radiators: twoWindings.data.tankAndOilFormulas.totalRadiatorWeight,
     };
+    const generalTableBody = isDryType ? [
+      ["Weights (kg)", "Material Data"],
+      ["Core & Wdg:   " + generalTableData.coreAndWdg, "Cond: (kg)\t: " + generalTableData.cond],
+      ["Enclosure & Fitting: " + generalTableData.tankAndFitting, "Core: (kg)\t : " + generalTableData.weightCore],
+      ["Insulation:\t   " + generalTableData.insulation, "Steel: (kg)\t : " + generalTableData.steel],
+      ["Total:\t      " + (generalTableData.transformerWeight || generalTableData.total), ""],
+      ["Over-all Dimensions: (m)", ""],
+      [generalTableData.overallDimensions, ""]
+    ] : [
+      ["Weights (kg)", "Costing Data"],
+      ["Core & Wdg:   " + generalTableData.coreAndWdg, "Oil (l)\t        : " + generalTableData.oilCost],
+      ["Tank & Fitting: " + generalTableData.tankAndFitting, "Cond: (kg)\t: " + generalTableData.cond],
+      ["Oil:\t\t   " + generalTableData.oilWeight, "Core: (kg)\t : " + generalTableData.weightCore],
+      ["Total:\t      " + generalTableData.total, "Insulation: (kg)  : " + generalTableData.insulation],
+      ["Over-all Dimensions: (m)", "Steel: (kg)\t : " + generalTableData.steel],
+      [generalTableData.overallDimensions, "Radiators\t  : " + generalTableData.radiators]
+    ];
+    const overallDimensionLabelRowIndex = generalTableBody.length - 2;
+    const overallDimensionValueRowIndex = generalTableBody.length - 1;
 
     // === Generals Table ===
     autoTable(doc, {
@@ -1044,15 +1103,7 @@ const Files = () => {
           lineWidth: 0, cellWidth: 47.5
         }
       },
-      body: [
-        ["Weights (kg)", "Costing Data"],
-        ["Core & Wdg:   " + generalTableData.coreAndWdg, "Oil (l)\t        : " + generalTableData.oilCost],
-        ["Tank & Fitting: " + generalTableData.tankAndFitting, "Cond: (kg)\t: " + generalTableData.cond],
-        ["Oil:\t\t   " + generalTableData.oilWeight, "Core: (kg)\t : " + generalTableData.weightCore],
-        ["Total:\t      " + generalTableData.total, "Insulation: (kg)  : " + generalTableData.insulation],
-        ["Over-all Dimensions: (m)", "Steel: (kg)\t : " + generalTableData.steel],
-        [generalTableData.overallDimensions, "Radiators\t  : " + generalTableData.radiators]
-      ],
+      body: generalTableBody,
       didParseCell: function (data) {
         //for header
         if (data.column.index === 0 && data.column.index === 1) {
@@ -1067,18 +1118,18 @@ const Files = () => {
         }
 
         //for both columns in body
-        if (data.row.index !== 0 && (data.row.index !== 5 && data.column.index === 0) && data.row.index !== 6 && data.section === 'body') {
+        if (data.row.index !== 0 && (data.row.index !== overallDimensionLabelRowIndex && data.column.index === 0) && data.row.index !== overallDimensionValueRowIndex && data.section === 'body') {
           data.cell.styles.halign = 'left';
         }
 
         //for overAllDimension cell
-        if (data.row.index === 5 && data.section === 'body' && data.column.index === 0) {
+        if (data.row.index === overallDimensionLabelRowIndex && data.section === 'body' && data.column.index === 0) {
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.cellPadding = { left: 3, top: 0.8, right: 0.8, bottom: 0.8 };
         }
 
         //for overAllDimension value 
-        if (data.row.index === 6 && data.section === 'body' && data.column.index === 1) {
+        if (data.row.index === overallDimensionValueRowIndex && data.section === 'body' && data.column.index === 1) {
           data.cell.styles.halign = 'left';
           if (data.column.index == 0) {
             data.cell.styles.cellPadding = { left: 6, top: 0.8, right: 0.8, bottom: 0.8 };
@@ -1152,7 +1203,7 @@ const Files = () => {
       body: [
         ["No Load Loss (W):", performaceTableData.noLoadLoss, ""],
         ["Load Loss (W):", performaceTableData.loadLoss, ""],
-        ["Tank Stray Loss (W):", performaceTableData.tankStrayLoss, ""],
+        [isDryType ? "Enclosure Stray Loss (W):" : "Tank Stray Loss (W):", performaceTableData.tankStrayLoss, ""],
         ["Resistance (5):", performaceTableData.resistance, ""],
         ["Reactance (%):", performaceTableData.reactance, ""],
         ["Impedance (%):", performaceTableData.impedance, ""],
