@@ -95,6 +95,7 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
 
   const handleExistingDesignClick = (row) => {
     if (row) {
+      sessionStorage.setItem("newDesignType", "two");
       if (row?.twoWindings) {
         const designData = JSON.parse(row?.twoWindings);
         let metadata = {}
