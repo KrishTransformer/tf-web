@@ -907,9 +907,9 @@ const Files = () => {
       {
         title: "Insulation Clearances:",
         rows: [
-          ["Insul. Core-LV:", twoWindings.data.insCoreLv],
-          ["Insul. LV-HV:", twoWindings.data.insLvHv],
-          ["Insul. HV-HV:", twoWindings.data.insHvHv]
+          ["Insul. Core-LV:", isDryType ? "_____" : twoWindings.data.insCoreLv],
+          ["Insul. LV-HV:", isDryType ? "_____" : twoWindings.data.insLvHv],
+          ["Insul. HV-HV:", isDryType ? "_____" : twoWindings.data.insHvHv]
         ]
       },
     ];
@@ -1003,11 +1003,6 @@ const Files = () => {
         cellPadding: { left: 2, top: 0.8, right: 0.8, bottom: 0.8 }
       },
       body: isDryType ? [
-        ["Side sheet: " + twoWindings.data.tank.tankWallThickness,
-        "Bot. Sheet: " + twoWindings.data.tank.tankBottomThickness,
-        "Lid Sheet: " + twoWindings.data.tank.tankLidThickness,
-        "Frame: " + twoWindings.data.tank.frameThickness],
-
         ["Enclosure Size: (mm)",
           "Length: " + twoWindings.data.tank.tankLength,
           "Width: " + twoWindings.data.tank.tankWidth,

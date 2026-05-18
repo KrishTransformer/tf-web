@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./SideBarThin.css";
 import { CiLogin } from "react-icons/ci";
 import { IoArrowBack, IoCalculatorOutline } from "react-icons/io5";
@@ -16,10 +16,29 @@ const SideBarThin = ({ id }) => {
   const isNewDesign = id === "new";
   const selectedNewDesignType = sessionStorage.getItem("newDesignType");
 
-  const showTwoWindingLink =
-    isTwoWindingRoute || (isNewDesign && selectedNewDesignType === "two");
+  useEffect(() => {
+    if (isTwoWindingRoute) {
+      sessionStorage.setItem("newDesignType", "two");
+    } else if (isMultiWindingRoute) {
+      sessionStorage.setItem("newDesignType", "multi");
+    }
+  }, [isMultiWindingRoute, isTwoWindingRoute]);
+
+  const currentDesignType = isMultiWindingRoute
+    ? "multi"
+    : isTwoWindingRoute
+      ? "two"
+      : selectedNewDesignType === "multi"
+        ? "multi"
+        : "two";
+
+  const showTwoWindingLink = currentDesignType === "two";
   const showMultiWindingLink =
-    isMultiWindingRoute || (isNewDesign && selectedNewDesignType === "multi");
+    currentDesignType === "multi" && (isMultiWindingRoute || isNewDesign);
+
+  const rememberDesignType = (designType) => {
+    sessionStorage.setItem("newDesignType", designType);
+  };
 
   return (
     <div className="sideBar-thin-main">
@@ -44,6 +63,7 @@ const SideBarThin = ({ id }) => {
               {showTwoWindingLink && (
                 <NavLink
                   to={`/2windings/${id}`}
+                  onClick={() => rememberDesignType("two")}
                   className={({ isActive }) => (isActive ? "active" : "inactive")}
                 >
                   <div className="icon-container">
@@ -55,6 +75,7 @@ const SideBarThin = ({ id }) => {
               {showMultiWindingLink && (
                 <NavLink
                   to={`/multiwindings/${id}`}
+                  onClick={() => rememberDesignType("multi")}
                   className={({ isActive }) => (isActive ? "active" : "inactive")}
                 >
                   <div className="icon-container">
