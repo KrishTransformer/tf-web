@@ -128,7 +128,7 @@ const Fabrication = () => {
 
   useEffect(() => {
     if (drawerOpen) {
-      socketRef.current = io('https://tf-cad-server.trafointel.com');
+      socketRef.current = io('https://tf-cad-service.trafointel.com');
 
       socketRef.current.on('connect', () => {
         console.log('✅ Connected to Flask Socket.IO Server');

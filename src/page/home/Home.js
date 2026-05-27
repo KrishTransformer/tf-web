@@ -36,7 +36,7 @@ import "./Home.css";
 const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const size = 10; // Number of entries per page
+  const size = 20; // Number of entries per page
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDesigns, setSelectedDesigns] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
