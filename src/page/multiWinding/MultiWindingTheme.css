@@ -10,10 +10,14 @@
   --mw-border: rgba(15, 23, 42, 0.12);
   --mw-border-strong: rgba(15, 23, 42, 0.18);
   --mw-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
-  --mw-accent: #0081ff;
-  --mw-accent-blue: #0081ff;
+  --mw-accent: #1d4ed8;
+  --mw-accent-blue: #1d4ed8;
   --mw-accent-orange: #ff5b1e;
   --mw-accent-soft: rgba(0, 129, 255, 0.08);
+  --mw-tab-surface: rgba(15, 23, 42, 0.04);
+  --mw-tab-hover: rgba(0, 129, 255, 0.1);
+  --mw-tab-active-text: #ffffff;
+  --mw-tab-active-shadow: 0 12px 24px rgba(0, 129, 255, 0.24);
   --mw-comment-text: #1d4ed8;
   --app-input-bg: #eef1f5;
   --app-input-accent-bg: #d7f3fc;
@@ -41,6 +45,10 @@ body.app-dark-mode .multi-winding-page {
   --mw-border-strong: rgba(143, 181, 255, 0.28);
   --mw-shadow: 0 22px 42px rgba(2, 10, 24, 0.42);
   --mw-accent-soft: rgba(143, 181, 255, 0.12);
+  --mw-tab-surface: rgba(255, 255, 255, 0.04);
+  --mw-tab-hover: rgba(143, 181, 255, 0.16);
+  --mw-tab-active-text: #08111f;
+  --mw-tab-active-shadow: 0 14px 26px rgba(77, 141, 255, 0.28);
   --mw-comment-text: #9fc5ff;
   --app-input-bg: #203147;
   --app-input-accent-bg: #233952;
@@ -73,64 +81,65 @@ body.app-dark-mode .multi-winding-page {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 7px;
+  gap: 12px;
+  padding: 10px;
   border: 1px solid var(--mw-border);
-  border-radius: 14px;
-  background: var(--mw-surface);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 55%),
+    var(--mw-surface);
   box-shadow: var(--mw-shadow);
+  backdrop-filter: blur(12px);
 }
 
 .multi-winding-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
   min-width: 0;
-  padding: 0 4px;
-  border-radius: 0;
-  background: transparent;
-  border: 0;
+  width: 100%;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--mw-tab-surface);
+  border: 1px solid var(--mw-border);
 }
 
 .multi-winding-tab {
   position: relative;
+  width: 100%;
   min-width: 0;
-  padding: 0.48rem 0.9rem 0.58rem;
-  border: 0;
-  border-radius: 0;
+  padding: 0.72rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
   background: transparent;
   color: var(--mw-page-muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  transition: color 0.2s ease;
+  letter-spacing: 0.01em;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .multi-winding-tab::after {
-  content: "";
-  position: absolute;
-  left: 0.9rem;
-  right: 0.9rem;
-  bottom: 0.15rem;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--mw-accent);
-  opacity: 0;
-  transform: scaleX(0.4);
-  transform-origin: center;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: none;
 }
 
 .multi-winding-tab:hover {
+  background: var(--mw-tab-hover);
+  border-color: var(--mw-border);
   color: var(--mw-page-text);
+  transform: translateY(-1px);
 }
 
 .multi-winding-tab.active {
-  color: var(--mw-page-text);
-}
-
-.multi-winding-tab.active::after {
-  opacity: 1;
-  transform: scaleX(1);
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--mw-accent-blue), #0ea5e9);
+  color: var(--mw-tab-active-text);
+  box-shadow: var(--mw-tab-active-shadow);
 }
 
 .multi-winding-tab-panel {
@@ -870,18 +879,13 @@ body.app-dark-mode .multi-winding-action-btn.primary {
   }
 
   .multi-winding-tabs {
-    gap: 2px;
+    gap: 6px;
     width: 100%;
   }
 
   .multi-winding-tab {
-    flex: 1 1 120px;
-    padding: 0.55rem 0.55rem 0.65rem;
-  }
-
-  .multi-winding-tab::after {
-    left: 0.55rem;
-    right: 0.55rem;
+    padding: 0.7rem 0.85rem;
+    text-align: center;
   }
 
   .multi-winding-common-actions {
