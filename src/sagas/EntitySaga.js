@@ -7,15 +7,12 @@ import {
   addEntityFailed,
   deleteEntityFailed,
   deleteEntityFullfiled,
-  updateEntity,
   updateEntityFailed,
-  fetchSearchEntity,
   fetchSearchEntityFullfiled,
   fetchSearchEntityFailed,
 } from "../actions/EntityActions";
 import * as constants from "../constants/EntityConstants";
-import { postApi, putApi, deleteApi } from "../api";
-import { COMMON_SERVICE } from "../constants/CommonConstants";
+import { entityApi } from "../api";
 
 function* fetchEntityData(payload) {
   try {
@@ -30,10 +27,10 @@ function* fetchEntityData(payload) {
       queryParam = payload.queryParam;
     }
     const response = yield call(
-      postApi,
-      `/entity/v2/` + payload.entityName + `?` + queryParam,
-      payloadBody, {}, {},
-      COMMON_SERVICE
+      entityApi.list,
+      payload.entityName,
+      queryParam,
+      payloadBody
     );
     if (payload.overWriteEntityName) {
       payload.entityName = payload.overWriteEntityName;
@@ -63,10 +60,10 @@ function* fetchSearchEntityData(payload) {
       queryParam = payload.queryParam;
     }
     const response = yield call(
-      postApi,
-      `/entity/v2/` + payload.entityName + `/search?` + queryParam,
-      payloadBody, {}, {},
-      COMMON_SERVICE
+      entityApi.search,
+      payload.entityName,
+      queryParam,
+      payloadBody
     );
     if (payload.overWriteEntityName) {
       payload.entityName = payload.overWriteEntityName;
@@ -91,17 +88,16 @@ function* addEntityData(payload) {
     let response = {};
     if (payload.entityName === "member") {
       response = yield call(
-        putApi,
-        `/entity/` + payload.entityName,
+        entityApi.create,
+        payload.entityName,
         payload.jsonBody,
-        { "User-Entity": true }
+        { headers: { "User-Entity": true } }
       );
     } else {
       response = yield call(
-        putApi,
-        `/entity/` + payload.entityName,
-        payload.jsonBody, {}, {},
-        COMMON_SERVICE
+        entityApi.create,
+        payload.entityName,
+        payload.jsonBody
       );
     }
     if (response && response.data) {
@@ -120,9 +116,9 @@ function* addEntityData(payload) {
 function* deleteEntityData(payload) {
   try {
     const response = yield call(
-      deleteApi,
-      `/entity/` + payload.entityName + `/` + payload.entityId,
-      COMMON_SERVICE
+      entityApi.remove,
+      payload.entityName,
+      payload.entityId
     );
     if (payload.skipFetch === "undefined") {
       payload.skipFetch = false;
@@ -148,11 +144,10 @@ function* deleteEntityData(payload) {
 function* updateEntityData(payload) {
   try {
     const response = yield call(
-      putApi,
-      `/entity/${payload.entityName}/${payload.entityId}`,
+      entityApi.update,
+      payload.entityName,
+      payload.entityId,
       payload.jsonBody,
-      {}, {},
-      COMMON_SERVICE
     );
     if (response && response.data) {
       if (payload.entityName == "lomMaterial") {

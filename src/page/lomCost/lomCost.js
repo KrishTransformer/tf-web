@@ -23,8 +23,7 @@ import { useSelector } from "react-redux";
 import { selectEntity } from "../../selectors/EntitySelector";
 import { useNavigate } from "react-router-dom";
 import { IoHomeOutline } from "react-icons/io5";
-import { putApi, postApi, deleteApi } from "../../api";
-import { COMMON_SERVICE } from "../../constants/CommonConstants";
+import { entityApi } from "../../api";
 import defaultLomRateList from "../../resources/LomRatelist.json";
 import "./lomCost.css";
 
@@ -131,12 +130,10 @@ const LomCost = () => {
       }
 
       // Fetch full list to ensure replacement is complete, not page-limited.
-      const existingResponse = await postApi(
-        "/entity/v2/lomMaterial?offset=0&size=1000&sortAttribute=createdAt&sortOrder=ASC",
-        {},
-        {},
-        {},
-        COMMON_SERVICE
+      const existingResponse = await entityApi.list(
+        "lomMaterial",
+        "offset=0&size=1000&sortAttribute=createdAt&sortOrder=ASC",
+        {}
       );
       const existingRows = existingResponse?.data?.data || [];
 
@@ -144,13 +141,13 @@ const LomCost = () => {
         await Promise.all(
           existingRows
             .filter((row) => row?.id)
-            .map((row) => deleteApi(`/entity/lomMaterial/${row.id}`, COMMON_SERVICE))
+            .map((row) => entityApi.remove("lomMaterial", row.id))
         );
       }
 
       await Promise.all(
         defaultsPayload.map((payload) =>
-          putApi("/entity/lomMaterial", payload, {}, {}, COMMON_SERVICE)
+          entityApi.create("lomMaterial", payload)
         )
       );
 

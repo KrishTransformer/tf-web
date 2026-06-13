@@ -27,6 +27,7 @@ import { IoLogOutOutline, IoSettingsOutline } from "react-icons/io5";
 import { signOut } from "../../actions/AuthActions";
 import { selectAuth } from "../../selectors/AuthSelector";
 import CustomCookies from "../../api/Cookies";
+import { clearAuthTokens, getIdToken } from "../../api/authToken";
 import { postApi } from "../../api";
 import { COMMON_SERVICE } from "../../constants/CommonConstants";
 import { parseJwt } from "../../utils/AuthUtil";
@@ -75,7 +76,7 @@ const Home = () => {
     };
 
     try {
-      const token = CustomCookies.getAccessToken();
+      const token = getIdToken();
       if (!token) return fallback;
       const payload = parseJwt(token);
       const payloadEmail =
@@ -248,7 +249,7 @@ const Home = () => {
   };
 
   const handleLogout = async () => {
-    const accessToken = CustomCookies.getAccessToken();
+    const accessToken = getIdToken();
     try {
       if (accessToken) {
         await postApi(
@@ -263,7 +264,8 @@ const Home = () => {
       console.error("Logout API failed:", error);
     } finally {
       actions.signOut();
-      CustomCookies.clearTokens();
+      clearAuthTokens();
+      CustomCookies.clearAuthRedirectMessage();
       setIsProfileCardOpen(false);
       navigate("/");
     }

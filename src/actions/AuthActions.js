@@ -1,4 +1,4 @@
-import CustomCookies from "../api/Cookies";
+import { setAuthTokens } from "../api/authToken";
 import * as constants from "../constants/AuthConstants";
 import { parseJwt } from "../utils/AuthUtil";
 
@@ -10,7 +10,7 @@ export const signIn = (username, password) => ({
 
 export const signInFullfiled = (response) => {
 	const jsonPayload = parseJwt(response?.idToken);
-	CustomCookies.setToken(response);
+	setAuthTokens(response);
 	let phoneNum = response?.email?.split('@')[0];
 	phoneNum = phoneNum?.replace('__at__', '@');
 

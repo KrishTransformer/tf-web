@@ -24,6 +24,7 @@ const MultiWinding = () => {
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("appTheme") === "dark"
   );
+  const [activeTab, setActiveTab] = useState("part1");
 
   useEffect(() => {
     setFormState(multiWindings?.data || initialState.multiWindings.data);
@@ -94,6 +95,38 @@ const MultiWinding = () => {
   }, [actions, formState, multiWindings?.isLoading]);
 
   const currentPath = formState?.designId || (id === "new" ? "New Multi Winding" : id);
+  const tabs = [
+    {
+      key: "part1",
+      label: "Inputs",
+      content: (
+        <Part1
+          formState={formState}
+          handleInputChange={handleInputChange}
+        />
+      ),
+    },
+    {
+      key: "part2",
+      label: "Windings",
+      content: (
+        <Part2
+          formState={formState}
+          handleInputChange={handleInputChange}
+        />
+      ),
+    },
+    {
+      key: "part3",
+      label: "Dimensions & Cost",
+      content: (
+        <Part3
+          formState={formState}
+          handleInputChange={handleInputChange}
+        />
+      ),
+    },
+  ];
 
   return (
     <Layout
@@ -107,45 +140,51 @@ const MultiWinding = () => {
         <div className="multi-winding-page-shell">
           <div className="row m-1">
             <div className="col-12 mt-3">
-              <Part1
-                formState={formState}
-                handleInputChange={handleInputChange}
-              />
-            </div>
-            <div className="col-12 mt-3">
-              <Part2
-                formState={formState}
-                handleInputChange={handleInputChange}
-              />
-            </div>
-            <div className="col-12 mt-3">
-              <Part3
-                formState={formState}
-                handleInputChange={handleInputChange}
-              />
-            </div>
-            <div className="col-12 mt-3">
-              <FlexContainer className="multi-winding-common-actions" margin="0 0 16px">
-                <button
-                  className="multi-winding-action-btn secondary"
-                  onClick={handleReset}
-                >
-                  Reset
-                </button>
-                <button
-                  className="multi-winding-action-btn primary btn-calculate"
-                  onClick={handleCalculate}
-                  disabled={multiWindings?.isLoading}
-                >
-                  {multiWindings?.isLoading ? (
-                    <div className="spinner-border" role="status">
-                      <span className="sr-only"></span>
-                    </div>
-                  ) : (
-                    "Calculate"
-                  )}
-                </button>
-              </FlexContainer>
+              <div className="multi-winding-tabs-shell">
+                <div className="multi-winding-topbar">
+                  <div className="multi-winding-tabs">
+                    {tabs.map((tab) => (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        className={`multi-winding-tab${
+                          activeTab === tab.key ? " active" : ""
+                        }`}
+                        onClick={() => setActiveTab(tab.key)}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                  <FlexContainer
+                    className="multi-winding-common-actions"
+                    margin="0"
+                  >
+                    <button
+                      className="multi-winding-action-btn secondary"
+                      onClick={handleReset}
+                    >
+                      Reset
+                    </button>
+                    <button
+                      className="multi-winding-action-btn primary btn-calculate"
+                      onClick={handleCalculate}
+                      disabled={multiWindings?.isLoading}
+                    >
+                      {multiWindings?.isLoading ? (
+                        <div className="spinner-border" role="status">
+                          <span className="sr-only"></span>
+                        </div>
+                      ) : (
+                        "Calculate"
+                      )}
+                    </button>
+                  </FlexContainer>
+                </div>
+                <div className="multi-winding-tab-panel">
+                  {tabs.find((tab) => tab.key === activeTab)?.content}
+                </div>
+              </div>
             </div>
             <div className="col-12 mt-1 mb-3">
               <Container

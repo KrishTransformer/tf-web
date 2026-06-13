@@ -14,7 +14,7 @@ import {
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./Signin.css";
 import { fetchEntity } from "../../actions/EntityActions";
-import { extractFromHostname } from "../../utils/StringUtils.js";
+import CustomCookies from "../../api/Cookies.js";
 
 const Login = () => {
   const [redirectMessage, setRedirectMessage] = useState("");
@@ -31,15 +31,14 @@ const Login = () => {
   });
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  console.log("user",username,password);
+
   useEffect(() => {
     actions.clearErrorMessage();
-    const hostname = window.location.hostname;
-    console.log("hostname",hostname);
-    const extracted = extractFromHostname(hostname);
-    console.log(extracted);
-    setCompanyName(extracted);
+    const authRedirectMessage = CustomCookies.getAuthRedirectMessage();
+    if (authRedirectMessage) {
+      setRedirectMessage(authRedirectMessage);
+      CustomCookies.clearAuthRedirectMessage();
+    }
   }, []);
 
   useEffect(() => {
