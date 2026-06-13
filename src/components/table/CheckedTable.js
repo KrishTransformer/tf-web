@@ -21,6 +21,17 @@ import {
   fetchFileFailed,
 } from "../../actions/FileActions";
 
+const safeJsonParse = (value, fallback = null) => {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn("Invalid JSON value:", value, error);
+    return fallback;
+  }
+};
+
 const styleCell = {
   fontSize: "16px",
   fontWeight: "600",
@@ -37,6 +48,22 @@ const linkCell = {
   color: "#0056b3",
   cursor: "pointer",
   textDecoration: "underline",
+};
+
+const formatDisplayValue = (value, fallback = "-") => {
+  return value === undefined || value === null || value === "" ? fallback : value;
+};
+
+const formatJoinedValues = (values, separator = "/") => {
+  const filteredValues = values.filter(
+    (value) => value !== undefined && value !== null && value !== ""
+  );
+
+  if (filteredValues.length === 0) {
+    return "-";
+  }
+
+  return filteredValues.join(separator);
 };
 
 export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = false }) {
@@ -97,22 +124,22 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
     if (row) {
       sessionStorage.setItem("newDesignType", "two");
       if (row?.twoWindings) {
-        const designData = JSON.parse(row?.twoWindings);
+        const designData = safeJsonParse(row?.twoWindings, {});
         let metadata = {}
         metadata.designId = row.designId;
         metadata.createdAt = row.createdAt;
         actions.addCalcFullfiled("2windings", designData, metadata);
       }
       if (row?.core) {
-        const coreData = JSON.parse(row?.core);
+        const coreData = safeJsonParse(row?.core, {});
         actions.addCalcFullfiled("core", coreData);
       }
       if (row?.fabrication) {
-        const coreData = JSON.parse(row?.fabrication);
+        const coreData = safeJsonParse(row?.fabrication, {});
         actions.addCalcFullfiled("fabrication", coreData);
       }
       if (row?.lom) {
-        const lomData = JSON.parse(row?.lom);
+        const lomData = safeJsonParse(row?.lom, []);
         actions.fetchFileFullfiled({ data: lomData });
       }
       navigate("/2windings/" + row?.id);
@@ -166,7 +193,19 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
         </TableHead>
         <TableBody>
           {rows.map((row) => {
-            const designData = JSON.parse(row.twoWindings);
+            const designData = safeJsonParse(row?.twoWindings, {});
+            const frameValue = formatJoinedValues(
+              [designData?.core?.coreDia, designData?.core?.limbHt, designData?.core?.cenDist],
+              " x "
+            );
+            const voltageValue = formatJoinedValues(
+              [designData?.lowVoltage, designData?.highVoltage],
+              "/"
+            );
+            const lossesValue = formatJoinedValues(
+              [designData?.coreLoss, designData?.loadLoss],
+              "/"
+            );
 
             return (
               <TableRow
@@ -225,22 +264,14 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
                 >
                   {row.designId}
                 </TableCell>
-                <TableCell sx={styleRow}>{designData?.kVA}</TableCell>
+                <TableCell sx={styleRow}>{formatDisplayValue(designData?.kVA)}</TableCell>
+                <TableCell sx={styleRow}>{voltageValue}</TableCell>
+                <TableCell sx={styleRow}>{formatDisplayValue(designData?.ez)}</TableCell>
+                <TableCell sx={styleRow}>{frameValue}</TableCell>
+                <TableCell sx={styleRow}>{formatDisplayValue(designData?.voltsPerTurn)}</TableCell>
+                <TableCell sx={styleRow}>{lossesValue}</TableCell>
                 <TableCell sx={styleRow}>
-                  {designData?.lowVoltage}/{designData?.highVoltage}
-                </TableCell>
-                <TableCell sx={styleRow}>{designData?.ez}</TableCell>
-                <TableCell sx={styleRow}>
-                  {`${designData?.core?.coreDia} x
-                  ${designData?.core?.limbHt} x 
-                  ${designData?.core?.cenDist}`}
-                </TableCell>
-                <TableCell sx={styleRow}>{designData?.voltsPerTurn}</TableCell>
-                <TableCell
-                  sx={styleRow}
-                >{`${designData?.coreLoss}/${designData?.loadLoss}`}</TableCell>
-                <TableCell sx={styleRow}>
-                  {designData?.cost?.capitalCost}
+                  {formatDisplayValue(designData?.cost?.capitalCost)}
                 </TableCell>
                 {/* <TableCell sx={styleRow}>
                   <span className="text-primary">
