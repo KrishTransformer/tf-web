@@ -1,18 +1,16 @@
 // import Cookies from "js-cookie";
 
 export default class CustomCookies {
-  static setToken(token = {}) {
-    const { idToken } = token;
-    sessionStorage.setItem("idToken", idToken);
+  static setAuthRedirectMessage(value) {
+    sessionStorage.setItem("auth_redirect_message", value || "");
   }
 
-  static getAccessToken() {
-    const access_token = sessionStorage.getItem("idToken") || "";
-    return access_token && access_token !== "undefined" ? access_token : "";
+  static getAuthRedirectMessage() {
+    return sessionStorage.getItem("auth_redirect_message") || "";
   }
 
-  static clearTokens() {
-    sessionStorage.setItem("idToken", "");
+  static clearAuthRedirectMessage() {
+    sessionStorage.removeItem("auth_redirect_message");
   }
 
   static setAuthCode(value) {
@@ -45,22 +43,6 @@ export default class CustomCookies {
 
   static getCodeChallenge() {
     return sessionStorage.getItem("code_challenge");
-  }
-
-  static setRefreshedToken(token = {}) {
-    const { access_token, refresh_token, token_type } = token;
-    sessionStorage.setItem("access_token", access_token);
-    sessionStorage.setItem("refresh_token", refresh_token);
-    sessionStorage.setItem("token_type", token_type);
-  }
-
-  static getRefreshToken() {
-    const refresh_token = sessionStorage.getItem("refresh_token") || "";
-    return refresh_token && refresh_token !== "undefined" ? refresh_token : "";
-  }
-
-  static hasToken() {
-    return Boolean(this.getAccessToken());
   }
 
   static setMerchantTransactionId(value) {
