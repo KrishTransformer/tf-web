@@ -23,17 +23,19 @@ function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
       if (calcName.includes("2windings")) {
         let twoWindingsDataPayload = response.data; 
         let entityDesignPayload = {};
-        if (id && id != "") {
+        const hasPersistedEntity = Boolean(id);
+
+        if (hasPersistedEntity) {
           console.log("overwrite");
           entityDesignPayload.id = id;
-        } else if (!metadataDesignId) {
+        } else {
           console.log("new");
           metadataDesignId =
           response.data.kVA + "k-" + generateUniqueFiveDigitNumber();
         }
         let twoWindingsMetadataPayload = {}
         twoWindingsMetadataPayload.designId = metadataDesignId;
-        twoWindingsMetadataPayload.entityId = id || metadata?.entityId || "";
+        twoWindingsMetadataPayload.entityId = hasPersistedEntity ? id : "";
         twoWindingsDataPayload.designId = metadataDesignId;
         yield put(addCalcFullfiled(calcName, twoWindingsDataPayload, twoWindingsMetadataPayload));
         entityDesignPayload.designId = metadataDesignId;
