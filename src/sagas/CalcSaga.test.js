@@ -54,6 +54,7 @@ describe("addCalcData saga", () => {
         twoWindings: JSON.stringify({
           kVA: 100,
           turns: 55,
+          designId,
         }),
       })
     );
@@ -116,7 +117,7 @@ describe("addCalcData saga", () => {
     expect(generator.next().done).toBe(true);
   });
 
-  test("keeps existing designId for persisted designs", () => {
+  test("generates a fresh designId even for persisted designs", () => {
     const action = {
       jsonBody: { kVA: 400 },
       calcName: "2windings",
@@ -129,23 +130,23 @@ describe("addCalcData saga", () => {
     const calcResponse = { data: { kVA: 400, current: 22 } };
 
     generator.next();
-    expect(generator.next(calcResponse).value).toEqual(
-      put(
-        addCalcFullfiled(
-          "2windings",
-          { ...calcResponse.data, designId: "400k-99999" },
-          { designId: "400k-99999", entityId: "entity-9" }
-        )
-      )
-    );
+    const firstPutEffect = generator.next(calcResponse).value;
+    const designId = firstPutEffect.payload.action.metadata.designId;
+
+    expect(firstPutEffect.payload.action.response).toEqual({
+      ...calcResponse.data,
+      designId,
+    });
+    expect(firstPutEffect.payload.action.metadata).toEqual({ designId, entityId: "" });
+    expect(designId).toMatch(/^400k-/);
 
     expect(generator.next().value).toEqual(
       call(entityApi.create, "design", {
-        id: "entity-9",
-        designId: "400k-99999",
+        designId,
         twoWindings: JSON.stringify({
           kVA: 400,
           current: 22,
+          designId,
         }),
       })
     );

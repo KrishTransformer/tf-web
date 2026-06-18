@@ -13,7 +13,6 @@ import { CAD_SERVICE, STORAGE_SERVICE } from "../constants/CommonConstants";
 
 export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
   try {
-    let metadataDesignId = metadata?.designId;
     const response = bodyType
       ? yield call(postApi, `/calculate/` + calcName + bodyType, jsonBody, {
           "User-Calc": true,
@@ -22,26 +21,18 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
     if (response && response.data) {
       if (calcName.includes("2windings")) {
         let twoWindingsDataPayload = response.data; 
-        const hasPersistedEntity = Boolean(id);
-        let entityDesignPayload = {
-          twoWindings: JSON.stringify(response.data),
-        };
-
-        if (hasPersistedEntity) {
-          console.log("overwrite");
-          entityDesignPayload.id = id;
-        } else {
-          console.log("new");
-          metadataDesignId =
+        const metadataDesignId =
           response.data.kVA + "k-" + generateUniqueFiveDigitNumber();
-        }
-
-        entityDesignPayload.designId = metadataDesignId;
 
         let twoWindingsMetadataPayload = {}
         twoWindingsMetadataPayload.designId = metadataDesignId;
-        twoWindingsMetadataPayload.entityId = hasPersistedEntity ? id : "";
+        twoWindingsMetadataPayload.entityId = "";
         twoWindingsDataPayload.designId = metadataDesignId;
+
+        let entityDesignPayload = {
+          designId: metadataDesignId,
+          twoWindings: JSON.stringify(twoWindingsDataPayload),
+        };
         yield put(addCalcFullfiled(calcName, twoWindingsDataPayload, twoWindingsMetadataPayload));
 
         try {
