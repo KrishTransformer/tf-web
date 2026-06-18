@@ -5,13 +5,13 @@ import {
   generate3DFullfiled,
   generate3DFailed,
 } from "../actions/CalcActions";
-import { addEntity } from "../actions/EntityActions";
+import { addEntity, addEntityFailed, fetchEntity } from "../actions/EntityActions";
 import * as constants from "../constants/CalcConstants";
-import { postApi, putApi, deleteApi, getApi } from "../api";
+import { postApi, putApi, deleteApi, getApi, entityApi } from "../api";
 import { generateUniqueFiveDigitNumber } from "../utils/StringUtils";
 import { CAD_SERVICE, STORAGE_SERVICE } from "../constants/CommonConstants";
 
-function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
+export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
   try {
     let metadataDesignId = metadata?.designId;
     const response = bodyType
@@ -22,8 +22,10 @@ function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
     if (response && response.data) {
       if (calcName.includes("2windings")) {
         let twoWindingsDataPayload = response.data; 
-        let entityDesignPayload = {};
         const hasPersistedEntity = Boolean(id);
+        let entityDesignPayload = {
+          twoWindings: JSON.stringify(response.data),
+        };
 
         if (hasPersistedEntity) {
           console.log("overwrite");
@@ -33,14 +35,55 @@ function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
           metadataDesignId =
           response.data.kVA + "k-" + generateUniqueFiveDigitNumber();
         }
+
+        entityDesignPayload.designId = metadataDesignId;
+
         let twoWindingsMetadataPayload = {}
         twoWindingsMetadataPayload.designId = metadataDesignId;
         twoWindingsMetadataPayload.entityId = hasPersistedEntity ? id : "";
         twoWindingsDataPayload.designId = metadataDesignId;
         yield put(addCalcFullfiled(calcName, twoWindingsDataPayload, twoWindingsMetadataPayload));
-        entityDesignPayload.designId = metadataDesignId;
-        entityDesignPayload.twoWindings = JSON.stringify(response.data);
-        yield put(addEntity(entityDesignPayload, "design"));
+
+        try {
+          const entityResponse = yield call(
+            entityApi.create,
+            "design",
+            entityDesignPayload
+          );
+
+          if (entityResponse && entityResponse.data) {
+            let persistedEntityId =
+              entityResponse?.data?.id ||
+              entityResponse?.data?.data?.id ||
+              twoWindingsMetadataPayload.entityId;
+
+            if (!persistedEntityId && metadataDesignId) {
+              const lookupResponse = yield call(
+                entityApi.list,
+                "design",
+                "offset=0&size=1",
+                { designId: [metadataDesignId] }
+              );
+
+              persistedEntityId = lookupResponse?.data?.data?.[0]?.id || "";
+            }
+
+            if (persistedEntityId && persistedEntityId !== twoWindingsMetadataPayload.entityId) {
+              twoWindingsMetadataPayload = {
+                ...twoWindingsMetadataPayload,
+                entityId: persistedEntityId,
+              };
+              yield put(addCalcFullfiled(calcName, twoWindingsDataPayload, twoWindingsMetadataPayload));
+            }
+
+            yield put(fetchEntity("design", "offset=0&size=100"));
+          } else {
+            yield put(addEntityFailed("design"));
+          }
+        } catch (entityError) {
+          console.error("Error saving design entity:", entityError);
+          yield put(addEntityFailed("design"));
+        }
       } else if (calcName.includes("core")) {
         let payload = response.data; 
         let dataPayload = {};        
