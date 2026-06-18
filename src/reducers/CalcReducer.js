@@ -1,5 +1,17 @@
 import * as constants from "../constants/CalcConstants";
 
+const normalizeCalcName = (calcName) => {
+  if (calcName === "2windings") {
+    return "twoWindings";
+  }
+
+  if (calcName === "multiwindings") {
+    return "multiWindings";
+  }
+
+  return calcName;
+};
+
 export const initialState = {
   twoWindings: {
     isLoading: false,
@@ -1139,16 +1151,18 @@ initialState.multiWindings = JSON.parse(JSON.stringify(initialState.twoWindings)
 
 const calcReducer = (state = initialState, action) => {
   switch (action.type) {
-    case constants.ADD_CALC:
+    case constants.ADD_CALC: {
+      const calcName = normalizeCalcName(action.calcName);
       return {
         ...state,
-        [action.calcName]: {
-          ...state[action.calcName],
+        [calcName]: {
+          ...state[calcName],
           isLoading: true,
           isFullfilled: false,
           isFailed: false,
         },
       };
+    }
 
     case constants.ADD_CALC_FULFILLED:
       return {
