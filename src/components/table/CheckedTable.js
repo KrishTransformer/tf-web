@@ -128,6 +128,7 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
         let metadata = {}
         metadata.designId = row.designId;
         metadata.createdAt = row.createdAt;
+        metadata.entityId = row.id;
         actions.addCalcFullfiled("2windings", designData, metadata);
       }
       if (row?.core) {

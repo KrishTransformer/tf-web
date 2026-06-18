@@ -753,8 +753,8 @@ const TwoWinding = () => {
       });
     }
 
-    let entityId = "";
-    if (twoWindings?.data?.designId) {
+    let entityId = twoWindings?.metadata?.entityId || "";
+    if (!entityId && twoWindings?.data?.designId) {
       entityId = design?.data?.data?.filter((item) => item.designId == twoWindings?.data?.designId)[0]?.id;
     }
 

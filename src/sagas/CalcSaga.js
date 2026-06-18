@@ -26,13 +26,14 @@ function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
         if (id && id != "") {
           console.log("overwrite");
           entityDesignPayload.id = id;
-        } else {
+        } else if (!metadataDesignId) {
           console.log("new");
           metadataDesignId =
           response.data.kVA + "k-" + generateUniqueFiveDigitNumber();
         }
         let twoWindingsMetadataPayload = {}
         twoWindingsMetadataPayload.designId = metadataDesignId;
+        twoWindingsMetadataPayload.entityId = id || metadata?.entityId || "";
         twoWindingsDataPayload.designId = metadataDesignId;
         yield put(addCalcFullfiled(calcName, twoWindingsDataPayload, twoWindingsMetadataPayload));
         entityDesignPayload.designId = metadataDesignId;
