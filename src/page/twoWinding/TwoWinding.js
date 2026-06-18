@@ -753,14 +753,9 @@ const TwoWinding = () => {
       });
     }
 
-    let entityId = twoWindings?.metadata?.entityId || "";
-    if (!entityId && twoWindings?.data?.designId) {
-      entityId = design?.data?.data?.filter((item) => item.designId == twoWindings?.data?.designId)[0]?.id;
-    }
-
     // Send the modified data to the API
     console.log("dataToSubmit.innerWindings:", dataToSubmit.lockedAttributes);
-    actions.addCalc(dataToSubmit, "2windings", "/circular", entityId, twoWindings?.metadata);
+    actions.addCalc(dataToSubmit, "2windings", "/circular", "", twoWindings?.metadata);
     console.log("dataToSubmit.innerWindings: after_call", dataToSubmit.lockedAttributes);
 
     window.scrollTo(0, 0);
