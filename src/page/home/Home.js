@@ -47,7 +47,7 @@ const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("appTheme") === "dark";
   });
-  const showMultiWdgOption = false;
+  const showMultiWdgOption = true;
   const profileMenuRef = useRef(null);
   const settingsMenuRef = useRef(null);
 
@@ -276,6 +276,25 @@ const Home = () => {
     navigate("/lomCost");
   };
 
+  const designTypeOptions = useMemo(
+    () => [
+      {
+        key: "two",
+        designType: "two",
+        badge: "2W",
+        tag: "Production Flow",
+        title: "2 Winding",
+        description:
+          "Start the current two-winding design workflow with the full calculation page.",
+        features: ["Oil Type", "Dry Type", "Mechanical Design"],
+        cta: "Open 2 Winding",
+      },
+    ],
+    []
+  );
+
+  const isSingleDesignTypeOption = designTypeOptions.length === 1;
+
   // let a;
   // console.log(a.name)
   // console.log("selectedDesigns in home page:", selectedDesigns)
@@ -417,53 +436,41 @@ const Home = () => {
           onClose={() => setDesignTypeModalOpen(false)}
           title="Create New Design"
           showButtons={false}
+          minWidth={isSingleDesignTypeOption ? 420 : 620}
         >
-          <div className="home-design-type-modal">
-            <div className="home-design-type-grid">
-              <button
-                type="button"
-                className="home-design-type-card"
-                onClick={() => handleDesignTypeSelection("two")}
-              >
-                <div className="home-design-type-card-top">
-                  <span className="home-design-type-badge">2W</span>
-                  <span className="home-design-type-tag">Production Flow</span>
-                </div>
-                <span className="home-design-type-title">2 Winding</span>
-                <span className="home-design-type-description">
-                  Start the current two-winding design workflow with the full
-                  calculation page.
-                </span>
-                <div className="home-design-type-features">
-                  <span className="home-design-type-feature">Oil Type</span>
-                  <span className="home-design-type-feature">Dry Type</span>
-                  <span className="home-design-type-feature">Mechanical Design</span>
-                </div>
-                <span className="home-design-type-cta">Open 2 Winding</span>
-              </button>
-              {showMultiWdgOption && (
+          <div
+            className={`home-design-type-modal ${
+              isSingleDesignTypeOption ? "home-design-type-modal-single" : ""
+            }`}
+          >
+            <div
+              className={`home-design-type-grid ${
+                isSingleDesignTypeOption ? "home-design-type-grid-single" : ""
+              }`}
+            >
+              {designTypeOptions.map((option) => (
                 <button
+                  key={option.key}
                   type="button"
                   className="home-design-type-card"
-                  onClick={() => handleDesignTypeSelection("multi")}
+                  onClick={() => handleDesignTypeSelection(option.designType)}
                 >
                   <div className="home-design-type-card-top">
-                    <span className="home-design-type-badge">MW</span>
-                    <span className="home-design-type-tag alt">New Workspace</span>
+                    <span className="home-design-type-badge">{option.badge}</span>
+                    <span className="home-design-type-tag">{option.tag}</span>
                   </div>
-                  <span className="home-design-type-title">Multi Winding</span>
-                  <span className="home-design-type-description">
-                    Open the multi-winding workspace prepared for the next design
-                    flow we are building out.
-                  </span>
+                  <span className="home-design-type-title">{option.title}</span>
+                  <span className="home-design-type-description">{option.description}</span>
                   <div className="home-design-type-features">
-                    <span className="home-design-type-feature">Tap Winding</span>
-                    <span className="home-design-type-feature">Edge Winding</span>
-                    <span className="home-design-type-feature">Ideal for 33kV and above</span>
+                    {option.features.map((feature) => (
+                      <span key={feature} className="home-design-type-feature">
+                        {feature}
+                      </span>
+                    ))}
                   </div>
-                  <span className="home-design-type-cta">Open Multi Winding</span>
+                  <span className="home-design-type-cta">{option.cta}</span>
                 </button>
-              )}
+              ))}
             </div>
           </div>
         </CustomModal>

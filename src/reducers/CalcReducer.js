@@ -1,4 +1,5 @@
 import * as constants from "../constants/CalcConstants";
+import { MULTI_WDG_DEFAULT_COST } from "../constants/MultiWindingDefaults";
 
 const normalizeCalcName = (calcName) => {
   if (calcName === "2windings") {
@@ -1148,6 +1149,76 @@ export const initialState = {
 };
 
 initialState.multiWindings = JSON.parse(JSON.stringify(initialState.twoWindings));
+initialState.multiWindings.data = {
+  ...initialState.multiWindings.data,
+  windingConfiguration: "2_WDG_LV_HV_MAIN",
+  primaryVoltage: initialState.twoWindings.data.lowVoltage,
+  secondaryVoltage: initialState.twoWindings.data.highVoltage,
+  lowVoltage: "",
+  highVoltage: "",
+  tapStepsPercent: 2.5,
+  tapStepsPositive: 2,
+  tapStepsNegative: 2,
+  fluxDensity: 1.6888,
+  corseVoltage: "",
+  fineVoltage: "",
+  outerVoltage: "",
+  corseCurrentDensity: initialState.twoWindings.data.hvCurrentDensity,
+  fineCurrentDensity: initialState.twoWindings.data.hvCurrentDensity,
+  outerCurrentDensity: initialState.twoWindings.data.hvCurrentDensity,
+  corseConductorMaterial: initialState.twoWindings.data.hVConductorMaterial,
+  fineConductorMaterial: initialState.twoWindings.data.hVConductorMaterial,
+  outerConductorMaterial: initialState.twoWindings.data.hVConductorMaterial,
+  corseWindingType: "HELICAL",
+  fineWindingType: "HELICAL",
+  outerWindingType: "HELICAL",
+  cost: {
+    ...initialState.multiWindings.data.cost,
+    ...MULTI_WDG_DEFAULT_COST,
+  },
+  part2Windings: {
+    lv: JSON.parse(JSON.stringify(initialState.twoWindings.data.innerWindings)),
+    hvMain: JSON.parse(JSON.stringify(initialState.twoWindings.data.outerWindings)),
+    corse: JSON.parse(JSON.stringify(initialState.twoWindings.data.outerWindings)),
+    fine: JSON.parse(JSON.stringify(initialState.twoWindings.data.outerWindings)),
+    outer: JSON.parse(JSON.stringify(initialState.twoWindings.data.outerWindings)),
+  },
+  multiCoilDimensions: {
+    corse: {
+      id: "",
+      radial: "",
+      od: "",
+    },
+    fine: {
+      id: "",
+      radial: "",
+      od: "",
+    },
+    outer: {
+      id: "",
+      radial: "",
+      od: "",
+    },
+    gaps: {
+      hvMainToOuterGap: "",
+      hvMainToCorseGap: "",
+      corseToOuterGap: "",
+      hvMainToFineGap: "",
+      fineToOuterGap: "",
+      corseToFineGap: "",
+    },
+  },
+  multiCost: {
+    conductors: {
+      lv: { weight: "", totalCost: "" },
+      hvMain: { weight: "", totalCost: "" },
+      corse: { weight: "", totalCost: "" },
+      fine: { weight: "", totalCost: "" },
+      outer: { weight: "", totalCost: "" },
+    },
+  },
+  calculationResponse: null,
+};
 
 const calcReducer = (state = initialState, action) => {
   switch (action.type) {

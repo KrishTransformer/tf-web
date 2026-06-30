@@ -427,16 +427,14 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             bgColor="#D7F3FC"
             borderColor="0.5px solid #00000033"
           /> */}
-          {!isDryType && (
-            <CustomInput
-              label="Tank Loss"
-              type="text"
-              value={formState.tank?.tankLoss}
-              onChange={(e) => handleInputChange("tank.tankLoss", e.target.value)}
-              bgColor="var(--app-input-accent-bg)"
-              borderColor="var(--app-input-border)"
-            />
-          )}
+          <CustomInput
+            label="Tank Loss"
+            type="text"
+            value={formState.tank?.tankLoss}
+            onChange={(e) => handleInputChange("tank.tankLoss", e.target.value)}
+            bgColor="var(--app-input-accent-bg)"
+            borderColor="var(--app-input-border)"
+          />
           <CustomInput
             label="Load Loss"
             type="text"

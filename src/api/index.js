@@ -13,6 +13,13 @@ instance.interceptors.request.use(async (config) => {
     config.headers = {};
   }
 
+  if (config.headers["X-Skip-Auth"] === "true") {
+    delete config.headers["X-Skip-Auth"];
+    delete config.headers.Authorization;
+    delete config.headers.authorization;
+    return config;
+  }
+
   if (!config.headers.Authorization) {
     const token = getIdToken();
 
@@ -52,7 +59,7 @@ export const commonService = {
     API_URL: "https://tf-common-service.trafointel.com/tf/api/" + fullUrl,
   },
   local: {
-    API_URL: "http://localhost:8080/tf/api",
+    API_URL: "https://tf-common-service.trafointel.com/tf/api/design.trafointel.com",
   },
 };
 
@@ -61,7 +68,7 @@ export const coreService = {
     API_URL: "https://tf-core-service.trafointel.com/tf/api/" + fullUrl,
   },
   local: {
-    API_URL: "http://localhost:8080/tf/api",
+    API_URL: "https://tf-core-service.trafointel.com/tf/api/" + fullUrl,
   },
 };
 
@@ -72,6 +79,15 @@ export const cadService = {
   },
   local: {
     API_URL: "https://tf-cad-service.trafointel.com",
+  },
+};
+
+export const multiWdgService = {
+  prod: {
+    API_URL: "https://multiwdg-backend.trafointel.com",
+  },
+  local: {
+    API_URL: "https://multiwdg-backend.trafointel.com",
   },
 };
 
@@ -102,12 +118,14 @@ const getEnvironment = (key) => {
 export const coreServiceConfig = getEnvironment(coreService);
 export const commonServiceConfig = getEnvironment(commonService);
 export const cadServiceConfig = getEnvironment(cadService);
+export const multiWdgServiceConfig = getEnvironment(multiWdgService);
 export const storageServiceConfig = getEnvironment(storageService);
 
 const BASE_URL = {
   CORE_SERVICE: coreServiceConfig.API_URL,
   COMMON_SERVICE: commonServiceConfig.API_URL,
   CAD_SERVICE: cadServiceConfig.API_URL,
+  MULTI_WDG_SERVICE: multiWdgServiceConfig.API_URL,
   STORAGE_SERVICE: storageServiceConfig.API_URL,
 };
 
