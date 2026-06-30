@@ -61,7 +61,7 @@ export const coreService = {
     API_URL: "https://tf-core-service.trafointel.com/tf/api/" + fullUrl,
   },
   local: {
-    API_URL: "http://localhost:8080/tf/api",
+    API_URL: "https://tf-core-service.trafointel.com/tf/api/" + fullUrl,
   },
 };
 

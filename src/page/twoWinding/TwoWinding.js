@@ -23,6 +23,13 @@ import { selectEntity } from "../../selectors/EntitySelector";
 import { initialState } from "./../../reducers/CalcReducer";
 import { useParams } from "react-router-dom";
 import "./TwoWindingTheme.css";
+
+const DRY_TYPE_WINDING_TEMPERATURES = {
+  CLASS_B: "70",
+  CLASS_F: "90",
+  CLASS_H: "115",
+};
+
 const TwoWinding = () => {
   const { id } = useParams();
 
@@ -173,6 +180,33 @@ const TwoWinding = () => {
 
   const handleInputChange = (fieldPath, value) => {
     //console.log("fieldPath:", fieldPath, " value:", value);
+
+    if (fieldPath === "dryType") {
+      setFormState((prevState) => {
+        const isDryTypeSelected = value === true || value === "true";
+        const selectedDryTempClass = prevState.dryTempClass || "CLASS_B";
+
+        return {
+          ...prevState,
+          dryType: value,
+          ...(isDryTypeSelected && {
+            dryTempClass: selectedDryTempClass,
+            windingTemp:
+              DRY_TYPE_WINDING_TEMPERATURES[selectedDryTempClass] || prevState.windingTemp,
+          }),
+        };
+      });
+      return;
+    }
+
+    if (fieldPath === "dryTempClass") {
+      setFormState((prevState) => ({
+        ...prevState,
+        dryTempClass: value,
+        windingTemp: DRY_TYPE_WINDING_TEMPERATURES[value] || prevState.windingTemp,
+      }));
+      return;
+    }
 
     if (fieldPath === "eTransCostType") {
       setFormState((prevState) => {

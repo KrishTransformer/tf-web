@@ -38,6 +38,7 @@ const CustomModal = ({
   children,
   onModalSubmit,
   showButtons = true,
+  minWidth = 500,
 }) => {
   const isDarkMode = localStorage.getItem("appTheme") === "dark";
 
@@ -49,7 +50,7 @@ const CustomModal = ({
       aria-labelledby="custom-modal-title"
       aria-describedby="custom-modal-description"
     >
-      <Box sx={style} className="custom-modal-shell">
+      <Box sx={{ ...style, minWidth }} className="custom-modal-shell">
         <Box sx={headerStyle}>
           <TextTypo
             text={title}

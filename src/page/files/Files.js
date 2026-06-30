@@ -628,6 +628,19 @@ const Files = () => {
     return String(value);
   };
 
+  const formatDryTempClass = (dryTempClass) => {
+    switch (dryTempClass) {
+      case "CLASS_B":
+        return "Class B";
+      case "CLASS_F":
+        return "Class F";
+      case "CLASS_H":
+        return "Class H";
+      default:
+        return "Dry Type";
+    }
+  };
+
   const desGeneratePDF = () => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const isDryType = isDryTypeDesign(twoWindings?.data?.dryType);
@@ -644,6 +657,9 @@ const Files = () => {
     const displayTemperature = isDryType
       ? `${formatPdfValue(twoWindings?.data?.ambientTemp, "-")}/${formatPdfValue(twoWindings?.data?.windingTemp, "-")}`
       : `${formatPdfValue(twoWindings?.data?.windingTemp, "-")}/${formatPdfValue(twoWindings?.data?.topOilTemp, "-")}`;
+    const temperatureLabel = isDryType
+      ? `(${formatDryTempClass(twoWindings?.data?.dryTempClass)}) Temp Rise`
+      : "Temperature";
     const displayCooling = isDryType
       ? formatPdfValue(twoWindings?.data?.coolingType, "AN")
       : "ONAN";
@@ -715,7 +731,7 @@ const Files = () => {
         "Flux Density: " + twoWindings.data.lvFormulas.revisedFluxDensity.toFixed(3) + "T",
         "Frequency: " + twoWindings.data.frequency + "Hz"],
         ["Volts/Turn: " + twoWindings.data.lvFormulas.revisedVoltsPerTurn,
-        "Temperature: " + displayTemperature,
+        `${temperatureLabel}: ` + displayTemperature,
         "Cooling: " + displayCooling,
         "Vector Group: " + twoWindings.data.vectorGroup]
       ]
@@ -776,7 +792,11 @@ const Files = () => {
         ],
         ["No. of Layers", twoWindings.data.innerWindings.noOfLayers, twoWindings.data.outerWindings.noOfLayers],
         ["Turns/Layer", twoWindings?.data?.lvWindingType === "DISC" ? 1 : twoWindings.data.innerWindings.turnsPerLayer,
-          twoWindings?.data?.hvWindingType === "DISC" ? 1 : `${parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10)} X ${twoWindings.data.hvFormulas.hvTurnsPerLayer} + ${(twoWindings.data.hvFormulas.hvTurnsAtHighest - (parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10) * twoWindings.data.hvFormulas.hvTurnsPerLayer)).toFixed(0)}`],
+          twoWindings?.data?.hvWindingType === "DISC"
+            ? 1
+            : twoWindings?.data?.hvWindingType === "XOVER"
+              ? twoWindings?.data?.outerWindings?.turnsLayers
+              : `${parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10)} X ${twoWindings.data.hvFormulas.hvTurnsPerLayer} + ${(twoWindings.data.hvFormulas.hvTurnsAtHighest - (parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10) * twoWindings.data.hvFormulas.hvTurnsPerLayer)).toFixed(0)}`],
         ["Insu. b/w layer (mm)", `${twoWindings.data.innerWindings.interLayerInsulation} (${Math.round(twoWindings.data.innerWindings.interLayerInsulation / 0.0254)} mil)`, `${twoWindings.data.outerWindings.interLayerInsulation} (${Math.round(twoWindings.data.outerWindings.interLayerInsulation / 0.0254)} mil)`],
         [ductLabel, twoWindings.data.innerWindings.noOfDuctsWidth.replace(" / ", " x ") + ductSuffix, twoWindings.data.outerWindings.noOfDuctsWidth.replace(" / ", " x ") + ductSuffix],
         ["Conductor (mm)",
@@ -1282,6 +1302,8 @@ const Files = () => {
 
   const gtpGeneratePDF = () => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const isDryType = isDryTypeDesign(twoWindings?.data?.dryType);
+    const dryTempClassLabel = formatDryTempClass(twoWindings?.data?.dryTempClass);
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -1491,9 +1513,11 @@ const Files = () => {
       ["10.", "REFERENCE  AMBIENT  TEMP. IN  DEG  C :", gtpData.refAmbientTemp],
       ["11.", "TYPE OF  COOLING :", gtpData.typeOfCooling],
 
-      ["12.", "TEMPERATURE  RISE :  a) TOP OIL IN  DEG  C :\n" +
+      ["12.", isDryType
+        ? `TEMP RISE :  a) AMBIENT IN  DEG  C :\n\t\t\t\t\t  b) (${dryTempClassLabel}) WINDING:`
+        : "TEMPERATURE  RISE :  a) TOP OIL IN  DEG  C :\n" +
         "\t\t\t\t\t  b) WINDING:"
-        , gtpData.tempRiseTopOil + "\n" +
+        , (isDryType ? gtpData.refAmbientTemp : gtpData.tempRiseTopOil) + "\n" +
         gtpData.tempRiseWinding
       ],
 
