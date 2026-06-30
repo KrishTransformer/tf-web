@@ -9,15 +9,30 @@ import { addEntity, addEntityFailed, fetchEntity } from "../actions/EntityAction
 import * as constants from "../constants/CalcConstants";
 import { postApi, putApi, deleteApi, getApi, entityApi } from "../api";
 import { generateUniqueFiveDigitNumber } from "../utils/StringUtils";
-import { CAD_SERVICE, STORAGE_SERVICE } from "../constants/CommonConstants";
+import {
+  CAD_SERVICE,
+  STORAGE_SERVICE,
+  MULTI_WDG_SERVICE,
+  MULTI_WDG_CALCULATOR_PATH,
+} from "../constants/CommonConstants";
+import { mapMultiWindingResponseToFormState } from "../utils/multiWindingResponse";
 
 export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
   try {
-    const response = bodyType
-      ? yield call(postApi, `/calculate/` + calcName + bodyType, jsonBody, {
-          "User-Calc": true,
-        })
-      : yield call(postApi, `/calculate/` + calcName, jsonBody);
+    const response = calcName.includes("multiwindings")
+      ? yield call(
+          postApi,
+          MULTI_WDG_CALCULATOR_PATH,
+          jsonBody,
+          { "X-Skip-Auth": "true" },
+          {},
+          MULTI_WDG_SERVICE
+        )
+      : bodyType
+        ? yield call(postApi, `/calculate/` + calcName + bodyType, jsonBody, {
+            "User-Calc": true,
+          })
+        : yield call(postApi, `/calculate/` + calcName, jsonBody);
     if (response && response.data) {
       if (calcName.includes("2windings")) {
         let twoWindingsDataPayload = response.data; 
@@ -75,6 +90,14 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
           console.error("Error saving design entity:", entityError);
           yield put(addEntityFailed("design"));
         }
+      } else if (calcName.includes("multiwindings")) {
+        yield put(
+          addCalcFullfiled(
+            calcName,
+            mapMultiWindingResponseToFormState(response.data),
+            metadata
+          )
+        );
       } else if (calcName.includes("core")) {
         let payload = response.data; 
         let dataPayload = {};        

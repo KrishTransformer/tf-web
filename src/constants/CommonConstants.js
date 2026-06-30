@@ -13,3 +13,5 @@ export const COMMON_SERVICE = "COMMON_SERVICE"
 export const CAD_SERVICE = "CAD_SERVICE"
 export const STORAGE_SERVICE = "STORAGE_SERVICE"
 export const CORE_SERVICE = "CORE_SERVICE";
+export const MULTI_WDG_SERVICE = "MULTI_WDG_SERVICE";
+export const MULTI_WDG_CALCULATOR_PATH = "/api/multiWdgCalculator/";

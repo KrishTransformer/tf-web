@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { selectCalc } from "../../selectors/CalcSelector";
 import { initialState } from "../../reducers/CalcReducer";
+import { buildMultiWindingPayload } from "../../utils/multiWindingPayload";
 import Part1 from "./Part1";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
@@ -14,12 +15,14 @@ import "./MultiWindingTheme.css";
 const MultiWinding = () => {
   const { id } = useParams();
   const { multiWindings } = useSelector(selectCalc);
+  const cloneMultiWindingState = (state) =>
+    JSON.parse(JSON.stringify(state || initialState.multiWindings.data));
   const actions = useActions({
     addCalc,
     clearCalc,
   });
   const [formState, setFormState] = useState(
-    multiWindings?.data || initialState.multiWindings.data
+    cloneMultiWindingState(multiWindings?.data)
   );
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("appTheme") === "dark"
@@ -27,8 +30,12 @@ const MultiWinding = () => {
   const [activeTab, setActiveTab] = useState("part1");
 
   useEffect(() => {
-    setFormState(multiWindings?.data || initialState.multiWindings.data);
-  }, [multiWindings]);
+    if (!multiWindings?.data) {
+      return;
+    }
+
+    setFormState(cloneMultiWindingState(multiWindings.data));
+  }, [multiWindings?.data, multiWindings?.isFullfilled]);
 
   useEffect(() => {
     const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
@@ -72,7 +79,7 @@ const MultiWinding = () => {
   };
 
   const handleCalculate = () => {
-    actions.addCalc(formState, "multiwindings");
+    actions.addCalc(buildMultiWindingPayload(formState), "multiwindings");
     window.scrollTo(0, 0);
   };
 
@@ -81,7 +88,7 @@ const MultiWinding = () => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
         if (!multiWindings?.isLoading) {
-          actions.addCalc(formState, "multiwindings");
+          actions.addCalc(buildMultiWindingPayload(formState), "multiwindings");
           window.scrollTo(0, 0);
         }
       }
@@ -201,7 +208,7 @@ const MultiWinding = () => {
                   borderRadius="8px"
                   fontSize="16px"
                 >
-                  Multi-winding inputs are now mounted. Use Ctrl+Enter to run calculation once the backend endpoint is available for your environment.
+                  Multi-winding calculation now sends the current frontend payload to the dedicated backend. Response fields can be mapped into the UI next.
                 </Container>
               </Container>
             </div>

@@ -20,6 +20,45 @@ describe("addCalcData saga", () => {
     jest.clearAllMocks();
   });
 
+  test("routes multi-winding calculate requests to the dedicated backend and preserves the form payload", () => {
+    const action = {
+      jsonBody: { designId: "D-1001", windingSelection: "5_WDG", kVA: 100 },
+      calcName: "multiwindings",
+      bodyType: "",
+      id: "",
+      metadata: { designId: "D-1001" },
+    };
+
+    const generator = addCalcData(action);
+    const response = { data: { selectedCode: "5_WDG", inputs: {}, results: {} } };
+
+    expect(generator.next().value).toEqual(
+      call(
+        postApi,
+        "/api/multiWdgCalculator/",
+        action.jsonBody,
+        { "X-Skip-Auth": "true" },
+        {},
+        "MULTI_WDG_SERVICE"
+      )
+    );
+
+    expect(generator.next(response).value).toEqual(
+      put(
+        addCalcFullfiled(
+          "multiwindings",
+          expect.objectContaining({
+            windingConfiguration: "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
+            calculationResponse: response.data,
+          }),
+          action.metadata
+        )
+      )
+    );
+
+    expect(generator.next().done).toBe(true);
+  });
+
   test("generates a new designId for a new 2-winding design and stores returned entityId", () => {
     const action = {
       jsonBody: { kVA: 100 },

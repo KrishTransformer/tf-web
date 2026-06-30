@@ -47,7 +47,7 @@ const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("appTheme") === "dark";
   });
-  const showMultiWdgOption = false;
+  const showMultiWdgOption = true;
   const profileMenuRef = useRef(null);
   const settingsMenuRef = useRef(null);
 
