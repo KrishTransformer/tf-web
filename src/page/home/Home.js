@@ -47,7 +47,7 @@ const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("appTheme") === "dark";
   });
-  const showMultiWdgOption = true;
+  const showMultiWdgOption = false;
   const profileMenuRef = useRef(null);
   const settingsMenuRef = useRef(null);
 
@@ -277,20 +277,38 @@ const Home = () => {
   };
 
   const designTypeOptions = useMemo(
-    () => [
-      {
-        key: "two",
-        designType: "two",
-        badge: "2W",
-        tag: "Production Flow",
-        title: "2 Winding",
-        description:
-          "Start the current two-winding design workflow with the full calculation page.",
-        features: ["Oil Type", "Dry Type", "Mechanical Design"],
-        cta: "Open 2 Winding",
-      },
-    ],
-    []
+    () => {
+      const options = [
+        {
+          key: "two",
+          designType: "two",
+          badge: "2W",
+          tag: "Production Flow",
+          title: "2 Winding",
+          description:
+            "Start the current two-winding design workflow with the full calculation page.",
+          features: ["Oil Type", "Dry Type", "Mechanical Design"],
+          cta: "Open 2 Winding",
+        },
+      ];
+
+      if (showMultiWdgOption) {
+        options.push({
+          key: "multi",
+          designType: "multi",
+          badge: "MW",
+          tag: "New Workspace",
+          title: "Multi Winding",
+          description:
+            "Open the multi-winding workspace prepared for the next design flow we are building out.",
+          features: ["Tap Winding", "Edge Winding", "Ideal for 33kV and above"],
+          cta: "Open Multi Winding",
+        });
+      }
+
+      return options;
+    },
+    [showMultiWdgOption]
   );
 
   const isSingleDesignTypeOption = designTypeOptions.length === 1;
