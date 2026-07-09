@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Layout,
   FlexContainer,
@@ -202,7 +202,7 @@ const Files = () => {
   const [coreData, setCoreData] = useState(core?.data);
 
   const [openAccordions, setOpenAccordions] = useState({
-    LOM: true,
+    LOM: false,
     CCC: false,
   });
 
@@ -336,6 +336,11 @@ const Files = () => {
   //Payload for LOM
   const materialData = lomMaterial?.data?.data || [];
   const [rateOverrides, setRateOverrides] = useState({});
+  const hasRequestedLomMaterialRef = useRef(false);
+  const hasGeneratedLomRef = useRef(false);
+  const reloadLomRequestedRef = useRef(false);
+  const lomPayloadRef = useRef(null);
+  const lomMaterialQuery = "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC";
   const lomPayload = buildLomPayload({
     fabrication,
     twoWindings,
@@ -346,14 +351,48 @@ const Files = () => {
   const lomRateKeySignature = lomRateKeys.join("|");
 
   useEffect(() => {
-    if (!lomMaterial?.isLoading && materialData.length === 0) {
-      actions.fetchEntity("lomMaterial", "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC");
+    if (
+      hasRequestedLomMaterialRef.current ||
+      lomMaterial?.isLoading ||
+      materialData.length > 0
+    ) {
+      return;
     }
-  }, [lomMaterial?.isLoading, materialData.length]);
+
+    hasRequestedLomMaterialRef.current = true;
+    if (materialData.length === 0) {
+      actions.fetchEntity("lomMaterial", lomMaterialQuery);
+    }
+  }, [actions, lomMaterial?.isLoading, materialData.length]);
 
   useEffect(() => {
-    actions.fetchFile(lomPayload);
-  }, [fabrication, twoWindings, lomMaterial?.data, materialData.length, rateOverrides]);
+    if (materialData.length === 0) {
+      return;
+    }
+
+    lomPayloadRef.current = lomPayload;
+  }, [lomPayload, materialData.length]);
+
+  useEffect(() => {
+    if (!openAccordions.LOM || hasGeneratedLomRef.current || materialData.length === 0 || !lomPayloadRef.current) {
+      return;
+    }
+
+    hasGeneratedLomRef.current = true;
+    actions.fetchFile(lomPayloadRef.current);
+  }, [actions, materialData.length, openAccordions.LOM]);
+
+  useEffect(() => {
+    if (lomMaterial?.isLoading || !reloadLomRequestedRef.current) {
+      return;
+    }
+
+    reloadLomRequestedRef.current = false;
+    if (materialData.length > 0 && lomPayloadRef.current) {
+      hasGeneratedLomRef.current = true;
+      actions.fetchFile(lomPayloadRef.current);
+    }
+  }, [actions, lomMaterial?.isLoading, lomMaterial?.data, materialData.length]);
 
 
   console.log("customer:", customer);
@@ -398,6 +437,12 @@ const Files = () => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editableRate, setEditableRate] = useState("");
 
+  const reloadLom = () => {
+    reloadLomRequestedRef.current = true;
+    setRateOverrides({});
+    actions.fetchEntity("lomMaterial", lomMaterialQuery);
+  };
+
   const startEditing = (index, rate) => {
     setEditingIndex(index);
     setEditableRate(rate);
@@ -414,6 +459,7 @@ const Files = () => {
     }
 
     targetRow.rate = updatedRate;
+    targetRow.cost = Number(targetRow.quantity) * updatedRate;
 
     if (!targetRow.isNew) {
       const rateKey = targetRow.rateKey ?? lomRateKeys[rowIndex];
@@ -423,11 +469,9 @@ const Files = () => {
           [rateKey]: updatedRate,
         }));
       }
-    } else {
-      targetRow.cost = targetRow.quantity * updatedRate;
-      setTableRows(updatedRows);
     }
 
+    setTableRows(updatedRows);
     setEditingIndex(null);
   };
 
@@ -461,24 +505,35 @@ const Files = () => {
     // const totalQty = tableRows.reduce((sum, row) => sum + Number(row.quantity), 0);
     const totalCost = tableRows.reduce((sum, row) => sum + Number(row.cost), 0);
     return (
-      <TableContainer
-        component={Paper}
-        sx={{
-          backgroundColor: filesTheme.card,
-          color: filesTheme.text,
-          border: `1px solid ${filesTheme.border}`,
-          boxShadow: "none",
-        }}
-      >
-        <Table
+      <>
+        <FlexContainer justify="end" margin="0 0 12px 0">
+          <Button
+            variant="contained"
+            onClick={reloadLom}
+            disabled={lom.isLoading || lomMaterial?.isLoading}
+            sx={styleAddItem}
+          >
+            {lom.isLoading || lomMaterial?.isLoading ? "Reloading..." : "Reload LOM"}
+          </Button>
+        </FlexContainer>
+        <TableContainer
+          component={Paper}
           sx={{
-            minWidth: 650,
-            border: `1px solid ${filesTheme.border}`,
             backgroundColor: filesTheme.card,
+            color: filesTheme.text,
+            border: `1px solid ${filesTheme.border}`,
+            boxShadow: "none",
           }}
-          aria-label="simple table"
         >
-          <TableHead>
+          <Table
+            sx={{
+              minWidth: 650,
+              border: `1px solid ${filesTheme.border}`,
+              backgroundColor: filesTheme.card,
+            }}
+            aria-label="simple table"
+          >
+            <TableHead>
             <TableRow>
               <TableCell sx={styleCell}>S.No</TableCell>
               <TableCell sx={styleCell}>Description</TableCell>
@@ -607,7 +662,8 @@ const Files = () => {
           </TableBody>
         </Table>
         <Button variant="contained" onClick={handleNewAddItem} sx={styleAddItem}>Add Item</Button>
-      </TableContainer>
+        </TableContainer>
+      </>
     )
   }
 
