@@ -162,7 +162,7 @@ function* load3DData({ designId }) {
       `/models/${designId}.glb`,
       STORAGE_SERVICE,
       {},
-      {},
+      { "X-Skip-Auth": "true" },
       { responseType: 'blob' }
     );
     if (response && response.data) {

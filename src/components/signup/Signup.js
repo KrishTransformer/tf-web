@@ -146,8 +146,10 @@ const SignUp = () => {
   }, [signUpSucceeded, navigate]);
 
   return (
-    <div className="signfullpage">
+    <div className="signfullpage auth-page">
       <CustomCard
+        className="auth-clean-card"
+        contentClassName="auth-card-content auth-clean-card-content"
         companyName={companyName}
         title="Sign Up"
       >
@@ -200,12 +202,13 @@ const SignUp = () => {
             Organization
           </button>
         </div> */}
-        <div>
+        <div className="auth-field">
           <label>Username</label>
           <input
             name="username"
             autoComplete="off"
             className="signin-inputfield"
+            placeholder="Create a username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             type="text"
@@ -225,7 +228,7 @@ const SignUp = () => {
             />
           </div>
         )} */}
-        <div>
+        <div className="auth-field">
           <label>Password</label>
           <div className="password-input">
             <input
@@ -233,6 +236,7 @@ const SignUp = () => {
               type={showPassword ? "text" : "password"}
               name="password"
               className="signin-inputfield"
+              placeholder="Create a password"
               onChange={(e) => setPassword(e.target.value)}
               inputProps={{
                 maxLength: 40,
@@ -244,7 +248,7 @@ const SignUp = () => {
             </button>
           </div>
         </div>
-        <div>
+        <div className="auth-field">
           <label>Confirm Password</label>
           <div className="password-input mb-2">
             <input
@@ -252,6 +256,7 @@ const SignUp = () => {
               type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               className="signin-inputfield"
+              placeholder="Confirm your password"
               onChange={(e) => setConfirmPassword(e.target.value)}
               inputProps={{
                 maxLength: 40,
@@ -263,13 +268,14 @@ const SignUp = () => {
             </button>
           </div>
         </div>
-        <div>
+        <div className="auth-field">
           <label>Email ID</label>
-          <div className="d-flex align-items-center gap-2">
+          <div className="auth-inline-action d-flex align-items-center gap-2">
             <input
               name="email"
               autoComplete="off"
               className="signin-inputfield mb-2"
+              placeholder="Enter your email address"
               value={emailId}
               onChange={(e) => {
                 setEmailId(e.target.value);
@@ -291,12 +297,13 @@ const SignUp = () => {
             </p>
           )}
         </div>
-        <div>
+        <div className="auth-field">
           <label>OTP</label>
           <input
             name="otp"
             autoComplete="off"
             className="signin-inputfield mb-2"
+            placeholder="Enter the OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             type="text"
@@ -321,8 +328,8 @@ const SignUp = () => {
             )}
           </ModalButton>
         </InputContainer>
-        <div className="d-flex justify-content-center mt-3">
-          <div className="d-flex">
+        <div className="auth-link-row d-flex justify-content-center mt-3">
+          <div className="auth-link-group d-flex">
             <h6 className="signin-subtext">Exsisting User ? &nbsp;</h6>
             <NavLink to="/" className="signin-subtext1">
               Sign In

@@ -31,7 +31,6 @@ import { clearAuthTokens, getIdToken } from "../../api/authToken";
 import { postApi } from "../../api";
 import { COMMON_SERVICE } from "../../constants/CommonConstants";
 import { parseJwt } from "../../utils/AuthUtil";
-import logo from "../../assets/dstar-electric-logo.png";
 import "./Home.css";
 
 const Home = () => {
@@ -322,7 +321,6 @@ const Home = () => {
       <div className={`home-page-wrapper ${isDarkMode ? "home-page-wrapper-dark" : ""}`}>
         <FlexContainer align="center" justify="space-between" margin="2px 2px">
           <FlexContainer align="center" gap="10px">
-            <img src={logo} alt="Company Logo" className="home-header-logo" />
             <h1 className="home-header-title" data-text="Krish Transformer Design Software">
               Krish Transformer Design Software
             </h1>

@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
 import "./SideBarThin.css";
 import { CiLogin } from "react-icons/ci";
-import { IoArrowBack, IoCalculatorOutline } from "react-icons/io5";
+import { IoArrowBack, IoCalculatorOutline, IoHomeOutline } from "react-icons/io5";
 import { IoMdPerson, IoIosInformationCircleOutline } from "react-icons/io";
 import { LuFileText } from "react-icons/lu";
 import { TbLayoutNavbar } from "react-icons/tb";
 import { HiOutlineCube } from "react-icons/hi2";
 import { NavLink, useHistory, useLocation } from "react-router-dom";
-import logo from "./../../assets/dstar-electric-logo.png";
 
 const SideBarThin = ({ id }) => {
   const location = useLocation();
@@ -46,7 +45,7 @@ const SideBarThin = ({ id }) => {
         <div>
           <NavLink to="/home">
             <div className="logo-container">
-              <img src={logo} />
+              <IoHomeOutline className="logo-container-icon" />
             </div>
           </NavLink>
 
