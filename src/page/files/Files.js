@@ -36,7 +36,6 @@ import {
 import tableData from "../files/Tabledata.json"; // Import JSON file
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import logo from "./../../assets/files/logo.png"
 import saraConsultants from "./../../assets/files/saraConsultants.png"
 import { data, get } from "jquery";
 import { registerDejaVuSansFont } from '../../assets/fonts/DejaVuSans-normal';
@@ -697,6 +696,23 @@ const Files = () => {
     }
   };
 
+  const drawPdfLogoPlaceholder = (doc, x, y, width, height) => {
+    const cornerRadius = 2;
+
+    doc.setDrawColor(148, 163, 184);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(x, y, width, height, cornerRadius, cornerRadius, "FD");
+
+    doc.setDrawColor(203, 213, 225);
+    doc.line(x + 3, y + 3, x + width - 3, y + height - 3);
+    doc.line(x + width - 3, y + 3, x + 3, y + height - 3);
+
+    doc.setTextColor(71, 85, 105);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.text("LOGO", x + width / 2, y + height / 2 + 1, { align: "center" });
+  };
+
   const desGeneratePDF = () => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const isDryType = isDryTypeDesign(twoWindings?.data?.dryType);
@@ -759,7 +775,7 @@ const Files = () => {
     const logoY = (lastTable?.table?.startY || 7) - 5; // Move 5 units up
 
 
-    doc.addImage(logo, "PNG", logoX, logoY, logoSize, logoSize);
+    drawPdfLogoPlaceholder(doc, logoX, logoY, logoSize, logoSize);
 
     currentY = lastTable.finalY + spacing;
 
@@ -1445,14 +1461,7 @@ const Files = () => {
     doc.setDrawColor(204, 0, 204);
     doc.line(underlineX, underlineY, underlineX + underlineWidth, underlineY);
 
-    doc.addImage(
-      logo,
-      'PNG',
-      pageWidth - outerMargin - 25,
-      headerY + 5,
-      20,
-      20
-    );
+    drawPdfLogoPlaceholder(doc, pageWidth - outerMargin - 25, headerY + 5, 20, 20);
 
     const marginX = 13;
     const tableWidth = pageWidth - 2 * marginX;
@@ -1795,14 +1804,7 @@ const Files = () => {
     const imageX = pageWidth - imageWidth - paddingRight;
     const imageY = 5;
 
-    doc.addImage(
-      logo,
-      'PNG',
-      imageX,
-      imageY,
-      imageWidth,
-      imageHeight
-    );
+    drawPdfLogoPlaceholder(doc, imageX, imageY, imageWidth, imageHeight);
 
 
     let currentY = titleY + 5;

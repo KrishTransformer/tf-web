@@ -80,11 +80,18 @@ const Login = () => {
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleSignIn();
+    }
+  };
+
   return (
-    <div className="signfullpage">
-      <CustomCard 
-        // companyName={companyName}
-        companyName={"K R I S H"} 
+    <div className="signfullpage auth-page">
+      <CustomCard
+        className="auth-clean-card"
+        contentClassName="auth-card-content auth-clean-card-content"
+        companyName={"K R I S H"}
         companyNameExt={"Transformer Design Software"}
         title="Sign In"
       >
@@ -126,19 +133,21 @@ const Login = () => {
             </Alert>
           )}
         </InputContainer>
-        <div>
+        <div className="auth-field">
           <label>Username / Email</label>
           <input
             autoComplete="off"
             type="text"
             name="name"
             className="signin-inputfield"
+            placeholder="Enter your username or email"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={handleKeyDown}
             required
           />
         </div>
-        <div>
+        <div className="auth-field">
           <label>Password</label>
           <div className="password-input mb-3">
             <input
@@ -146,10 +155,12 @@ const Login = () => {
               name="password"
               onChange={(e) => setPassword(e.target.value)}
               className="signin-inputfield"
+              placeholder="Enter your password"
+              onKeyDown={handleKeyDown}
               required
             />
             <button type="button" onClick={togglePasswordVisibility}>
-              {showPassword ? < FaEye/> : <FaEyeSlash />}
+              {showPassword ? <FaEye /> : <FaEyeSlash />}
             </button>
           </div>
         </div>
@@ -172,11 +183,11 @@ const Login = () => {
           </ModalButton>
         </InputContainer>
 
-        <div className="d-flex justify-content-between align-items-center mt-3">
+        <div className="auth-link-row d-flex justify-content-between align-items-center mt-3">
           <NavLink to="/forgotPassword" className="signin-subtext1">
             Forgot Password?
           </NavLink>
-          <div className="d-flex align-items-center">
+          <div className="auth-link-group d-flex align-items-center">
             <h6 className="signin-subtext mb-0">Not Registered? &nbsp;</h6>
             <NavLink to="/signUp" className="signin-subtext1">
               Sign Up

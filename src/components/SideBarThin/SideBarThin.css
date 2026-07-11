@@ -123,9 +123,9 @@ body.app-dark-mode .sideBar-thin-main {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
-.logo-container img {
-  height: 40px;
-  width:  40px;
+.logo-container-icon {
+  font-size: 28px;
+  color: var(--sidebar-thin-active);
 }
 
 .profile-icon-link {

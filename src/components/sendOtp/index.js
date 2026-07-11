@@ -100,8 +100,13 @@ const RequestOtp = () => {
   }, [passwordResetSucceeded, navigate]);
 
   return (
-    <div className="signfullpage">
-      <CustomCard title="Forgot Password?" companyName={companyName}>
+    <div className="signfullpage auth-page">
+      <CustomCard
+        className="auth-clean-card"
+        contentClassName="auth-card-content auth-clean-card-content"
+        title="Forgot Password?"
+        companyName={companyName}
+      >
         <InputContainer>
           {errorMessage?.error?.message && (
             <Alert
@@ -128,12 +133,13 @@ const RequestOtp = () => {
             </Alert>
           )}
         </InputContainer>
-        <div>
+        <div className="auth-field">
           <label>Email</label>
           <input
             name="name"
             autoComplete="off"
             className="signin-inputfield mb-3"
+            placeholder="Enter your registered email"
             onChange={(e) => setPhoneNumber(e.target.value)}
              type="text"
             // inputProps={{
@@ -173,19 +179,20 @@ const RequestOtp = () => {
         </InputContainer>
         {sessionInfo && (
           <>
-            <div>
+            <div className="auth-field">
               <label>OTP</label>
               <input
                 name="otp"
                 autoComplete="off"
                 className="signin-inputfield mb-2"
+                placeholder="Enter the OTP"
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value)}
                 type="text"
                 required
               />
             </div>
-            <div>
+            <div className="auth-field">
               <label>New Password</label>
               <div className="password-input">
                 <input
@@ -193,6 +200,7 @@ const RequestOtp = () => {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   className="signin-inputfield"
+                  placeholder="Create a new password"
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
@@ -218,8 +226,8 @@ const RequestOtp = () => {
           </>
         )}
 
-        <div className="d-flex justify-content-center mt-3">
-          <div className="d-flex">
+        <div className="auth-link-row d-flex justify-content-center mt-3">
+          <div className="auth-link-group d-flex">
             <h6 className="signin-subtext">Back to SignIn? &nbsp;</h6>
             <NavLink to="/" className="signin-subtext1">
               Sign In
