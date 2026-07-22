@@ -4,7 +4,7 @@ module.exports = function setupProxy(app) {
   app.use(
     "/storage-proxy",
     createProxyMiddleware({
-      target: "https://transformer.treffertech.com",
+      target: "https://design.trafointel.com",
       changeOrigin: true,
       pathRewrite: {
         "^/storage-proxy": "",

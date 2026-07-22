@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Layout,
   FlexContainer,
@@ -36,6 +36,7 @@ import {
 import tableData from "../files/Tabledata.json"; // Import JSON file
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import logo from "./../../assets/files/logo.png"
 import saraConsultants from "./../../assets/files/saraConsultants.png"
 import { data, get } from "jquery";
 import { registerDejaVuSansFont } from '../../assets/fonts/DejaVuSans-normal';
@@ -201,7 +202,7 @@ const Files = () => {
   const [coreData, setCoreData] = useState(core?.data);
 
   const [openAccordions, setOpenAccordions] = useState({
-    LOM: false,
+    LOM: true,
     CCC: false,
   });
 
@@ -335,11 +336,6 @@ const Files = () => {
   //Payload for LOM
   const materialData = lomMaterial?.data?.data || [];
   const [rateOverrides, setRateOverrides] = useState({});
-  const hasRequestedLomMaterialRef = useRef(false);
-  const hasGeneratedLomRef = useRef(false);
-  const reloadLomRequestedRef = useRef(false);
-  const lomPayloadRef = useRef(null);
-  const lomMaterialQuery = "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC";
   const lomPayload = buildLomPayload({
     fabrication,
     twoWindings,
@@ -350,48 +346,14 @@ const Files = () => {
   const lomRateKeySignature = lomRateKeys.join("|");
 
   useEffect(() => {
-    if (
-      hasRequestedLomMaterialRef.current ||
-      lomMaterial?.isLoading ||
-      materialData.length > 0
-    ) {
-      return;
+    if (!lomMaterial?.isLoading && materialData.length === 0) {
+      actions.fetchEntity("lomMaterial", "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC");
     }
-
-    hasRequestedLomMaterialRef.current = true;
-    if (materialData.length === 0) {
-      actions.fetchEntity("lomMaterial", lomMaterialQuery);
-    }
-  }, [actions, lomMaterial?.isLoading, materialData.length]);
+  }, [lomMaterial?.isLoading, materialData.length]);
 
   useEffect(() => {
-    if (materialData.length === 0) {
-      return;
-    }
-
-    lomPayloadRef.current = lomPayload;
-  }, [lomPayload, materialData.length]);
-
-  useEffect(() => {
-    if (!openAccordions.LOM || hasGeneratedLomRef.current || materialData.length === 0 || !lomPayloadRef.current) {
-      return;
-    }
-
-    hasGeneratedLomRef.current = true;
-    actions.fetchFile(lomPayloadRef.current);
-  }, [actions, materialData.length, openAccordions.LOM]);
-
-  useEffect(() => {
-    if (lomMaterial?.isLoading || !reloadLomRequestedRef.current) {
-      return;
-    }
-
-    reloadLomRequestedRef.current = false;
-    if (materialData.length > 0 && lomPayloadRef.current) {
-      hasGeneratedLomRef.current = true;
-      actions.fetchFile(lomPayloadRef.current);
-    }
-  }, [actions, lomMaterial?.isLoading, lomMaterial?.data, materialData.length]);
+    actions.fetchFile(lomPayload);
+  }, [fabrication, twoWindings, lomMaterial?.data, materialData.length, rateOverrides]);
 
 
   console.log("customer:", customer);
@@ -436,12 +398,6 @@ const Files = () => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editableRate, setEditableRate] = useState("");
 
-  const reloadLom = () => {
-    reloadLomRequestedRef.current = true;
-    setRateOverrides({});
-    actions.fetchEntity("lomMaterial", lomMaterialQuery);
-  };
-
   const startEditing = (index, rate) => {
     setEditingIndex(index);
     setEditableRate(rate);
@@ -458,7 +414,6 @@ const Files = () => {
     }
 
     targetRow.rate = updatedRate;
-    targetRow.cost = Number(targetRow.quantity) * updatedRate;
 
     if (!targetRow.isNew) {
       const rateKey = targetRow.rateKey ?? lomRateKeys[rowIndex];
@@ -468,9 +423,11 @@ const Files = () => {
           [rateKey]: updatedRate,
         }));
       }
+    } else {
+      targetRow.cost = targetRow.quantity * updatedRate;
+      setTableRows(updatedRows);
     }
 
-    setTableRows(updatedRows);
     setEditingIndex(null);
   };
 
@@ -504,35 +461,24 @@ const Files = () => {
     // const totalQty = tableRows.reduce((sum, row) => sum + Number(row.quantity), 0);
     const totalCost = tableRows.reduce((sum, row) => sum + Number(row.cost), 0);
     return (
-      <>
-        <FlexContainer justify="end" margin="0 0 12px 0">
-          <Button
-            variant="contained"
-            onClick={reloadLom}
-            disabled={lom.isLoading || lomMaterial?.isLoading}
-            sx={styleAddItem}
-          >
-            {lom.isLoading || lomMaterial?.isLoading ? "Reloading..." : "Reload LOM"}
-          </Button>
-        </FlexContainer>
-        <TableContainer
-          component={Paper}
+      <TableContainer
+        component={Paper}
+        sx={{
+          backgroundColor: filesTheme.card,
+          color: filesTheme.text,
+          border: `1px solid ${filesTheme.border}`,
+          boxShadow: "none",
+        }}
+      >
+        <Table
           sx={{
-            backgroundColor: filesTheme.card,
-            color: filesTheme.text,
+            minWidth: 650,
             border: `1px solid ${filesTheme.border}`,
-            boxShadow: "none",
+            backgroundColor: filesTheme.card,
           }}
+          aria-label="simple table"
         >
-          <Table
-            sx={{
-              minWidth: 650,
-              border: `1px solid ${filesTheme.border}`,
-              backgroundColor: filesTheme.card,
-            }}
-            aria-label="simple table"
-          >
-            <TableHead>
+          <TableHead>
             <TableRow>
               <TableCell sx={styleCell}>S.No</TableCell>
               <TableCell sx={styleCell}>Description</TableCell>
@@ -661,8 +607,7 @@ const Files = () => {
           </TableBody>
         </Table>
         <Button variant="contained" onClick={handleNewAddItem} sx={styleAddItem}>Add Item</Button>
-        </TableContainer>
-      </>
+      </TableContainer>
     )
   }
 
@@ -683,36 +628,6 @@ const Files = () => {
     return String(value);
   };
 
-  const formatDryTempClass = (dryTempClass) => {
-    switch (dryTempClass) {
-      case "CLASS_B":
-        return "Class B";
-      case "CLASS_F":
-        return "Class F";
-      case "CLASS_H":
-        return "Class H";
-      default:
-        return "Dry Type";
-    }
-  };
-
-  const drawPdfLogoPlaceholder = (doc, x, y, width, height) => {
-    const cornerRadius = 2;
-
-    doc.setDrawColor(148, 163, 184);
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(x, y, width, height, cornerRadius, cornerRadius, "FD");
-
-    doc.setDrawColor(203, 213, 225);
-    doc.line(x + 3, y + 3, x + width - 3, y + height - 3);
-    doc.line(x + width - 3, y + 3, x + 3, y + height - 3);
-
-    doc.setTextColor(71, 85, 105);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.text("LOGO", x + width / 2, y + height / 2 + 1, { align: "center" });
-  };
-
   const desGeneratePDF = () => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const isDryType = isDryTypeDesign(twoWindings?.data?.dryType);
@@ -729,9 +644,6 @@ const Files = () => {
     const displayTemperature = isDryType
       ? `${formatPdfValue(twoWindings?.data?.ambientTemp, "-")}/${formatPdfValue(twoWindings?.data?.windingTemp, "-")}`
       : `${formatPdfValue(twoWindings?.data?.windingTemp, "-")}/${formatPdfValue(twoWindings?.data?.topOilTemp, "-")}`;
-    const temperatureLabel = isDryType
-      ? `(${formatDryTempClass(twoWindings?.data?.dryTempClass)}) Temp Rise`
-      : "Temperature";
     const displayCooling = isDryType
       ? formatPdfValue(twoWindings?.data?.coolingType, "AN")
       : "ONAN";
@@ -775,7 +687,7 @@ const Files = () => {
     const logoY = (lastTable?.table?.startY || 7) - 5; // Move 5 units up
 
 
-    drawPdfLogoPlaceholder(doc, logoX, logoY, logoSize, logoSize);
+    doc.addImage(logo, "PNG", logoX, logoY, logoSize, logoSize);
 
     currentY = lastTable.finalY + spacing;
 
@@ -803,7 +715,7 @@ const Files = () => {
         "Flux Density: " + twoWindings.data.lvFormulas.revisedFluxDensity.toFixed(3) + "T",
         "Frequency: " + twoWindings.data.frequency + "Hz"],
         ["Volts/Turn: " + twoWindings.data.lvFormulas.revisedVoltsPerTurn,
-        `${temperatureLabel}: ` + displayTemperature,
+        "Temperature: " + displayTemperature,
         "Cooling: " + displayCooling,
         "Vector Group: " + twoWindings.data.vectorGroup]
       ]
@@ -864,11 +776,7 @@ const Files = () => {
         ],
         ["No. of Layers", twoWindings.data.innerWindings.noOfLayers, twoWindings.data.outerWindings.noOfLayers],
         ["Turns/Layer", twoWindings?.data?.lvWindingType === "DISC" ? 1 : twoWindings.data.innerWindings.turnsPerLayer,
-          twoWindings?.data?.hvWindingType === "DISC"
-            ? 1
-            : twoWindings?.data?.hvWindingType === "XOVER"
-              ? twoWindings?.data?.outerWindings?.turnsLayers
-              : `${parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10)} X ${twoWindings.data.hvFormulas.hvTurnsPerLayer} + ${(twoWindings.data.hvFormulas.hvTurnsAtHighest - (parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10) * twoWindings.data.hvFormulas.hvTurnsPerLayer)).toFixed(0)}`],
+          twoWindings?.data?.hvWindingType === "DISC" ? 1 : `${parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10)} X ${twoWindings.data.hvFormulas.hvTurnsPerLayer} + ${(twoWindings.data.hvFormulas.hvTurnsAtHighest - (parseInt(twoWindings.data.hvFormulas.hvNumberOfLayers, 10) * twoWindings.data.hvFormulas.hvTurnsPerLayer)).toFixed(0)}`],
         ["Insu. b/w layer (mm)", `${twoWindings.data.innerWindings.interLayerInsulation} (${Math.round(twoWindings.data.innerWindings.interLayerInsulation / 0.0254)} mil)`, `${twoWindings.data.outerWindings.interLayerInsulation} (${Math.round(twoWindings.data.outerWindings.interLayerInsulation / 0.0254)} mil)`],
         [ductLabel, twoWindings.data.innerWindings.noOfDuctsWidth.replace(" / ", " x ") + ductSuffix, twoWindings.data.outerWindings.noOfDuctsWidth.replace(" / ", " x ") + ductSuffix],
         ["Conductor (mm)",
@@ -1291,7 +1199,7 @@ const Files = () => {
         ["No Load Loss (W):", performaceTableData.noLoadLoss, ""],
         ["Load Loss (W):", performaceTableData.loadLoss, ""],
         [isDryType ? "Enclosure Stray Loss (W):" : "Tank Stray Loss (W):", performaceTableData.tankStrayLoss, ""],
-        ["Resistance (5):", performaceTableData.resistance, ""],
+        ["Resistance (%):", performaceTableData.resistance, ""],
         ["Reactance (%):", performaceTableData.reactance, ""],
         ["Impedance (%):", performaceTableData.impedance, ""],
         ["No Load Curr. (%):", performaceTableData.noLoadCurrent, ""]
@@ -1374,8 +1282,6 @@ const Files = () => {
 
   const gtpGeneratePDF = () => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const isDryType = isDryTypeDesign(twoWindings?.data?.dryType);
-    const dryTempClassLabel = formatDryTempClass(twoWindings?.data?.dryTempClass);
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -1461,7 +1367,14 @@ const Files = () => {
     doc.setDrawColor(204, 0, 204);
     doc.line(underlineX, underlineY, underlineX + underlineWidth, underlineY);
 
-    drawPdfLogoPlaceholder(doc, pageWidth - outerMargin - 25, headerY + 5, 20, 20);
+    doc.addImage(
+      logo,
+      'PNG',
+      pageWidth - outerMargin - 25,
+      headerY + 5,
+      20,
+      20
+    );
 
     const marginX = 13;
     const tableWidth = pageWidth - 2 * marginX;
@@ -1578,11 +1491,9 @@ const Files = () => {
       ["10.", "REFERENCE  AMBIENT  TEMP. IN  DEG  C :", gtpData.refAmbientTemp],
       ["11.", "TYPE OF  COOLING :", gtpData.typeOfCooling],
 
-      ["12.", isDryType
-        ? `TEMP RISE :  a) AMBIENT IN  DEG  C :\n\t\t\t\t\t  b) (${dryTempClassLabel}) WINDING:`
-        : "TEMPERATURE  RISE :  a) TOP OIL IN  DEG  C :\n" +
+      ["12.", "TEMPERATURE  RISE :  a) TOP OIL IN  DEG  C :\n" +
         "\t\t\t\t\t  b) WINDING:"
-        , (isDryType ? gtpData.refAmbientTemp : gtpData.tempRiseTopOil) + "\n" +
+        , gtpData.tempRiseTopOil + "\n" +
         gtpData.tempRiseWinding
       ],
 
@@ -1804,7 +1715,14 @@ const Files = () => {
     const imageX = pageWidth - imageWidth - paddingRight;
     const imageY = 5;
 
-    drawPdfLogoPlaceholder(doc, imageX, imageY, imageWidth, imageHeight);
+    doc.addImage(
+      logo,
+      'PNG',
+      imageX,
+      imageY,
+      imageWidth,
+      imageHeight
+    );
 
 
     let currentY = titleY + 5;
@@ -2631,7 +2549,7 @@ const Files = () => {
                 text="Tank"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Tank_GAD.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Tank_GAD.pdf`,
                     "_blank"
                   );
                 }}
@@ -2643,7 +2561,7 @@ const Files = () => {
                 text="ActivePart"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_ActivePart_GAD.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_ActivePart_GAD.pdf`,
                     "_blank"
                   );
                 }}
@@ -2655,7 +2573,7 @@ const Files = () => {
                 text="Conservator"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Conservator.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Conservator.pdf`,
                     "_blank"
                   );
                 }}
@@ -2668,7 +2586,7 @@ const Files = () => {
                 icon={<FiDownload />}
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Lid.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Lid.pdf`,
                     "_blank"
                   );
                 }}
@@ -2679,7 +2597,7 @@ const Files = () => {
                 text="MainAssembly_GAD"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_MainAssembly_GAD.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_MainAssembly_GAD.pdf`,
                     "_blank"
                   );
                 }}
@@ -2691,7 +2609,7 @@ const Files = () => {
                 text="Rating Plate"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Rating_plate.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Rating_plate.pdf`,
                     "_blank"
                   );
                 }}
