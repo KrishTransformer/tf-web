@@ -2549,7 +2549,7 @@ const Files = () => {
                 text="Tank"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Tank_GAD.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Tank_GAD.pdf`,
                     "_blank"
                   );
                 }}
@@ -2561,7 +2561,7 @@ const Files = () => {
                 text="ActivePart"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_ActivePart_GAD.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_ActivePart_GAD.pdf`,
                     "_blank"
                   );
                 }}
@@ -2573,7 +2573,7 @@ const Files = () => {
                 text="Conservator"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Conservator.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Conservator.pdf`,
                     "_blank"
                   );
                 }}
@@ -2586,7 +2586,7 @@ const Files = () => {
                 icon={<FiDownload />}
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Lid.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Lid.pdf`,
                     "_blank"
                   );
                 }}
@@ -2597,7 +2597,7 @@ const Files = () => {
                 text="MainAssembly_GAD"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_MainAssembly_GAD.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_MainAssembly_GAD.pdf`,
                     "_blank"
                   );
                 }}
@@ -2609,7 +2609,7 @@ const Files = () => {
                 text="Rating Plate"
                 onClick={() => {
                   window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Rating_plate.pdf`,
+                    `https://design.trafointel.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Rating_plate.pdf`,
                     "_blank"
                   );
                 }}

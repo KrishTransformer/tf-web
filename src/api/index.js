@@ -94,10 +94,10 @@ export const multiWdgService = {
 
 export const storageService = {
   prod: {
-    API_URL: "https://transformer.treffertech.com",
+    API_URL: "https://design.trafointel.com",
   },
   local: {
-    API_URL: "https://transformer.treffertech.com",
+    API_URL: "https://design.trafointel.com",
   },
 };
 
