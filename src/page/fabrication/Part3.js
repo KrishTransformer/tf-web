@@ -106,6 +106,8 @@ const Part3 = ({ formState, handleInputChange }) => {
       <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="10px" borderRadius="20px" margin="10px 0px 0px 0px">
 
         <ImagePreview btnText="Maximize" btnOnClick={handleOpen}
+          buttonMode="icon"
+          buttonLabel="Open 3D viewer fullscreen"
           disablebtn={isViewerUnavailable}
           showSpinner={
             (currentBlob !== "" &&
@@ -120,7 +122,7 @@ const Part3 = ({ formState, handleInputChange }) => {
               }}
             />
           ) : (
-            <MyGlbViewer canvasHeight="400" canvasWidth="550" />
+            <MyGlbViewer canvasHeight="400" canvasWidth="550" isActive={!open} />
           )}
         </ImagePreview>
 
@@ -143,7 +145,12 @@ const Part3 = ({ formState, handleInputChange }) => {
           />
         ) : (
         // <MyGlbViewer canvasHeight="600" canvasWidth="1200" open={open} isMaximized={isMaximized}/>
-        <MyGlbViewer canvasHeight={isMaximized ? "750" :"600"} canvasWidth={isMaximized ? "1600" : "1200"} open={open} />
+        <MyGlbViewer
+          canvasHeight={isMaximized ? "750" :"600"}
+          canvasWidth={isMaximized ? "1600" : "1200"}
+          open={open}
+          isActive={open}
+        />
         // <MyGlbViewer canvasHeight="700" canvasWidth="1500" open={open} />
           
         )}

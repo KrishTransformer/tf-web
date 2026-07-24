@@ -19,7 +19,13 @@ import { FaCrosshairs } from "react-icons/fa";
 import { FaHandPaper } from "react-icons/fa";
 
 
-const MyGlbViewer = ({ canvasHeight, canvasWidth, open, isMaximized }) => {
+const MyGlbViewer = ({
+  canvasHeight,
+  canvasWidth,
+  open,
+  isMaximized,
+  isActive = true,
+}) => {
 
   const { generate3d } = useSelector(selectGenerate3D);
   const mountRef = useRef(null);
@@ -49,6 +55,7 @@ const MyGlbViewer = ({ canvasHeight, canvasWidth, open, isMaximized }) => {
   const modelRef = useRef();
   const controlsRef = useRef();
   const rendererRef = useRef();
+  const animationFrameRef = useRef(null);
   const prevZoomToAreaModeRef = useRef(false);
 
   // listener storage for cleanup
@@ -62,6 +69,67 @@ const MyGlbViewer = ({ canvasHeight, canvasWidth, open, isMaximized }) => {
   const zoomToAreaModeRef = useRef(zoomToAreaMode);
   useEffect(() => { zoomToAreaModeRef.current = zoomToAreaMode; }, [zoomToAreaMode]);
 
+  const normalizeDimension = (value, fallback) => {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : fallback;
+  };
+
+  const normalizedCanvasWidth = normalizeDimension(canvasWidth, 550);
+  const normalizedCanvasHeight = normalizeDimension(canvasHeight, 400);
+
+  const getViewportSize = () => {
+    const measuredWidth = mountRef.current?.clientWidth;
+    const measuredHeight = mountRef.current?.clientHeight;
+
+    return {
+      width: normalizeDimension(measuredWidth, normalizedCanvasWidth),
+      height: normalizeDimension(measuredHeight, normalizedCanvasHeight),
+    };
+  };
+
+  const disposeViewer = () => {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    try {
+      const dom = listenersRef.current.domElement;
+      if (dom) {
+        if (listenersRef.current.onContextMenu) {
+          dom.removeEventListener('contextmenu', listenersRef.current.onContextMenu, false);
+        }
+        if (listenersRef.current.onClick) {
+          dom.removeEventListener('click', listenersRef.current.onClick, false);
+        }
+        if (listenersRef.current.onMouseMove) {
+          dom.removeEventListener('mousemove', listenersRef.current.onMouseMove, false);
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+
+    if (rendererRef.current) {
+      const canvas = rendererRef.current.domElement;
+      if (canvas && canvas.parentNode === mountRef.current) {
+        mountRef.current.removeChild(canvas);
+      }
+      rendererRef.current.dispose();
+      rendererRef.current = null;
+    }
+
+    if (controlsRef.current) {
+      controlsRef.current.dispose();
+      controlsRef.current = null;
+    }
+
+    sceneRef.current = null;
+    cameraRef.current = null;
+    modelRef.current = null;
+    setViewerReady(false);
+  };
+
   // Reset view to default every time modal is opened
   useEffect(() => {
     if (open) {
@@ -70,56 +138,29 @@ const MyGlbViewer = ({ canvasHeight, canvasWidth, open, isMaximized }) => {
   }, [open]);
 
   useEffect(() => {
-    let sceneWidth = window.innerWidth;
-    let sceneHeight = window.innerHeight;
-    if (generate3d?.data?.blob) {
+    if (!isActive || !generate3d?.data?.blob) {
+      disposeViewer();
+      return undefined;
+    }
+
+    const { width, height } = getViewportSize();
+    if (width > 0 && height > 0) {
       init(
         generate3d?.data?.blob,
-        sceneWidth,
-        sceneHeight,
+        width,
+        height,
         mountRef,
-        canvasWidth,
-        canvasHeight
       );
     }
 
     return () => {
-      try {
-        const dom = listenersRef.current.domElement;
-        if (dom) {
-          if (listenersRef.current.onContextMenu) {
-            dom.removeEventListener('contextmenu', listenersRef.current.onContextMenu, false);
-          }
-          if (listenersRef.current.onClick) {
-            dom.removeEventListener('click', listenersRef.current.onClick, false);
-          }
-          if (listenersRef.current.onMouseMove) {
-            dom.removeEventListener('mousemove', listenersRef.current.onMouseMove, false);
-          }
-        }
-      } catch (err) {
-        // ignore
-      }
-
-      if (rendererRef.current) {
-        const canvas = rendererRef.current.domElement;
-        if (canvas && canvas.parentNode === mountRef.current) {
-          mountRef.current.removeChild(canvas);
-        }
-        rendererRef.current.dispose();
-        rendererRef.current = null;
-      }
-
-      if (controlsRef.current) {
-        controlsRef.current.dispose();
-        controlsRef.current = null;
-      }
+      disposeViewer();
     };
-  }, [generate3d?.data?.blob]);
+  }, [generate3d?.data?.blob, isActive]);
 
-  function init(blob, sceneWidth, sceneHeight, mountRef, canvasWidth, canvasHeight) {
+  function init(blob, sceneWidth, sceneHeight, mountRef) {
     setupScene();
-    setupRenderer(mountRef, canvasWidth, canvasHeight);
+    setupRenderer(mountRef, sceneWidth, sceneHeight);
     setupLighting();
     setPerspectiveCamera(sceneWidth / sceneHeight); // Temporary perspective camera
     setupControls();
@@ -143,7 +184,8 @@ const MyGlbViewer = ({ canvasHeight, canvasWidth, open, isMaximized }) => {
     
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setSize(canvasWidth, canvasHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(canvasWidth, canvasHeight, false);
     renderer.setClearColor(new THREE.Color(0x3a3a3a));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.VSMShadowMap;
@@ -451,7 +493,7 @@ const MyGlbViewer = ({ canvasHeight, canvasWidth, open, isMaximized }) => {
   }
 
   function animate() {
-    requestAnimationFrame(animate);
+    animationFrameRef.current = requestAnimationFrame(animate);
     if (controlsRef.current) controlsRef.current.update();
     if (rendererRef.current && sceneRef.current && cameraRef.current) {
       rendererRef.current.render(sceneRef.current, cameraRef.current);
@@ -865,32 +907,54 @@ function formatDimension(value) {
   }, [panMode]);
 
   useEffect(() => {
-    if (rendererRef.current) {
-      // Just update renderer size - don't recreate scene
-      rendererRef.current.setSize(canvasWidth, canvasHeight);
-      
-      // Update camera aspect ratio
+    if (!isActive) {
+      return undefined;
+    }
+
+    const syncViewerSize = () => {
+      if (!rendererRef.current) {
+        return;
+      }
+
+      const { width, height } = getViewportSize();
+      rendererRef.current.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      rendererRef.current.setSize(width, height, false);
+
       if (cameraRef.current) {
         if (cameraRef.current.isOrthographicCamera) {
-          const aspect = canvasWidth / canvasHeight;
+          const aspect = width / height;
           const frustumSize = cameraRef.current.top * 2;
           cameraRef.current.left = -frustumSize * aspect / 2;
           cameraRef.current.right = frustumSize * aspect / 2;
         } else {
-          cameraRef.current.aspect = canvasWidth / canvasHeight;
+          cameraRef.current.aspect = width / height;
         }
         cameraRef.current.updateProjectionMatrix();
       }
-      
-      // Update controls
+
       if (controlsRef.current) {
         controlsRef.current.update();
       }
-    }
-  }, [canvasWidth, canvasHeight]);
+    };
+
+    syncViewerSize();
+    window.addEventListener('resize', syncViewerSize);
+
+    return () => {
+      window.removeEventListener('resize', syncViewerSize);
+    };
+  }, [canvasWidth, canvasHeight, isActive, isMaximized]);
   return (
     <div className="glbviewer" >
-      <div className="glbviewer-canvas-area" ref={mountRef}>
+      <div
+        className="glbviewer-canvas-area"
+        ref={mountRef}
+        style={{
+          width: "100%",
+          maxWidth: `${normalizedCanvasWidth}px`,
+          aspectRatio: `${normalizedCanvasWidth} / ${normalizedCanvasHeight}`,
+        }}
+      >
 
         {/* <div ref={mountRef} style={{ width: '100%', height: '100%' }} /> */}
 
