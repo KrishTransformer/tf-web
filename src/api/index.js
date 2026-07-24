@@ -97,7 +97,7 @@ export const storageService = {
     API_URL: "https://transformer.treffertech.com",
   },
   local: {
-    API_URL: "https://transformer.treffertech.com",
+    API_URL: "/storage-proxy",
   },
 };
 
