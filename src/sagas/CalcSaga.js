@@ -166,18 +166,31 @@ function* load3DData({ designId }) {
       { responseType: 'blob' }
     );
     if (response && response.data) {
-      // console.log(response.data)
-      if (response.status != 200) throw new Error("Model file not found");
-      // let blob = response.data.blob();
-      // let dataPayload = {};
-      // dataPayload.designId = params.fileName;
-      // dataPayload.status = "GENERATE_3D_REQUESTED";
-      // Create an object URL for the 
+      if (response.status !== 200) throw new Error("Model file not found");
       const blob = response.data;
       if (!(blob instanceof Blob)) {
         throw new Error('The response data is not a Blob');
       }
-      console.log(blob)
+
+      const contentType = response.headers?.["content-type"] || "";
+      if (
+        blob.size === 0 ||
+        contentType.includes("text/html") ||
+        contentType.includes("application/json")
+      ) {
+        let errorDetails = "";
+        try {
+          errorDetails = yield call([blob, blob.text]);
+        } catch (readError) {
+          errorDetails = "";
+        }
+
+        throw new Error(
+          `Unexpected model response for ${designId}.glb (${contentType || "unknown content type"})${errorDetails ? `: ${errorDetails.slice(0, 200)}` : ""}`
+        );
+      }
+
+      console.log(blob);
       const objectURL = URL.createObjectURL(blob);
       console.log(objectURL);
       yield put(generate3DFullfiled(objectURL));

@@ -38,6 +38,9 @@ import { io } from 'socket.io-client';
 import "./FabricationTheme.css";
 //const socket = io('http://localhost:5000'); //https://tf-cad-server.trafointel.com
 //const socket = io('https://tf-cad-server.trafointel.com');
+const DRAWINGS_STATUS_QUERY = "offset=0&size=30&sortAttribute=createdAt&sortOrder=ASC";
+const DRAWINGS_STATUS_POLL_INTERVAL_MS = 5000;
+
 const Fabrication = () => {
   const { id } = useParams();
   const [isDarkMode, setIsDarkMode] = useState(
@@ -51,6 +54,7 @@ const Fabrication = () => {
   console.log("generate3d in fab page:", generate3d);
   const { drawingsStatus } = useSelector(selectEntity);
   const { design } = useSelector(selectEntity);
+  const designId = twoWindings.data?.designId;
   const [formState, setFormState] = useState({
     ...fabrication?.data,
     restOfVariables: {
@@ -374,15 +378,17 @@ const Fabrication = () => {
   }, []);
 
   const fetch3DDiagram = () => {
-    let designId = twoWindings.data?.designId;
+    if (!designId) {
+      return;
+    }
     //  designId = "500k-72270";
     console.log("fetch3DDiagram is called");
     actions.load3DRequest(designId, "generate3d");
   };
 
   const fetchData = () => {
-    let filterPayload = { designId: [twoWindings.data?.designId] };
-    actions.fetchEntity("drawingsStatus", "offset=0&size=30", filterPayload);
+    let filterPayload = { designId: [designId] };
+    actions.fetchEntity("drawingsStatus", DRAWINGS_STATUS_QUERY, filterPayload);
   };
 
   useEffect(() => {
@@ -468,6 +474,7 @@ const Fabrication = () => {
   const handleGenerate3D = () => {
     setAllow3DButton1(false);
     setAllow3DButton2(false);
+    setHasFetched3D(false);
     let payload = {};
     Object.entries(formState).forEach(([key, value]) => {
       payload = {
@@ -549,6 +556,7 @@ const Fabrication = () => {
   };
 
   const stepsData = drawingsStatus?.data?.data || [];
+  const latestStep = stepsData[stepsData.length - 1];
   const totalDuration =
     stepsData.length > 1
       ? formatDuration(stepsData[0].createdAt, stepsData[stepsData.length - 1].createdAt)
@@ -569,18 +577,46 @@ const Fabrication = () => {
   const [hasFetched3D, setHasFetched3D] = useState(false);
   console.log("hasFetched3D:", hasFetched3D);
 
-  const lastMessage = stepsData[stepsData.length - 1]?.message?.includes("Process finished!");
+  const lastMessage = latestStep?.message?.includes("Process finished!");
+  const hasFailedStep = latestStep?.status === "Failed";
+  const is3DGenerationPending =
+    generate3d?.isLoading ||
+    generate3d?.data?.blob?.includes?.("generate3d") === true;
+
+  useEffect(() => {
+    setHasFetched3D(false);
+  }, [twoWindings?.data?.designId]);
+
   useEffect(() => {
     //setHasFetched3D((prev) => canGenerate3D ? false : prev);
     if (hasFetched3D === false) {
       console.log("hasFetched3D is", hasFetched3D);
-      if (lastMessage) {
+      if (lastMessage && designId) {
         console.log("Last message");
-        fetch3DDiagram();
+        actions.load3DRequest(designId, "generate3d");
         setHasFetched3D(true);
       }
     }
-  }, [stepsData, hasFetched3D]);
+  }, [stepsData, hasFetched3D, lastMessage, designId]);
+
+  useEffect(() => {
+    if (
+      !designId ||
+      (stepsData.length === 0 && !is3DGenerationPending) ||
+      lastMessage ||
+      hasFailedStep
+    ) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      actions.fetchEntity("drawingsStatus", DRAWINGS_STATUS_QUERY, { designId: [designId] });
+    }, DRAWINGS_STATUS_POLL_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [designId, stepsData.length, lastMessage, hasFailedStep, is3DGenerationPending]);
 
   console.log("generate3D.data in fab page:", generate3d?.data);
   console.log("drawingsStatus?.data?.data", drawingsStatus?.data?.data);
