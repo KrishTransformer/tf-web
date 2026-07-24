@@ -2543,13 +2543,6 @@ const Files = () => {
             />
             <FlexContainer direction="column" margin="20px 0px" className="files-download-list">
               <IconBtn
-                text="Download Glb"
-                icon={<FiDownload />}
-                onClick={handleDownloadGlb}
-                bgColor="var(--files-download-sky)"
-                borderColor={filesTheme.border}
-              />
-              <IconBtn
                 text="Des. Prnt Out"
                 icon={<FiDownload />}
                 onClick={desGeneratePDF}
@@ -2662,6 +2655,13 @@ const Files = () => {
               icon={<FiDownload />}
               fontColor="var(--files-icon-accent)"
               borderColor={filesTheme.borderStrong}
+            />
+            <IconBtn
+              text="Download Glb"
+              icon={<FiDownload />}
+              onClick={handleDownloadGlb}
+              bgColor="var(--files-download-sky)"
+              borderColor={filesTheme.border}
             />
           </Container>
         </div>
