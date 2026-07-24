@@ -7,7 +7,7 @@ import {
 } from "../actions/CalcActions";
 import { addEntity, addEntityFailed, fetchEntity } from "../actions/EntityActions";
 import * as constants from "../constants/CalcConstants";
-import { postApi, putApi, deleteApi, getApi, entityApi } from "../api";
+import { postApi, putApi, deleteApi, entityApi, storageServiceConfig } from "../api";
 import { generateUniqueFiveDigitNumber } from "../utils/StringUtils";
 import {
   CAD_SERVICE,
@@ -156,46 +156,15 @@ function* generate3DData({ payload, params, calcName }) {
 
 function* load3DData({ designId }) {
   try {
-    console.log(designId);
-    const response = yield call(
-      getApi,
-      `/models/${designId}.glb`,
-      STORAGE_SERVICE,
-      {},
-      { "X-Skip-Auth": "true" },
-      { responseType: 'blob' }
-    );
-    if (response && response.data) {
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error("Model file not found");
-      }
-      const blob = response.data;
-      if (!(blob instanceof Blob)) {
-        throw new Error('The response data is not a Blob');
-      }
+    if (!designId) {
+      throw new Error("Design ID is required to load the 3D model");
+    }
 
-      const contentType = response.headers?.["content-type"] || "";
-      if (
-        blob.size === 0 ||
-        contentType.includes("text/html") ||
-        contentType.includes("application/json")
-      ) {
-        let errorDetails = "";
-        try {
-          errorDetails = yield call([blob, blob.text]);
-        } catch (readError) {
-          errorDetails = "";
-        }
+    const modelUrl = `${storageServiceConfig.API_URL}/models/${designId}.glb`;
+    console.log("Loading GLB from:", modelUrl);
 
-        throw new Error(
-          `Unexpected model response for ${designId}.glb (${contentType || "unknown content type"})${errorDetails ? `: ${errorDetails.slice(0, 200)}` : ""}`
-        );
-      }
-
-      console.log(blob);
-      const objectURL = URL.createObjectURL(blob);
-      console.log(objectURL);
-      yield put(generate3DFullfiled(objectURL));
+    if (modelUrl) {
+      yield put(generate3DFullfiled(modelUrl));
     } else {
       yield put(generate3DFailed());
     }

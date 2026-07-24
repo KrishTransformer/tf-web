@@ -113,7 +113,7 @@ const Home = () => {
     else {
       actions.fetchSearchEntity("design", `offset=${offset}&size=${size}`, searchPayload);
     }
-    if (generate3d?.data?.blob) {
+    if (generate3d?.data?.blob?.startsWith?.("blob:")) {
       URL.revokeObjectURL(generate3d?.data?.blob);
       actions.generate3DCleared()
     }
