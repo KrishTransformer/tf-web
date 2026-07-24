@@ -1,10 +1,10 @@
-import React, { Children } from "react";
+import React from "react";
 import "./ImagePreview.css";
 import { CircularProgress } from "@mui/material";
 
 const ImagePreview = ({ btnText = "Preview", btnOnClick, disablebtn, showSpinner, children }) => {
   return (
-    <div class="image-container w-100">
+    <div className="image-container w-100">
       {/* <img
         src="https://c8.alamy.com/comp/D95B7C/electrical-station-in-portland-D95B7C.jpg"
         alt="Transformer Diagram"
@@ -12,7 +12,12 @@ const ImagePreview = ({ btnText = "Preview", btnOnClick, disablebtn, showSpinner
       /> */}
 
       
-        <button className="preview-button" onClick={btnOnClick} disabled={disablebtn}>
+        <button
+          type="button"
+          className="preview-button"
+          onClick={btnOnClick}
+          disabled={disablebtn}
+        >
           {showSpinner ? (
             <div className="preview-spinner-wrapper">
               <CircularProgress size={20} color="inherit" />

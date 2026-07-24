@@ -2333,6 +2333,38 @@ const Files = () => {
     actions.addEntity(payload, "design", true);
   };
 
+  const handleDownloadGlb = async () => {
+    const designId = twoWindings?.data?.designId;
+
+    if (!designId) {
+      alert("Design ID is not available.");
+      return;
+    }
+
+    const modelUrl = `https://transformer.treffertech.com/models/${designId}.glb`;
+
+    try {
+      const response = await fetch(modelUrl);
+
+      if (!response.ok) {
+        throw new Error(`Failed to download GLB (${response.status})`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${designId}.glb`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error("Error downloading GLB:", error);
+      alert("Unable to download the GLB file right now.");
+    }
+  };
+
   const [isEditing, setIsEditing] = useState(false);
   const [customerName, setCustomerName] = useState(customer?.data?.customerName);
   const [customerPlace, setCustomerPlace] = useState(customer?.data?.customerPlace);
@@ -2510,6 +2542,13 @@ const Files = () => {
               fontColor={filesTheme.text}
             />
             <FlexContainer direction="column" margin="20px 0px" className="files-download-list">
+              <IconBtn
+                text="Download Glb"
+                icon={<FiDownload />}
+                onClick={handleDownloadGlb}
+                bgColor="var(--files-download-sky)"
+                borderColor={filesTheme.border}
+              />
               <IconBtn
                 text="Des. Prnt Out"
                 icon={<FiDownload />}

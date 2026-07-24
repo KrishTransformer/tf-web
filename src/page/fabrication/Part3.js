@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Container, TextTypo, CustomModal,CustomModalWithMaximize } from "../../components";
+import React, { useEffect, useState } from "react";
+import { Container, TextTypo, CustomModalWithMaximize } from "../../components";
 import AccessoriesTabs from "./AccessoriesTabs";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { useSelector } from "react-redux";
@@ -14,6 +14,11 @@ const Part3 = ({ formState, handleInputChange }) => {
   const { generate3d } = useSelector(selectGenerate3D);
   const [open, setOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const currentBlob = generate3d?.data?.blob;
+  const isViewerUnavailable =
+    currentBlob?.includes?.("generate3d") === true ||
+    currentBlob === "" ||
+    currentBlob === undefined;
 
   const toggleTabsVisibility = () => {
     setIsTabsVisible((prevState) => !prevState);
@@ -33,6 +38,28 @@ const Part3 = ({ formState, handleInputChange }) => {
     setOpen(false);
     setIsMaximized(false); // added to reset maximize on close
   };
+
+  useEffect(() => {
+    const handleViewerShortcuts = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "m") {
+        if (!isViewerUnavailable) {
+          event.preventDefault();
+          setOpen(true);
+        }
+        return;
+      }
+
+      if (event.key === "Escape" && open) {
+        event.preventDefault();
+        handleClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleViewerShortcuts);
+    return () => {
+      window.removeEventListener("keydown", handleViewerShortcuts);
+    };
+  }, [isViewerUnavailable, open]);
 
   return (
     <Container margin="0px 0px 10px 0px">
@@ -79,13 +106,10 @@ const Part3 = ({ formState, handleInputChange }) => {
       <Container className="fabrication-card" bgColor="var(--fab-surface)" padding="10px" borderRadius="20px" margin="10px 0px 0px 0px">
 
         <ImagePreview btnText="Maximize" btnOnClick={handleOpen}
-          disablebtn={generate3d?.data?.blob?.includes?.("generate3d") === true
-            || generate3d?.data?.blob == ""
-            || generate3d?.data?.blob == undefined
-          }
+          disablebtn={isViewerUnavailable}
           showSpinner={
-            (generate3d?.data?.blob !== "" &&
-              generate3d?.data?.blob?.includes?.("generate3d") === true) || (generate3d?.data?.blob === undefined)
+            (currentBlob !== "" &&
+              currentBlob?.includes?.("generate3d") === true) || currentBlob === undefined
           }
         >
           {generate3d?.isLoading ? (

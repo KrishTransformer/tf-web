@@ -32,6 +32,8 @@
   gap: 5px;
   min-width: 80px;
   height: 40px;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .preview-spinner-wrapper {
@@ -46,9 +48,15 @@
   background-color: var(--neon-green);
 }
 
+.preview-button,
+.preview-button * {
+  cursor: inherit;
+}
+
 .preview-button svg {
   width: 12px;
   height: 12px;
+  pointer-events: none;
 }
 
 .preview-spinner {
@@ -59,5 +67,9 @@
 }
 
 .preview-button:disabled {
+  cursor: not-allowed;
+}
+
+.preview-button:disabled * {
   cursor: not-allowed;
 }
