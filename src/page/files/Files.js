@@ -2341,7 +2341,7 @@ const Files = () => {
       return;
     }
 
-    const modelUrl = `https://transformer.treffertech.com/models/${designId}.glb`;
+    const modelUrl = `/models/${designId}.glb`;
 
     try {
       const response = await fetch(modelUrl);
