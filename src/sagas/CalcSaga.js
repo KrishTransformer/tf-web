@@ -166,7 +166,9 @@ function* load3DData({ designId }) {
       { responseType: 'blob' }
     );
     if (response && response.data) {
-      if (response.status !== 200) throw new Error("Model file not found");
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error("Model file not found");
+      }
       const blob = response.data;
       if (!(blob instanceof Blob)) {
         throw new Error('The response data is not a Blob');
