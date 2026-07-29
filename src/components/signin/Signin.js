@@ -189,9 +189,12 @@ const Login = () => {
           </NavLink>
           <div className="auth-link-group d-flex align-items-center">
             <h6 className="signin-subtext mb-0">Not Registered? &nbsp;</h6>
-            <NavLink to="/signUp" className="signin-subtext1">
+            <span
+              className="signin-subtext1 signin-subtext-disabled"
+              aria-disabled="true"
+            >
               Sign Up
-            </NavLink>
+            </span>
           </div>
         </div>
       </CustomCard>
