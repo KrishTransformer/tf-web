@@ -30,9 +30,12 @@ export const load3DRequest = (designId, calcName) => {
 };
 
 export const generate3DFullfiled = (response) => {
-  let output = {
-    blob: response,
-  };
+  let output =
+    response && typeof response === "object" && !Array.isArray(response) && Object.prototype.hasOwnProperty.call(response, "blob")
+      ? response
+      : {
+        blob: response,
+      };
   return {
     type: constants.GENERATE_3D_FULFILLED,
     calcName: "generate3d",

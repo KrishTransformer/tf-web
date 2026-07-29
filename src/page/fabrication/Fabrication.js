@@ -18,9 +18,11 @@ import {
   generate3DRequest,
   load3DRequest,
   generate3DCleared,
+  generate3DFullfiled,
 } from "../../actions/CalcActions";
 import { deleteEntity } from "../../actions/EntityActions";
 import { fetchEntity, addEntity } from "../../actions/EntityActions";
+import { getApi } from "../../api";
 import { splitJsonObject } from "../../utils/StringUtils";
 import { useParams } from "react-router-dom";
 import { Alert, CircularProgress, Snackbar } from "@mui/material";
@@ -35,6 +37,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import { StepperContainer, StyledStepLabel, TimeText, } from "../../styles/components/StepperStyles";
 import { Divider } from "@mui/material";
 import { io } from 'socket.io-client';
+import { COMMON_SERVICE } from "../../constants/CommonConstants";
 import "./FabricationTheme.css";
 //const socket = io('http://localhost:5000'); //https://tf-cad-server.trafointel.com
 //const socket = io('https://tf-cad-server.trafointel.com');
@@ -342,6 +345,7 @@ const Fabrication = () => {
     deleteEntity,
     generate3DRequest,
     generate3DCleared,
+    generate3DFullfiled,
     load3DRequest,
   });
 
@@ -361,21 +365,55 @@ const Fabrication = () => {
   }, []);
 
   useEffect(() => {
-    //console.log("fab:", fabrication);
-    //console.log("fabrication?.tank?.tank_L:", fabrication?.data?.tank?.tank_L);
-    if (
-      fabrication?.data?.tank?.tank_L == ""
-    ) {
-      console.log("fab useEffect inside if")
-      handleFabCalculate();
-    }
-    fetchData();
-    if (!generate3d?.data?.blob) {
-      fetch3DDiagram();
-    }
+    let isCancelled = false;
 
-    return () => { };
-  }, []);
+    const bootstrapCadState = async () => {
+      if (
+        fabrication?.data?.tank?.tank_L == ""
+      ) {
+        console.log("fab useEffect inside if")
+        handleFabCalculate();
+      }
+
+      fetchData();
+
+      if (!designId) {
+        return;
+      }
+
+      try {
+        const response = await getApi(
+          `/cad/jobs/active`,
+          COMMON_SERVICE,
+          { designId }
+        );
+        if (isCancelled) {
+          return;
+        }
+
+        const activeJob = response?.data;
+        if (activeJob?.runId && activeJob?.jobStatus) {
+          actions.generate3DFullfiled({
+            blob: "generate3d",
+            job: activeJob,
+          });
+          return;
+        }
+      } catch (error) {
+        console.log("No active CAD job found for design:", designId, error?.message);
+      }
+
+      if (!generate3d?.data?.blob) {
+        fetch3DDiagram();
+      }
+    };
+
+    bootstrapCadState();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [designId]);
 
   const fetch3DDiagram = () => {
     if (!designId) {
@@ -486,16 +524,6 @@ const Fabrication = () => {
     params.fileName = formState?.restOfVariables?.designId;
     params.skipBatRun = "no";
 
-    const matchingIds = drawingsStatus?.data?.data
-      ?.filter(item => item.designId === twoWindings?.data?.designId)
-      ?.map(item => item.id);
-
-    if (matchingIds?.length > 0) {
-      matchingIds.forEach(id => {
-        actions.deleteEntity(id, "drawingsStatus", true);
-      });
-    }
-
     actions.generate3DRequest(payload, params, "generate3d");
     handleClickSnackBar();
     //handleCalculate();
@@ -557,6 +585,17 @@ const Fabrication = () => {
 
   const stepsData = drawingsStatus?.data?.data || [];
   const latestStep = stepsData[stepsData.length - 1];
+  const currentCadJob = generate3d?.data?.job;
+  const currentCadJobStatus = currentCadJob?.jobStatus;
+  const queuePosition =
+    typeof currentCadJob?.queuePosition === "number"
+      ? currentCadJob.queuePosition
+      : null;
+  const isCadJobQueued = currentCadJobStatus === "QUEUED";
+  const isCadJobRunning = currentCadJobStatus === "RUNNING";
+  const isCadJobFailed = currentCadJobStatus === "FAILED";
+  const isCadJobCompleted = currentCadJobStatus === "COMPLETED";
+  const hasActiveCadJob = isCadJobQueued || isCadJobRunning;
   const totalDuration =
     stepsData.length > 1
       ? formatDuration(stepsData[0].createdAt, stepsData[stepsData.length - 1].createdAt)
@@ -578,10 +617,11 @@ const Fabrication = () => {
   console.log("hasFetched3D:", hasFetched3D);
 
   const lastMessage = latestStep?.message?.includes("Process finished!");
-  const hasFailedStep = latestStep?.status === "Failed";
+  const hasFailedStep = latestStep?.status === "Failed" || latestStep?.status === "FAILED";
   const is3DGenerationPending =
     generate3d?.isLoading ||
-    generate3d?.data?.blob?.includes?.("generate3d") === true;
+    generate3d?.data?.blob?.includes?.("generate3d") === true ||
+    hasActiveCadJob;
 
   useEffect(() => {
     setHasFetched3D(false);
@@ -617,6 +657,53 @@ const Fabrication = () => {
       window.clearInterval(intervalId);
     };
   }, [designId, stepsData.length, lastMessage, hasFailedStep, is3DGenerationPending]);
+
+  useEffect(() => {
+    if (!designId || !currentCadJob?.runId || !hasActiveCadJob) {
+      return undefined;
+    }
+
+    let isCancelled = false;
+
+    const fetchCadJobState = async () => {
+      try {
+        const response = await getApi(
+          `/cad/jobs/${currentCadJob.runId}`,
+          COMMON_SERVICE
+        );
+        if (isCancelled || !response?.data) {
+          return;
+        }
+
+        const updatedJob = response.data;
+        const nextBlob =
+          updatedJob?.jobStatus === "COMPLETED" && generate3d?.data?.blob?.startsWith?.("blob:")
+            ? generate3d?.data?.blob
+            : ["QUEUED", "RUNNING"].includes(updatedJob?.jobStatus)
+              ? "generate3d"
+              : generate3d?.data?.blob || "generate3d";
+
+        actions.generate3DFullfiled({
+          blob: nextBlob,
+          job: updatedJob,
+        });
+
+        if (["QUEUED", "RUNNING"].includes(updatedJob?.jobStatus)) {
+          actions.fetchEntity("drawingsStatus", DRAWINGS_STATUS_QUERY, { designId: [designId] });
+        }
+      } catch (error) {
+        console.log("Failed to refresh CAD job state:", error?.message);
+      }
+    };
+
+    fetchCadJobState();
+    const intervalId = window.setInterval(fetchCadJobState, DRAWINGS_STATUS_POLL_INTERVAL_MS);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [designId, currentCadJob?.runId, currentCadJobStatus, generate3d?.data?.blob]);
 
   console.log("generate3D.data in fab page:", generate3d?.data);
   console.log("drawingsStatus?.data?.data", drawingsStatus?.data?.data);
@@ -655,6 +742,29 @@ const Fabrication = () => {
 
   console.log("canGenerate3D:", canGenerate3D);
   console.log("drawingsStatus?.data?.data?.[0]?.createdAt:", new Date(drawingsStatus?.data?.data?.[0]?.createdAt).getTime());
+
+  const drawerStatusLabel = lastMessage
+    ? "Success"
+    : hasFailedStep || isCadJobFailed
+      ? "Failed"
+      : isCadJobQueued
+        ? queuePosition !== null
+          ? `Queued (#${queuePosition + 1})`
+          : "Queued"
+        : isCadJobRunning
+          ? "Processing..."
+          : stepsData.length > 0
+            ? "Processing..."
+            : "Idle";
+
+  const drawerStatusColor =
+    drawerStatusLabel === "Success"
+      ? "green"
+      : drawerStatusLabel === "Failed"
+        ? "red"
+        : drawerStatusLabel.startsWith("Queued")
+          ? "#1e88e5"
+          : "orange";
 
 
   return (
@@ -728,20 +838,33 @@ const Fabrication = () => {
                     Duration: <strong>{totalDuration}</strong>
                   </Typography>
 
-                  <Typography variant="subtitle1" color={stepsData[stepsData.length - 1]?.message.includes("Process finished!") ? "green" : "orange"}>
-                    {stepsData[stepsData.length - 1]?.message?.includes("Process finished!") ? (
+                  <Typography variant="subtitle1" color={drawerStatusColor}>
+                    {drawerStatusLabel === "Success" ? (
                       <CheckCircleIcon fontSize="small" sx={{ verticalAlign: "middle", mr: 1 }} />
+                    ) : drawerStatusLabel === "Failed" ? (
+                      <ErrorRoundedIcon fontSize="small" sx={{ verticalAlign: "middle", mr: 1 }} />
                     ) : (
                       <PendingIcon fontSize="small" sx={{ verticalAlign: "middle", mr: 1 }} />
                     )}
                     Status:{" "}
                     <strong>
-                      {stepsData[stepsData.length - 1]?.message?.includes("Process finished!")
-                        ? "Success"
-                        : "Processing..."}
+                      {drawerStatusLabel}
                     </strong>
                   </Typography>
                 </Box>
+
+                {(currentCadJob?.runId || queuePosition !== null) && (
+                  <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mt: 1 }}>
+                    <Typography variant="body2" sx={{ color: "inherit", opacity: 0.8 }}>
+                      Run ID: <strong>{currentCadJob?.runId || "Pending"}</strong>
+                    </Typography>
+                    {queuePosition !== null && hasActiveCadJob && (
+                      <Typography variant="body2" sx={{ color: "inherit", opacity: 0.8 }}>
+                        Queue Position: <strong>{queuePosition + 1}</strong>
+                      </Typography>
+                    )}
+                  </Box>
+                )}
 
                 <Divider sx={{ width: "100%", my: 1, borderBottomWidth: 2, borderColor: isDarkMode ? "rgba(255,255,255,0.12)" : undefined }} />
 
@@ -764,11 +887,13 @@ const Fabrication = () => {
 
                             <StyledStepLabel
                               StepIconComponent={() =>
-                                step.status === "Success" ? (
+                                step.status === "Success" || step.status === "SUCCESS" ? (
                                   <CheckCircleIcon fontSize="small" sx={{ color: "green" }} />
-                                ) : step.status === "GENERATE_3D_REQUESTED" ? (
-                                  <CheckCircleIcon fontSize="small" sx={{ color: "orange" }} />
-                                ) : step.status === "Failed" ? (
+                                ) : step.status === "GENERATE_3D_REQUESTED" || step.status === "REQUESTED" ? (
+                                  <PendingIcon fontSize="small" sx={{ color: "#1e88e5" }} />
+                                ) : step.status === "PROCESSING" ? (
+                                  <PendingIcon fontSize="small" sx={{ color: "orange" }} />
+                                ) : step.status === "Failed" || step.status === "FAILED" ? (
                                   <ErrorRoundedIcon fontSize="small" sx={{ color: "red" }} />
                                 ) : (
                                   <RadioButtonUncheckedIcon fontSize="small" />
@@ -800,7 +925,7 @@ const Fabrication = () => {
                   className="btn btn-dark rounded btn-block w-100 py-2 btn-calculate"
                   onClick={handleCalculate}
                 >
-                  Show Status
+                  {hasActiveCadJob ? "Show Queue / Status" : "Show Status"}
                 </button>
               ) : (
                 // <button
@@ -861,7 +986,7 @@ const Fabrication = () => {
         autoHideDuration={3000}
         onClose={handleCloseSnackBar}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        message="CAD drawings generation inprogress, Check after 5 minutes"
+        message="CAD job queued. Open Status to track live progress."
       // action={action}
       />
       </div>
