@@ -1,0 +1,1 @@
+Reverts commit f368ad9 (changed to trafointe url) and restores the previous nginx, API, files page, and proxy behavior via commit 6ceca09.

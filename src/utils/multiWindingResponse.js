@@ -269,9 +269,17 @@ export const mapMultiWindingResponseToFormState = (responseData = {}) => {
     ez: pickDefined(results.ez?.value, common.ek),
     loadLoss: pickDefined(hvWinding.totalLoadLoss),
     coreLoss: pickDefined(
+      results.noLoadLoss,
+      results.coreLoss,
+      common.coreLoss,
+      hvWinding.coreLoss,
+      lvWinding.coreLoss
+    ),
+    nlcurrentPercentage: pickDefined(
       results.nlCurrentPercentage !== undefined
         ? roundIfNumber(results.nlCurrentPercentage, 2)
-        : undefined
+        : undefined,
+      common.nlCurrentPercentage
     ),
     lossesAt50Percent: pickDefined(results.lossesAt50Percent),
     lossesAt100Percent: pickDefined(results.lossesAt100Percent),
@@ -332,14 +340,24 @@ export const mapMultiWindingResponseToFormState = (responseData = {}) => {
       coolingStatement: tankAndOil.coolingStatement ?? "",
       conservatorDia: tankAndOil.conservatorDia ?? "",
       conservatorLength: tankAndOil.conservatorLength ?? "",
+      conservatorCapacity: tankAndOil.conservatorCapacity ?? "",
       wdgTankGap: tankAndOil.wdgTankGap ?? "",
       connectionGap: tankAndOil.connectionGap ?? "",
       topYokeCoverGap: tankAndOil.topYokeCoverGap ?? "",
       totalConductorWeight: tankAndOil.totalConductorWeight ?? "",
+      totalConnectionWeight: tankAndOil.totalConnectionWeight ?? "",
       totalSteelWeight: tankAndOil.totalSteelWeight ?? "",
       totalOil: tankAndOil.totalOil ?? "",
+      oilWeight: tankAndOil.oilWeight ?? "",
       insulationWeight: tankAndOil.insulationWeight ?? "",
       totalRadiatorWeight: tankAndOil.totalRadiatorWeight ?? "",
+      radiatorHeight: tankAndOil.radiatorHeight ?? "",
+      radiatorSection: tankAndOil.radiatorSection ?? "",
+      noOfRadiators: tankAndOil.noOfRadiators ?? "",
+      weightsOfActivePart: tankAndOil.weightsOfActivePart ?? "",
+      channelWeight: tankAndOil.channelWeight ?? "",
+      weightCore: tankAndOil.weightCore ?? "",
+      transformerWeight: tankAndOil.transformerWeight ?? "",
       weightOfTankAndAcc: tankAndOil.weightOfTankAndAcc ?? "",
       totalRadiatorCost: tankAndOil.radiatorCost ?? "",
       radiatorWidth: tankAndOil.radiatorWidth ?? "",

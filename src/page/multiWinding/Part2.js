@@ -1,5 +1,10 @@
 import React from "react";
 import { Container, CustomInput } from "../../components";
+import Input2WithModal from "../../components/input2WithModal/Input2WithModal";
+import Input2WithRadioModal from "../../components/input2WithRadioModal/Input2WithRadioModal";
+import ToggleInput2 from "../../components/toggleInput2/ToggleInput2";
+
+const hasValue = (value) => value !== undefined && value !== null && value !== "";
 
 const windingColumns = [
   {
@@ -58,49 +63,81 @@ const part2Fields = [
   { key: "loadLoss", label: "Load Loss (W)" },
 ];
 
+const getPart2Winding = (formState, columnId) =>
+  formState?.part2Windings?.[columnId] || {};
+
 const getPart2FieldValue = (formState, columnId, fieldKey) => {
-  if (fieldKey === "discDuctSize") {
-    if (columnId === "lv") {
-      return (
-        formState?.innerWindings?.discDuctSize ||
-        formState?.part2Windings?.lv?.discDuctSize ||
-        ""
-      );
-    }
-
-    if (columnId === "hvMain") {
-      return (
-        formState?.outerWindings?.discDuctSize ||
-        formState?.part2Windings?.hvMain?.discDuctSize ||
-        ""
-      );
-    }
+  if (fieldKey === "discDuctSize" && columnId === "lv") {
+    return hasValue(formState?.part2Windings?.lv?.discDuctSize)
+      ? formState.part2Windings.lv.discDuctSize
+      : formState?.innerWindings?.discDuctSize ?? "";
   }
 
-  return formState?.part2Windings?.[columnId]?.[fieldKey] || "";
-};
-
-const getPart2FieldPath = (columnId, fieldKey) => {
-  if (fieldKey === "discDuctSize") {
-    if (columnId === "lv") {
-      return "innerWindings.discDuctSize";
-    }
-
-    if (columnId === "hvMain") {
-      return "outerWindings.discDuctSize";
-    }
+  if (fieldKey === "discDuctSize" && columnId === "hvMain") {
+    return hasValue(formState?.part2Windings?.hvMain?.discDuctSize)
+      ? formState.part2Windings.hvMain.discDuctSize
+      : formState?.outerWindings?.discDuctSize ?? "";
   }
 
-  return `part2Windings.${columnId}.${fieldKey}`;
+  return formState?.part2Windings?.[columnId]?.[fieldKey] ?? "";
 };
 
-const Part2 = ({ formState, handleInputChange }) => {
+const getPart2FieldPath = (columnId, fieldKey) =>
+  `part2Windings.${columnId}.${fieldKey}`;
+
+const formatConductorValue = (winding = {}) => {
+  if (winding?.isConductorRound) {
+    return hasValue(winding?.conductorDiameter)
+      ? `Round ${winding.conductorDiameter}`
+      : "";
+  }
+
+  if (hasValue(winding?.condBreadth) && hasValue(winding?.condHeight)) {
+    return `${winding.condBreadth} x ${winding.condHeight}`;
+  }
+
+  return winding?.conductorSizes || "";
+};
+
+const formatParallelValue = (winding = {}) => {
+  if (
+    !hasValue(winding?.radialParallelCond) &&
+    !hasValue(winding?.axialParallelCond)
+  ) {
+    return winding?.noInParallel || "";
+  }
+
+  const radial = winding?.radialParallelCond ?? "";
+  const axial = winding?.axialParallelCond ?? "";
+  const total =
+    Number.isFinite(Number(radial)) && Number.isFinite(Number(axial))
+      ? Number(radial) * Number(axial)
+      : "";
+
+  return `R${radial} x A${axial} = ${total}`;
+};
+
+const formatDuctValue = (winding = {}) => {
+  if (!hasValue(winding?.ducts) && !hasValue(winding?.ductSize)) {
+    return winding?.noOfDuctsWidth || "";
+  }
+
+  return `${winding?.ducts ?? ""} / ${winding?.ductSize ?? ""}`;
+};
+
+const Part2 = ({
+  formState,
+  handleInputChange,
+  handleToggleLock,
+  lockedPart2Windings,
+}) => {
   const selectedConfiguration =
     formState?.windingConfiguration || "2_WDG_LV_HV_MAIN";
   const visibleColumns = windingColumns.filter((column) =>
-    (configurationColumns[selectedConfiguration] || configurationColumns["2_WDG_LV_HV_MAIN"]).includes(
-      column.id
-    )
+    (
+      configurationColumns[selectedConfiguration] ||
+      configurationColumns["2_WDG_LV_HV_MAIN"]
+    ).includes(column.id)
   );
   const gridTemplateColumns = `minmax(220px, 1.2fr) repeat(${visibleColumns.length}, minmax(160px, 1fr))`;
 
@@ -135,32 +172,123 @@ const Part2 = ({ formState, handleInputChange }) => {
                   <span className="multi-winding-part2-label-text">{field.label}</span>
                 </div>
 
-                {visibleColumns.map((column) => (
-                  <div
-                    className={`multi-winding-part2-input-cell${
-                      field.highlighted ? " highlighted" : ""
-                    }${isLastRow ? " last-row" : ""}`}
-                    key={`${field.key}-${column.id}`}
-                  >
-                    <CustomInput
-                      value={getPart2FieldValue(formState, column.id, field.key)}
-                      onChange={(e) =>
-                        handleInputChange(
-                          getPart2FieldPath(column.id, field.key),
-                          e.target.value
-                        )
-                      }
-                      margin="0"
-                      bgColor={
-                        field.highlighted
-                          ? "var(--app-input-accent-bg)"
-                          : "var(--app-input-bg)"
-                      }
-                      borderColor="var(--app-input-border)"
-                      placeholder={column.label}
-                    />
-                  </div>
-                ))}
+                {visibleColumns.map((column) => {
+                  const winding = getPart2Winding(formState, column.id);
+                  const lockState = lockedPart2Windings?.[column.id] || {};
+
+                  return (
+                    <div
+                      className={`multi-winding-part2-input-cell${
+                        field.highlighted ? " highlighted" : ""
+                      }${isLastRow ? " last-row" : ""}`}
+                      key={`${field.key}-${column.id}`}
+                    >
+                      {field.key === "conductorSizes" ? (
+                        <Input2WithRadioModal
+                          modalLabel={field.label}
+                          value={formatConductorValue(winding)}
+                          label1="Breadth"
+                          label2="Height"
+                          label3="Diameter"
+                          value1={winding?.condBreadth}
+                          value2={winding?.condHeight}
+                          value3={winding?.conductorDiameter}
+                          attributeName1={getPart2FieldPath(column.id, "condBreadth")}
+                          attributeName2={getPart2FieldPath(column.id, "condHeight")}
+                          attributeName3={getPart2FieldPath(column.id, "conductorDiameter")}
+                          attributeName4={getPart2FieldPath(column.id, "isConductorRound")}
+                          radio1="Round"
+                          radio2="Strip"
+                          isConductorRound={
+                            winding?.isConductorRound === true ? "Round" : "Strip"
+                          }
+                          onChange={handleInputChange}
+                          showUnlockIcon={true}
+                          handleToggleLock={() =>
+                            handleToggleLock(
+                              getPart2FieldPath(column.id, field.key),
+                              lockState?.conductorSizes
+                            )
+                          }
+                          isLocked={lockState?.conductorSizes}
+                        />
+                      ) : field.key === "noInParallel" ? (
+                        <Input2WithModal
+                          modalLabel={field.label}
+                          label1="No in Radial"
+                          label2="No in Axial"
+                          description="Enter number in Radial and number in Axial"
+                          value={formatParallelValue(winding)}
+                          value1={winding?.radialParallelCond}
+                          value2={winding?.axialParallelCond}
+                          attributeName1={getPart2FieldPath(column.id, "radialParallelCond")}
+                          attributeName2={getPart2FieldPath(column.id, "axialParallelCond")}
+                          onChange={handleInputChange}
+                          showUnlockIcon={true}
+                          handleToggleLock={() =>
+                            handleToggleLock(
+                              getPart2FieldPath(column.id, field.key),
+                              lockState?.noInParallel
+                            )
+                          }
+                          isLocked={lockState?.noInParallel}
+                        />
+                      ) : field.key === "noOfDuctsWidth" ? (
+                        <Input2WithModal
+                          modalLabel={field.label}
+                          label1="No Of Ducts"
+                          label2="Duct Width"
+                          description="Enter no of Ducts and Width"
+                          value={formatDuctValue(winding)}
+                          value1={winding?.ducts}
+                          value2={winding?.ductSize}
+                          attributeName1={getPart2FieldPath(column.id, "ducts")}
+                          attributeName2={getPart2FieldPath(column.id, "ductSize")}
+                          onChange={handleInputChange}
+                          isLocked={false}
+                          handleToggleLock={() => {}}
+                        />
+                      ) : field.key === "condInsulation" ? (
+                        <ToggleInput2
+                          label=""
+                          labelColor={column.labelColor}
+                          value={winding?.condInsulation ?? ""}
+                          onValueChange={(val) =>
+                            handleInputChange(
+                              getPart2FieldPath(column.id, "condInsulation"),
+                              val
+                            )
+                          }
+                          isEnamel={Boolean(winding?.isEnamel)}
+                          onToggleChange={(val) =>
+                            handleInputChange(
+                              getPart2FieldPath(column.id, "isEnamel"),
+                              val
+                            )
+                          }
+                        />
+                      ) : (
+                        <CustomInput
+                          value={getPart2FieldValue(formState, column.id, field.key)}
+                          onChange={(e) =>
+                            handleInputChange(
+                              getPart2FieldPath(column.id, field.key),
+                              e.target.value
+                            )
+                          }
+                          margin="0"
+                          bgColor={
+                            field.highlighted
+                              ? "var(--app-input-accent-bg)"
+                              : "var(--app-input-bg)"
+                          }
+                          borderColor="var(--app-input-border)"
+                          placeholder={column.label}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
               </React.Fragment>
             );
           })}

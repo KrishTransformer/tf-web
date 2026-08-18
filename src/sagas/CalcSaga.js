@@ -17,6 +17,18 @@ import {
 } from "../constants/CommonConstants";
 import { mapMultiWindingResponseToFormState } from "../utils/multiWindingResponse";
 
+const buildTwoWindingDesignId = (kva) =>
+  `${kva}k-${generateUniqueFiveDigitNumber()}`;
+
+const buildMultiWindingDesignId = (kva) =>
+  `${kva}k-M${generateUniqueFiveDigitNumber()}`;
+
+const firstNonEmptyValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "");
+
+const resolvePersistedEntityId = (response, fallback = "") =>
+  response?.data?.id || response?.data?.data?.id || fallback;
+
 export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
   try {
     const response = calcName.includes("multiwindings")
@@ -36,8 +48,7 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
     if (response && response.data) {
       if (calcName.includes("2windings")) {
         let twoWindingsDataPayload = response.data; 
-        const metadataDesignId =
-          response.data.kVA + "k-" + generateUniqueFiveDigitNumber();
+        const metadataDesignId = buildTwoWindingDesignId(response.data.kVA);
 
         let twoWindingsMetadataPayload = {}
         twoWindingsMetadataPayload.designId = metadataDesignId;
@@ -46,6 +57,7 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
 
         let entityDesignPayload = {
           designId: metadataDesignId,
+          designType: "two",
           twoWindings: JSON.stringify(twoWindingsDataPayload),
         };
         yield put(addCalcFullfiled(calcName, twoWindingsDataPayload, twoWindingsMetadataPayload));
@@ -58,10 +70,10 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
           );
 
           if (entityResponse && entityResponse.data) {
-            let persistedEntityId =
-              entityResponse?.data?.id ||
-              entityResponse?.data?.data?.id ||
-              twoWindingsMetadataPayload.entityId;
+            let persistedEntityId = resolvePersistedEntityId(
+              entityResponse,
+              twoWindingsMetadataPayload.entityId
+            );
 
             if (!persistedEntityId && metadataDesignId) {
               const lookupResponse = yield call(
@@ -91,13 +103,103 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
           yield put(addEntityFailed("design"));
         }
       } else if (calcName.includes("multiwindings")) {
+        const existingMetadata = metadata || {};
+        const mappedResponse = mapMultiWindingResponseToFormState(response.data);
+        const designId =
+          existingMetadata.designId ||
+          mappedResponse.designId ||
+          buildMultiWindingDesignId(
+            firstNonEmptyValue(
+              mappedResponse.kVA,
+              jsonBody?.kVA,
+              response?.data?.inputs?.ratings?.kVA
+            )
+          );
+        const persistedPayload = {
+          ...mappedResponse,
+          designId,
+          designType: "multi",
+        };
+        let multiWindingMetadataPayload = {
+          designId,
+          entityId: existingMetadata.entityId || "",
+        };
+
         yield put(
           addCalcFullfiled(
             calcName,
-            mapMultiWindingResponseToFormState(response.data),
-            metadata
+            persistedPayload,
+            multiWindingMetadataPayload
           )
         );
+
+        const entityDesignPayload = {
+          designId,
+          designType: "multi",
+          multiWindings: JSON.stringify(persistedPayload),
+        };
+
+        try {
+          let entityResponse;
+
+          if (multiWindingMetadataPayload.entityId) {
+            entityResponse = yield call(
+              entityApi.update,
+              "design",
+              multiWindingMetadataPayload.entityId,
+              entityDesignPayload
+            );
+          } else {
+            entityResponse = yield call(
+              entityApi.create,
+              "design",
+              entityDesignPayload
+            );
+          }
+
+          if (entityResponse && entityResponse.data) {
+            let persistedEntityId = resolvePersistedEntityId(
+              entityResponse,
+              multiWindingMetadataPayload.entityId
+            );
+
+            if (!persistedEntityId && designId) {
+              const lookupResponse = yield call(
+                entityApi.list,
+                "design",
+                "offset=0&size=1",
+                { designId: [designId] }
+              );
+
+              persistedEntityId = lookupResponse?.data?.data?.[0]?.id || "";
+            }
+
+            if (
+              persistedEntityId &&
+              persistedEntityId !== multiWindingMetadataPayload.entityId
+            ) {
+              multiWindingMetadataPayload = {
+                ...multiWindingMetadataPayload,
+                entityId: persistedEntityId,
+              };
+
+              yield put(
+                addCalcFullfiled(
+                  calcName,
+                  persistedPayload,
+                  multiWindingMetadataPayload
+                )
+              );
+            }
+
+            yield put(fetchEntity("design", "offset=0&size=100"));
+          } else {
+            yield put(addEntityFailed("design"));
+          }
+        } catch (entityError) {
+          console.error("Error saving multi-winding design entity:", entityError);
+          yield put(addEntityFailed("design"));
+        }
       } else if (calcName.includes("core")) {
         let payload = response.data; 
         let dataPayload = {};        

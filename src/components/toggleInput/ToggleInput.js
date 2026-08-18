@@ -29,6 +29,7 @@ const ToggleInput = ({
   onValueChange,
   onLabelChange,
   formState = {},
+  autoRecalculateValue = true,
 }) => {
   const [isAl, setIsAl] = useState(false);
 
@@ -41,6 +42,10 @@ const ToggleInput = ({
   }, [valueOfToggle]);
 
   useEffect(() => {
+    if (!autoRecalculateValue) {
+      return;
+    }
+
     const conductorMaterial = valueOfToggle === "Al" ? "Al" : "Cu";
     const newDensity = currentDensityValue(
       formState.dryType,
@@ -50,7 +55,7 @@ const ToggleInput = ({
     );
     onValueChange(newDensity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formState.dryType, formState.eTransCostType, formState.dryTempClass, valueOfToggle]);
+  }, [autoRecalculateValue, formState.dryType, formState.eTransCostType, formState.dryTempClass, valueOfToggle]);
 
   const handleToggle = (input) => {
     setIsAl(!isAl);

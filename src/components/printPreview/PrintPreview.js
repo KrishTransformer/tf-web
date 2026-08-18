@@ -2,7 +2,6 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import { IoMdClose } from "react-icons/io";
 import FlexContainer from "../flexbox/FlexContainer";
 import TextTypo from "../textTypo/TextTypo";
@@ -15,20 +14,27 @@ import core4_2 from "../../assets/core4.2.png";
 import core4_3 from "../../assets/core4.3.png";
 import core4_4 from "../../assets/core4.4.png";
 
-import { useSelector } from "react-redux";
-import { selectCalc } from "../../selectors/CalcSelector";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-
 const PrintPreview = ({
   open,
   onClose,
   title = "Modal",
   children,
   coreData,
+  designData,
 }) => {
-  const { twoWindings } = useSelector(selectCalc);
   const isDarkMode = localStorage.getItem("appTheme") === "dark";
+  const bladeType = coreData?.eCoreBladeType;
+  const isThreeBladeLayout = bladeType === "CRUSI_3" || bladeType === "BLADE_3";
+  const isFourBladeLayout = bladeType === "CRUSI_4" || bladeType === "BLADE_4";
+  const voltagePrimary = designData?.primaryVoltage ?? designData?.lowVoltage ?? "-";
+  const voltageSecondary = designData?.secondaryVoltage ?? designData?.highVoltage ?? "-";
+  const coreSize = [
+    designData?.core?.coreDia,
+    designData?.core?.limbHt,
+    designData?.core?.cenDist,
+  ]
+    .filter((value) => value !== undefined && value !== null && value !== "")
+    .join(" / ");
   const previewTheme = {
     modalBg: isDarkMode ? "#172233" : "#ffffff",
     modalBorder: isDarkMode ? "rgba(255, 255, 255, 0.12)" : "#000000",
@@ -80,31 +86,27 @@ const PrintPreview = ({
   };
 
   const table1Stacking = coreData?.centerLimbStacking;
-  const table2Stacking = coreData?.eCoreBladeType === "CRUSI_3" || coreData?.eCoreBladeType === "BLADE_3"
-    ? coreData?.yokeStacking
-    : coreData?.sideLimbStacking;
-  const table3Stacking = coreData?.eCoreBladeType === "CRUSI_3" || coreData?.eCoreBladeType === "BLADE_3"
-    ? coreData?.sideLimbStacking
-    : coreData?.doubleNotchStacking;
+  const table2Stacking = isThreeBladeLayout ? coreData?.yokeStacking : coreData?.sideLimbStacking;
+  const table3Stacking = isThreeBladeLayout ? coreData?.sideLimbStacking : coreData?.doubleNotchStacking;
   const table4Stacking = coreData?.singleNotchStacking;
 
-  const weightIndex = coreData.eCoreBladeType === "CRUSI_3" ? 5 : 4;
+  const weightIndex = bladeType === "CRUSI_3" ? 5 : 4;
   const table1TotalWeight = table1Stacking?.reduce((sum, row) => sum + (parseFloat(row[weightIndex]) || 0), 0) || 0;
   const table2TotalWeight = table2Stacking?.reduce((sum, row) => sum + (parseFloat(row[weightIndex]) || 0), 0) || 0;
   const table3TotalWeight = table3Stacking?.reduce((sum, row) => sum + (parseFloat(row[weightIndex]) || 0), 0) || 0;
   const table4TotalWeight = table4Stacking?.reduce((sum, row) => sum + (parseFloat(row[weightIndex]) || 0), 0) || 0;
 
-  const totalWeight = (coreData.eCoreBladeType === "CRUSI_3" || coreData.eCoreBladeType === "BLADE_3")
+  const totalWeight = isThreeBladeLayout
     ? (table1TotalWeight + table2TotalWeight + table3TotalWeight).toFixed(2) :
     (table1TotalWeight + table2TotalWeight + table3TotalWeight + table4TotalWeight).toFixed(2);
 
-  const tableHead = coreData.eCoreBladeType === "CRUSI_3"
+  const tableHead = bladeType === "CRUSI_3"
     ? ["Step\n  No.", "Len A\n  mm", "Len B\n  mm", "Width\n mm", "Stack\n mm", "Weight\n   kg"]
     : ["Step\n  No.", "Length\n  mm", "Width\n mm", "Stack\n mm", "Weight\n   kg"];
 
-  const coreImage1 = (coreData.eCoreBladeType === "CRUSI_4" || coreData.eCoreBladeType === "BLADE_4") ? core4_1 : core1;
-  const coreImage2 = (coreData.eCoreBladeType === "CRUSI_4" || coreData.eCoreBladeType === "BLADE_4") ? core4_2 : core2;
-  const coreImage3 = (coreData.eCoreBladeType === "CRUSI_4" || coreData.eCoreBladeType === "BLADE_4") ? core4_3 : core3;
+  const coreImage1 = isFourBladeLayout ? core4_1 : core1;
+  const coreImage2 = isFourBladeLayout ? core4_2 : core2;
+  const coreImage3 = isFourBladeLayout ? core4_3 : core3;
   const imageHeight = "55vh";
 
   return (
@@ -133,14 +135,12 @@ const PrintPreview = ({
               <FlexContainer align="center" direction="column">
                 <TextTypo text={`CORE Details for Transformer`} fontColor={previewTheme.text} />
                 <TextTypo
-                  text={`Voltage : ${twoWindings?.data?.lowVoltage}V / 
-                                ${twoWindings?.data?.highVoltage}V,    Frequency : ${twoWindings?.data?.frequency}Hz`}
+                  text={`Voltage : ${voltagePrimary}V / 
+                                ${voltageSecondary}V,    Frequency : ${designData?.frequency ?? "-"}Hz`}
                   fontColor={previewTheme.text}
                 />
                 <TextTypo
-                  text={`Core Size : ${twoWindings?.data?.core?.coreDia} / 
-                                ${twoWindings?.data?.core?.limbHt} / 
-                                ${twoWindings?.data?.core?.cenDist},    kVA : ${twoWindings?.data?.kVA}`}
+                  text={`Core Size : ${coreSize || "-"},    kVA : ${designData?.kVA ?? "-"}`}
                   fontColor={previewTheme.text}
                 />
               </FlexContainer>
@@ -202,7 +202,7 @@ const PrintPreview = ({
                     {/* Grand Total Row */}
                     <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                       <td
-                        colSpan="6"
+                        colSpan={tableHead.length}
                         style={{
                           padding: "8px",
                           border: `1px solid ${previewTheme.tableBorder}`,
@@ -284,7 +284,7 @@ const PrintPreview = ({
                       ))}
                     <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                       <td
-                        colSpan="6"
+                        colSpan={tableHead.length}
                         style={{
                           padding: "8px",
                           border: `1px solid ${previewTheme.tableBorder}`,
@@ -367,7 +367,7 @@ const PrintPreview = ({
                       ))}
                     <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                       <td
-                        colSpan="6"
+                        colSpan={tableHead.length}
                         style={{
                           padding: "8px",
                           border: `1px solid ${previewTheme.tableBorder}`,
@@ -384,7 +384,7 @@ const PrintPreview = ({
             </div>
 
             {/* table4 */}
-            {(coreData.eCoreBladeType === "CRUSI_4" || coreData.eCoreBladeType === "BLADE_4") && (
+            {isFourBladeLayout && (
               <div
                 className="d-flex"
                 style={{
@@ -465,7 +465,7 @@ const PrintPreview = ({
                         ))}
                       <tr style={{ fontWeight: "bold", backgroundColor: previewTheme.tableTotalBg, color: previewTheme.text }}>
                         <td
-                          colSpan="6"
+                          colSpan={tableHead.length}
                           style={{
                             padding: "8px",
                             border: `1px solid ${previewTheme.tableBorder}`,
