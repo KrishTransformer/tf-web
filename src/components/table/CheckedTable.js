@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,18 +7,11 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
-import { CiLogin } from "react-icons/ci";
-import { useSelector } from "react-redux";
-import { selectEntity } from "../../selectors/EntitySelector";
 import { addCalcFullfiled } from "../../actions/CalcActions";
 import { useActions } from "../../app/use-Actions";
 import { useNavigate } from "react-router-dom";
-import { FaRegTrashAlt } from "react-icons/fa";
-import ConfirmationDialog from "../../components/DeletingConfirmation";
-import { deleteEntity } from "../../actions/EntityActions";
 import {
   fetchFileFullfiled,
-  fetchFileFailed,
 } from "../../actions/FileActions";
 
 const safeJsonParse = (value, fallback = null) => {
@@ -66,70 +59,72 @@ const formatJoinedValues = (values, separator = "/") => {
   return filteredValues.join(separator);
 };
 
-export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = false }) {
-  const navigate = useNavigate();
-  const actions = useActions({ addCalcFullfiled, deleteEntity,fetchFileFullfiled });
-  const [open, setOpen] = useState(false);
+const isMultiWindingRow = (row) =>
+  row?.designType === "multi" || (!row?.designType && !!row?.multiWindings);
 
-  const [selected, setSelected] = React.useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+const parseDesignData = (row) =>
+  isMultiWindingRow(row)
+    ? safeJsonParse(row?.multiWindings, {})
+    : safeJsonParse(row?.twoWindings, {});
+
+const getVoltageValue = (designData, isMultiWindingDesign) =>
+  isMultiWindingDesign
+    ? formatJoinedValues(
+        [designData?.primaryVoltage, designData?.secondaryVoltage],
+        "/"
+      )
+    : formatJoinedValues([designData?.lowVoltage, designData?.highVoltage], "/");
+
+export default function CheckedTable({
+  rows,
+  selectedDesigns = [],
+  setSelectedDesigns,
+  isDarkMode = false,
+}) {
+  const navigate = useNavigate();
+  const actions = useActions({ addCalcFullfiled, fetchFileFullfiled });
+  const rowIds = rows?.map((row) => row.id) || [];
+  const selectedCount = rowIds.filter((id) => selectedDesigns.includes(id)).length;
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows?.map((row) => row.id);
-      setSelected(newSelected);
-      setSelectedDesigns(newSelected);
+      const mergedSelection = Array.from(
+        new Set([...(selectedDesigns || []), ...rowIds])
+      );
+      setSelectedDesigns(mergedSelection);
       return;
     }
-    setSelected([]);
-    setSelectedDesigns([]);
-  };
-
-  const handleOpenDeleteDialog = (id) => {
-    setSelectedId(id);
-    setOpen(true);
+    setSelectedDesigns(
+      (selectedDesigns || []).filter((selectedId) => !rowIds.includes(selectedId))
+    );
   };
 
   const handleClick = (id) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
+    if (selectedDesigns.includes(id)) {
+      setSelectedDesigns(selectedDesigns.filter((selectedId) => selectedId !== id));
+      return;
     }
-    
-    setSelected(newSelected);
-    setSelectedDesigns(newSelected);
+
+    setSelectedDesigns([...selectedDesigns, id]);
   };
-
-  // const handleTrashClose = () => setOpen(false);
-
-  // const handleDeleteEntities = () => {
-  //   if (selectedId) {
-  //     actions.deleteEntity(selectedId, "design");
-  //     setOpen(false);
-  //   }
-  // };
 
   const handleExistingDesignClick = (row) => {
     if (row) {
-      sessionStorage.setItem("newDesignType", "two");
-      if (row?.twoWindings) {
-        const designData = safeJsonParse(row?.twoWindings, {});
-        let metadata = {}
-        metadata.designId = row.designId;
-        metadata.createdAt = row.createdAt;
-        metadata.entityId = row.id;
-        actions.addCalcFullfiled("2windings", designData, metadata);
+      const isMultiWindingDesign = isMultiWindingRow(row);
+      const calcName = isMultiWindingDesign ? "multiwindings" : "2windings";
+      const routePath = isMultiWindingDesign ? "/multiwindings/" : "/2windings/";
+      const designData = parseDesignData(row);
+
+      sessionStorage.setItem("newDesignType", isMultiWindingDesign ? "multi" : "two");
+
+      const metadata = {
+        designId: row.designId,
+        createdAt: row.createdAt,
+        entityId: row.id,
+      };
+
+      if (designData && Object.keys(designData).length > 0) {
+        actions.addCalcFullfiled(calcName, designData, metadata);
       }
       if (row?.core) {
         const coreData = safeJsonParse(row?.core, {});
@@ -143,7 +138,7 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
         const lomData = safeJsonParse(row?.lom, []);
         actions.fetchFileFullfiled({ data: lomData });
       }
-      navigate("/2windings/" + row?.id);
+      navigate(routePath + row?.id);
     }
   };
 
@@ -164,9 +159,9 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
             <TableCell padding="checkbox">
               <Checkbox
                 indeterminate={
-                  selected.length > 0 && selected.length < rows.length
+                  selectedCount > 0 && selectedCount < rowIds.length
                 }
-                checked={rows.length > 0 && selected.length === rows.length}
+                checked={rowIds.length > 0 && selectedCount === rowIds.length}
                 onChange={handleSelectAllClick}
                 sx={{
                   color: isDarkMode ? "#8fb5ff" : undefined,
@@ -194,15 +189,13 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
         </TableHead>
         <TableBody>
           {rows.map((row) => {
-            const designData = safeJsonParse(row?.twoWindings, {});
+            const isMultiWindingDesign = isMultiWindingRow(row);
+            const designData = parseDesignData(row);
             const frameValue = formatJoinedValues(
               [designData?.core?.coreDia, designData?.core?.limbHt, designData?.core?.cenDist],
               " x "
             );
-            const voltageValue = formatJoinedValues(
-              [designData?.lowVoltage, designData?.highVoltage],
-              "/"
-            );
+            const voltageValue = getVoltageValue(designData, isMultiWindingDesign);
             const lossesValue = formatJoinedValues(
               [designData?.coreLoss, designData?.loadLoss],
               "/"
@@ -225,7 +218,7 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
               >
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={selected.includes(row.id)}
+                    checked={selectedDesigns.includes(row.id)}
                     onClick={() => handleClick(row.id)}
                     sx={{
                       color: isDarkMode ? "#8fb5ff" : undefined,
@@ -267,36 +260,22 @@ export default function CheckedTable({ rows, setSelectedDesigns, isDarkMode = fa
                 </TableCell>
                 <TableCell sx={styleRow}>{formatDisplayValue(designData?.kVA)}</TableCell>
                 <TableCell sx={styleRow}>{voltageValue}</TableCell>
-                <TableCell sx={styleRow}>{formatDisplayValue(designData?.ez)}</TableCell>
+                <TableCell sx={styleRow}>
+                  {formatDisplayValue(
+                    designData?.ez ?? designData?.commonFormulas?.ek
+                  )}
+                </TableCell>
                 <TableCell sx={styleRow}>{frameValue}</TableCell>
                 <TableCell sx={styleRow}>{formatDisplayValue(designData?.voltsPerTurn)}</TableCell>
                 <TableCell sx={styleRow}>{lossesValue}</TableCell>
                 <TableCell sx={styleRow}>
                   {formatDisplayValue(designData?.cost?.capitalCost)}
                 </TableCell>
-                {/* <TableCell sx={styleRow}>
-                  <span className="text-primary">
-                    <CiLogin /> View
-                  </span>
-                </TableCell> */}
-                {/* <TableCell sx={styleRow}>
-                  <FaRegTrashAlt
-                    onClick={() => handleOpenDeleteDialog(row.id)}
-                    style={{ cursor: "pointer" }}
-                  />
-                </TableCell> */}
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-      {/* <ConfirmationDialog
-        isDelete={true}
-        open={open}
-        handleClose={handleTrashClose}
-        handleAgree={handleDeleteEntities}
-        message="This cannot be undone and the item gets deleted permanently."
-      /> */}
     </TableContainer>
   );
 }

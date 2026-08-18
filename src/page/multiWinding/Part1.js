@@ -198,7 +198,12 @@ const coolingDetailFields = [
 const getValueByPath = (source, path) =>
   path.split(".").reduce((current, key) => current?.[key], source) ?? "";
 
-const Part1 = ({ formState, handleInputChange }) => {
+const Part1 = ({
+  formState,
+  handleInputChange,
+  handleToggleLock,
+  lockedCore,
+}) => {
   const selectedWindingConfiguration =
     formState?.windingConfiguration || windingOptions[0].value;
   const sectionColors = {
@@ -317,14 +322,14 @@ const Part1 = ({ formState, handleInputChange }) => {
               </FieldSlot>
               <FieldSlot>
                 <CustomInput
-                  label="Primary Voltage"
+                  label="Secondary Voltage"
                   value={formState?.primaryVoltage}
                   onChange={(e) => handleInputChange("primaryVoltage", e.target.value)}
                 />
               </FieldSlot>
               <FieldSlot>
                 <CustomInput
-                  label="Secondary Voltage"
+                  label="Primary Voltage"
                   value={formState?.secondaryVoltage}
                   onChange={(e) => handleInputChange("secondaryVoltage", e.target.value)}
                 />
@@ -471,6 +476,7 @@ const Part1 = ({ formState, handleInputChange }) => {
                       labelColor={winding.labelColor}
                       value={formState?.[winding.currentDensityPath]}
                       valueOfToggle={formState?.[winding.conductorMaterialPath]}
+                      autoRecalculateValue={false}
                       onValueChange={(value) =>
                         handleInputChange(winding.currentDensityPath, value)
                       }
@@ -546,6 +552,38 @@ const Part1 = ({ formState, handleInputChange }) => {
                       : "var(--app-input-bg)"
                   }
                   borderColor="var(--app-input-border)"
+                  showUnlockIcon={
+                    field.path === "core.coreDia" || field.path === "core.limbHt"
+                  }
+                  handleToggleLock={
+                    field.path === "core.coreDia"
+                      ? () =>
+                          handleToggleLock(
+                            "coreLock.coreDia",
+                            lockedCore?.coreDia
+                          )
+                      : field.path === "core.limbHt"
+                        ? () =>
+                            handleToggleLock(
+                              "coreLock.limbHt",
+                              lockedCore?.limbHt
+                            )
+                        : undefined
+                  }
+                  isLocked={
+                    field.path === "core.coreDia"
+                      ? lockedCore?.coreDia
+                      : field.path === "core.limbHt"
+                        ? lockedCore?.limbHt
+                        : false
+                  }
+                  readOnly={
+                    field.path === "core.coreDia"
+                      ? lockedCore?.coreDia
+                      : field.path === "core.limbHt"
+                        ? lockedCore?.limbHt
+                        : false
+                  }
                 />
               ))}
               <CustomInput

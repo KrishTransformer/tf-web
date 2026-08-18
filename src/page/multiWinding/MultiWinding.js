@@ -12,6 +12,133 @@ import Part2 from "./Part2";
 import Part3 from "./Part3";
 import "./MultiWindingTheme.css";
 
+const PART2_WINDING_IDS = ["lv", "hvMain", "corse", "fine", "outer"];
+
+const hasValue = (value) => value !== undefined && value !== null && value !== "";
+
+const createDefaultLockedPart2Windings = () =>
+  Object.fromEntries(
+    PART2_WINDING_IDS.map((windingId) => [
+      windingId,
+      {
+        conductorSizes: false,
+        noInParallel: false,
+      },
+    ])
+  );
+
+const cloneLockedPart2Windings = (source = {}) => {
+  const defaults = createDefaultLockedPart2Windings();
+
+  return Object.fromEntries(
+    PART2_WINDING_IDS.map((windingId) => [
+      windingId,
+      {
+        ...defaults[windingId],
+        ...(source?.[windingId] || {}),
+      },
+    ])
+  );
+};
+
+const createDefaultLockedCore = () => ({
+  coreDia: false,
+  limbHt: false,
+});
+
+const formatConductorSizesDisplay = (winding = {}) => {
+  if (winding?.isConductorRound) {
+    return hasValue(winding?.conductorDiameter)
+      ? `Round ${winding.conductorDiameter}`
+      : winding?.conductorSizes || "";
+  }
+
+  if (hasValue(winding?.condBreadth) && hasValue(winding?.condHeight)) {
+    return `${winding.condBreadth} X ${winding.condHeight}`;
+  }
+
+  return winding?.conductorSizes || "";
+};
+
+const formatNoInParallelDisplay = (winding = {}) => {
+  if (!hasValue(winding?.radialParallelCond) && !hasValue(winding?.axialParallelCond)) {
+    return winding?.noInParallel || "";
+  }
+
+  const radial = winding?.radialParallelCond ?? "";
+  const axial = winding?.axialParallelCond ?? "";
+  const total =
+    Number.isFinite(Number(radial)) && Number.isFinite(Number(axial))
+      ? Number(radial) * Number(axial)
+      : "";
+
+  return `R${radial} x A${axial} = ${total}`;
+};
+
+const formatNoOfDuctsWidthDisplay = (winding = {}) => {
+  if (!hasValue(winding?.ducts) && !hasValue(winding?.ductSize)) {
+    return winding?.noOfDuctsWidth || "";
+  }
+
+  return `${winding?.ducts ?? ""} / ${winding?.ductSize ?? ""}`;
+};
+
+const syncPart2WindingDisplayFields = (winding = {}) => ({
+  ...winding,
+  conductorSizes: formatConductorSizesDisplay(winding),
+  noInParallel: formatNoInParallelDisplay(winding),
+  noOfDuctsWidth: formatNoOfDuctsWidthDisplay(winding),
+});
+
+const getDefaultCurrentDensityForMaterial = (material) =>
+  material === "Al" ? "2.37" : "3.63";
+
+const getDefaultsForKva = (kvaValue) => {
+  const parsedKva = Number(kvaValue);
+
+  if (!Number.isFinite(parsedKva) || parsedKva <= 0) {
+    return null;
+  }
+
+  if (parsedKva <= 2500) {
+    return {
+      windingConfiguration: "2_WDG_LV_HV_MAIN",
+      primaryVoltage: 433,
+      secondaryVoltage: 11000,
+      lvWindingType: "HELICAL",
+      hvWindingType: "HELICAL",
+    };
+  }
+
+  if (parsedKva <= 10000) {
+    return {
+      windingConfiguration: "3_WDG_LV_HV_MAIN_OUTER",
+      primaryVoltage: 11000,
+      secondaryVoltage: 33000,
+      lvWindingType: "DISC",
+      hvWindingType: "DISC",
+    };
+  }
+
+  if (parsedKva <= 20000) {
+    return {
+      windingConfiguration: "4_WDG_LV_HV_MAIN_CORSE_OUTER",
+      primaryVoltage: 11000,
+      secondaryVoltage: 66000,
+      lvWindingType: "DISC",
+      hvWindingType: "DISC",
+    };
+  }
+
+  return {
+    windingConfiguration: "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
+    primaryVoltage: 33000,
+    secondaryVoltage: 132000,
+    lvWindingType: "DISC",
+    hvWindingType: "DISC",
+  };
+};
+
 const MultiWinding = () => {
   const { id } = useParams();
   const { multiWindings } = useSelector(selectCalc);
@@ -24,6 +151,12 @@ const MultiWinding = () => {
   const [formState, setFormState] = useState(
     cloneMultiWindingState(multiWindings?.data)
   );
+  const [lockedPart2Windings, setLockedPart2Windings] = useState(() =>
+    cloneLockedPart2Windings(multiWindings?.data?.lockedPart2Windings)
+  );
+  const [lockedCore, setLockedCore] = useState(
+    () => multiWindings?.data?.lockedAttributes?.coreLock || createDefaultLockedCore()
+  );
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("appTheme") === "dark"
   );
@@ -35,6 +168,12 @@ const MultiWinding = () => {
     }
 
     setFormState(cloneMultiWindingState(multiWindings.data));
+    setLockedPart2Windings(
+      cloneLockedPart2Windings(multiWindings.data?.lockedPart2Windings)
+    );
+    setLockedCore(
+      multiWindings.data?.lockedAttributes?.coreLock || createDefaultLockedCore()
+    );
   }, [multiWindings?.data, multiWindings?.isFullfilled]);
 
   useEffect(() => {
@@ -55,6 +194,45 @@ const MultiWinding = () => {
   const handleInputChange = (fieldPath, value) => {
     setFormState((prevState) => {
       const nextState = { ...prevState };
+
+      if (fieldPath === "kVA") {
+        nextState.kVA = value;
+        const defaults = getDefaultsForKva(value);
+
+        if (defaults) {
+          nextState.windingConfiguration = defaults.windingConfiguration;
+          nextState.primaryVoltage = defaults.primaryVoltage;
+          nextState.secondaryVoltage = defaults.secondaryVoltage;
+          nextState.lvWindingType = defaults.lvWindingType;
+          nextState.hvWindingType = defaults.hvWindingType;
+        }
+
+        return nextState;
+      }
+
+      if (
+        fieldPath === "lVConductorMaterial" ||
+        fieldPath === "hVConductorMaterial" ||
+        fieldPath === "corseConductorMaterial" ||
+        fieldPath === "fineConductorMaterial" ||
+        fieldPath === "outerConductorMaterial"
+      ) {
+        nextState[fieldPath] = value;
+
+        const densityFieldByMaterialField = {
+          lVConductorMaterial: "lvCurrentDensity",
+          hVConductorMaterial: "hvCurrentDensity",
+          corseConductorMaterial: "corseCurrentDensity",
+          fineConductorMaterial: "fineCurrentDensity",
+          outerConductorMaterial: "outerCurrentDensity",
+        };
+
+        nextState[densityFieldByMaterialField[fieldPath]] =
+          getDefaultCurrentDensityForMaterial(value);
+
+        return nextState;
+      }
+
       const keys = fieldPath.split(".");
       let current = nextState;
 
@@ -68,6 +246,83 @@ const MultiWinding = () => {
         current = current[key];
       });
 
+      if (keys[0] === "part2Windings" && keys.length === 3) {
+        const windingId = keys[1];
+        const field = keys[2];
+        const winding = {
+          ...(nextState.part2Windings?.[windingId] || {}),
+        };
+        const lockState = lockedPart2Windings?.[windingId] || {};
+
+        if (field === "isEnamel") {
+          winding.condInsulation = "";
+        }
+
+        if (field === "radialParallelCond" || field === "axialParallelCond") {
+          if (!lockState.conductorSizes) {
+            winding.condBreadth = "";
+            winding.condHeight = "";
+            winding.conductorDiameter = "";
+          }
+        }
+
+        if (field === "noOfLayers" && !lockState.noInParallel) {
+          winding.noInParallel = "";
+          winding.radialParallelCond = "";
+          winding.axialParallelCond = "";
+        }
+
+        if (
+          (field === "conductorDiameter" && winding.isConductorRound) ||
+          (field === "isConductorRound" && value === true)
+        ) {
+          winding.condBreadth = winding.conductorDiameter;
+          winding.condHeight = winding.conductorDiameter;
+        }
+
+        nextState.part2Windings = {
+          ...(nextState.part2Windings || {}),
+          [windingId]: syncPart2WindingDisplayFields(winding),
+        };
+      }
+
+      return nextState;
+    });
+  };
+
+  const handleToggleLock = (fieldPath, value) => {
+    const keys = fieldPath.split(".");
+
+    if (keys[0] === "coreLock" && keys.length === 2) {
+      const field = keys[1];
+      setLockedCore((prevState) => ({
+        ...(prevState || createDefaultLockedCore()),
+        [field]: !value,
+      }));
+      return;
+    }
+
+    if (keys[0] !== "part2Windings" || keys.length !== 3) {
+      return;
+    }
+
+    const windingId = keys[1];
+    const field = keys[2];
+
+    setLockedPart2Windings((prevState) => {
+      const nextState = cloneLockedPart2Windings(prevState);
+      const nextValue = !value;
+
+      nextState[windingId][field] = nextValue;
+
+      if (field === "conductorSizes" && nextValue) {
+        nextState[windingId].noInParallel = false;
+      }
+
+      if (field === "noInParallel" && nextValue) {
+        nextState[windingId].conductorSizes = false;
+      }
+
       return nextState;
     });
   };
@@ -75,11 +330,19 @@ const MultiWinding = () => {
   const handleReset = () => {
     actions.clearCalc();
     setFormState(initialState.multiWindings.data);
+    setLockedPart2Windings(createDefaultLockedPart2Windings());
+    setLockedCore(createDefaultLockedCore());
     window.scrollTo(0, 0);
   };
 
   const handleCalculate = () => {
-    actions.addCalc(buildMultiWindingPayload(formState), "multiwindings");
+    actions.addCalc(
+      buildMultiWindingPayload(formState, lockedPart2Windings, lockedCore),
+      "multiwindings",
+      undefined,
+      undefined,
+      multiWindings?.metadata
+    );
     window.scrollTo(0, 0);
   };
 
@@ -88,7 +351,13 @@ const MultiWinding = () => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
         if (!multiWindings?.isLoading) {
-          actions.addCalc(buildMultiWindingPayload(formState), "multiwindings");
+          actions.addCalc(
+            buildMultiWindingPayload(formState, lockedPart2Windings, lockedCore),
+            "multiwindings",
+            undefined,
+            undefined,
+            multiWindings?.metadata
+          );
           window.scrollTo(0, 0);
         }
       }
@@ -99,7 +368,14 @@ const MultiWinding = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [actions, formState, multiWindings?.isLoading]);
+  }, [
+    actions,
+    formState,
+    lockedCore,
+    lockedPart2Windings,
+    multiWindings?.isLoading,
+    multiWindings?.metadata,
+  ]);
 
   const currentPath = formState?.designId || (id === "new" ? "New Multi Winding" : id);
   const tabs = [
@@ -110,6 +386,8 @@ const MultiWinding = () => {
         <Part1
           formState={formState}
           handleInputChange={handleInputChange}
+          handleToggleLock={handleToggleLock}
+          lockedCore={lockedCore}
         />
       ),
     },
@@ -120,6 +398,8 @@ const MultiWinding = () => {
         <Part2
           formState={formState}
           handleInputChange={handleInputChange}
+          handleToggleLock={handleToggleLock}
+          lockedPart2Windings={lockedPart2Windings}
         />
       ),
     },

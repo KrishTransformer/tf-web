@@ -32,8 +32,7 @@ const SideBarThin = ({ id }) => {
         : "two";
 
   const showTwoWindingLink = currentDesignType === "two";
-  const showMultiWindingLink =
-    currentDesignType === "multi" && (isMultiWindingRoute || isNewDesign);
+  const showMultiWindingLink = currentDesignType === "multi";
 
   const rememberDesignType = (designType) => {
     sessionStorage.setItem("newDesignType", designType);
@@ -92,15 +91,17 @@ const SideBarThin = ({ id }) => {
                   <span>Core</span>
                 </div>
               </NavLink>
-              <NavLink
-                to={`/fabrication/${id}`}
-                className={({ isActive }) => (isActive ? "active" : "inactive")}
-              >
-                <div className="icon-container">
-                  <TbLayoutNavbar />
-                  <span>Fab</span>
-                </div>
-              </NavLink>
+              {currentDesignType === "two" && (
+                <NavLink
+                  to={`/fabrication/${id}`}
+                  className={({ isActive }) => (isActive ? "active" : "inactive")}
+                >
+                  <div className="icon-container">
+                    <TbLayoutNavbar />
+                    <span>Fab</span>
+                  </div>
+                </NavLink>
+              )}
               <NavLink
                 to={`/files/${id}`}
                 className={({ isActive }) => (isActive ? "active" : "inactive")}

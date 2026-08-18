@@ -12,6 +12,7 @@ jest.mock("../api", () => ({
   entityApi: {
     create: jest.fn(),
     list: jest.fn(),
+    update: jest.fn(),
   },
 }));
 
@@ -20,13 +21,13 @@ describe("addCalcData saga", () => {
     jest.clearAllMocks();
   });
 
-  test("routes multi-winding calculate requests to the dedicated backend and preserves the form payload", () => {
+  test("routes multi-winding calculate requests to the dedicated backend and stores a typed design record", () => {
     const action = {
-      jsonBody: { designId: "D-1001", windingSelection: "5_WDG", kVA: 100 },
+      jsonBody: { windingSelection: "5_WDG", kVA: 100 },
       calcName: "multiwindings",
       bodyType: "",
       id: "",
-      metadata: { designId: "D-1001" },
+      metadata: {},
     };
 
     const generator = addCalcData(action);
@@ -43,17 +44,101 @@ describe("addCalcData saga", () => {
       )
     );
 
-    expect(generator.next(response).value).toEqual(
+    const firstPutEffect = generator.next(response).value;
+    const firstAction = firstPutEffect.payload.action;
+    const designId = firstAction.metadata.designId;
+
+    expect(firstAction.type).toBe("ADD_CALC_FULFILLED");
+    expect(firstAction.response).toEqual(
+      expect.objectContaining({
+        windingConfiguration: "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
+        calculationResponse: response.data,
+        designId,
+        designType: "multi",
+      })
+    );
+    expect(firstAction.metadata).toEqual({ designId, entityId: "" });
+    expect(designId).toMatch(/^100k-M/);
+
+    const createEffect = generator.next().value;
+    expect(createEffect.payload.fn).toBe(entityApi.create);
+    expect(createEffect.payload.args[0]).toBe("design");
+    expect(createEffect.payload.args[1].designId).toBe(designId);
+    expect(createEffect.payload.args[1].designType).toBe("multi");
+    expect(JSON.parse(createEffect.payload.args[1].multiWindings)).toEqual(
+      expect.objectContaining({
+        windingConfiguration: "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
+        designId,
+        designType: "multi",
+      })
+    );
+
+    expect(generator.next({ data: { id: "multi-entity-1" } }).value).toEqual(
       put(
         addCalcFullfiled(
           "multiwindings",
           expect.objectContaining({
             windingConfiguration: "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
             calculationResponse: response.data,
+            designId,
+            designType: "multi",
           }),
-          action.metadata
+          { designId, entityId: "multi-entity-1" }
         )
       )
+    );
+
+    expect(generator.next().value).toEqual(
+      put(fetchEntity("design", "offset=0&size=100"))
+    );
+
+    expect(generator.next().done).toBe(true);
+  });
+
+  test("updates an existing multi-winding design when entity metadata is available", () => {
+    const action = {
+      jsonBody: { designId: "100k-M54321", windingSelection: "3_WDG", kVA: 100 },
+      calcName: "multiwindings",
+      bodyType: "",
+      id: "",
+      metadata: { designId: "100k-M54321", entityId: "entity-multi-9" },
+    };
+
+    const generator = addCalcData(action);
+    const response = { data: { selectedCode: "3_WDG", inputs: {}, results: {} } };
+
+    generator.next();
+    const firstPutEffect = generator.next(response).value;
+    expect(firstPutEffect).toEqual(
+      put(
+        addCalcFullfiled(
+          "multiwindings",
+          expect.objectContaining({
+            designId: "100k-M54321",
+            designType: "multi",
+            windingConfiguration: "3_WDG_LV_HV_MAIN_OUTER",
+          }),
+          { designId: "100k-M54321", entityId: "entity-multi-9" }
+        )
+      )
+    );
+
+    const updateEffect = generator.next().value;
+    expect(updateEffect.payload.fn).toBe(entityApi.update);
+    expect(updateEffect.payload.args[0]).toBe("design");
+    expect(updateEffect.payload.args[1]).toBe("entity-multi-9");
+    expect(updateEffect.payload.args[2].designId).toBe("100k-M54321");
+    expect(updateEffect.payload.args[2].designType).toBe("multi");
+    expect(JSON.parse(updateEffect.payload.args[2].multiWindings)).toEqual(
+      expect.objectContaining({
+        designId: "100k-M54321",
+        designType: "multi",
+        windingConfiguration: "3_WDG_LV_HV_MAIN_OUTER",
+      })
+    );
+
+    expect(generator.next({ data: { id: "entity-multi-9" } }).value).toEqual(
+      put(fetchEntity("design", "offset=0&size=100"))
     );
 
     expect(generator.next().done).toBe(true);
@@ -90,6 +175,7 @@ describe("addCalcData saga", () => {
     expect(generator.next().value).toEqual(
       call(entityApi.create, "design", {
         designId,
+        designType: "two",
         twoWindings: JSON.stringify({
           kVA: 100,
           turns: 55,
@@ -182,6 +268,7 @@ describe("addCalcData saga", () => {
     expect(generator.next().value).toEqual(
       call(entityApi.create, "design", {
         designId,
+        designType: "two",
         twoWindings: JSON.stringify({
           kVA: 400,
           current: 22,

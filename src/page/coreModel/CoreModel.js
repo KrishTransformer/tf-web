@@ -9,7 +9,6 @@ import {
   PrintPreview,
 } from "../../components";
 import CircularDiagram from "./CircularDiagram";
-import { postApi } from "../../api";
 import { useSelector } from "react-redux";
 import { selectCalc, selectCore } from "../../selectors/CalcSelector";
 import { useActions } from "../../app/use-Actions";
@@ -17,18 +16,20 @@ import { selectEntity } from "../../selectors/EntitySelector";
 import { addCalc } from "../../actions/CalcActions";
 import { useParams } from "react-router-dom";
 import "./CoreModel.css";
+
 const CoreModel = () => {
   const { id } = useParams();
-  const { twoWindings } = useSelector(selectCalc);
+  const { twoWindings, multiWindings } = useSelector(selectCalc);
   const { core } = useSelector(selectCore);
+  const isMultiWindingDesign = sessionStorage.getItem("newDesignType") === "multi";
+  const activeDesign = isMultiWindingDesign ? multiWindings : twoWindings;
+  const activeDesignData = activeDesign?.data;
+  const activeCore = activeDesignData?.core;
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("appTheme") === "dark"
   );
   const [coreData, setCoreData] = useState(core?.data);
   const [stepsData, setStepsData] = useState(core?.data?.bldStacks);
-  //console.log("Core Data:", coreData);
-  console.log("Steps Data:", stepsData);
-  console.log("twoWindings?.data?.core?.coreDia:", twoWindings?.data?.core?.coreDia);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { design } = useSelector(selectEntity);
   const actions = useActions({
@@ -36,13 +37,13 @@ const CoreModel = () => {
   });
 
   const requestPayload = {
-    coreDiameter: twoWindings?.data?.core?.coreDia,
-    limbHt: twoWindings?.data?.core?.limbHt,
-    cenDist: twoWindings?.data?.core?.cenDist,
+    coreDiameter: activeCore?.coreDia,
+    limbHt: activeCore?.limbHt,
+    cenDist: activeCore?.cenDist,
     minimumStepWidth: 0,
     numberOfSteps: 0,
     fixtureStepWidth: null,
-    eCoreBladeType: 'CRUSI_3',
+    eCoreBladeType: "CRUSI_3",
     coreStackRequestList: [],
     prevCoreStackRequestList: [],
   };
@@ -53,29 +54,34 @@ const CoreModel = () => {
     requestPayload.numberOfSteps = core?.data?.bldStacks?.length;
   }
   const [formState, setFormState] = useState(requestPayload);
+
   useEffect(() => {
     if (
-      twoWindings?.data?.core?.coreDia &&
-      twoWindings?.data?.core?.coreDia != 0 &&
+      activeCore?.coreDia &&
+      activeCore?.coreDia != 0 &&
       !core?.data?.coreArea
     ) {
       triggerCoreApi(formState);
     }
-  }, []);
+  }, [activeCore?.coreDia, core?.data?.coreArea]);
 
   useEffect(() => {
     setCoreData(core?.data);
     setStepsData(core?.data?.bldStacks);
-    if (core?.data?.coreArea) {
-      setFormState({
-        ...formState,
-        coreDiameter: twoWindings?.data?.core?.coreDia,
-        minimumStepWidth:
-          core?.data?.bldStacks[core?.data?.bldStacks?.length - 1].width,
-        numberOfSteps: core?.data?.bldStacks?.length,
-      });
-    }
-  }, [core]);
+    setFormState((prevState) => ({
+      ...prevState,
+      coreDiameter: activeCore?.coreDia,
+      limbHt: activeCore?.limbHt,
+      cenDist: activeCore?.cenDist,
+      ...(core?.data?.coreArea
+        ? {
+            minimumStepWidth:
+              core?.data?.bldStacks?.[core?.data?.bldStacks?.length - 1]?.width,
+            numberOfSteps: core?.data?.bldStacks?.length,
+          }
+        : {}),
+    }));
+  }, [activeCore?.cenDist, activeCore?.coreDia, activeCore?.limbHt, core]);
 
   useEffect(() => {
     const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
@@ -93,13 +99,15 @@ const CoreModel = () => {
   }, []);
 
   const triggerCoreApi = (payload) => {
-    let entityId = "";
-    if (twoWindings?.data?.designId) {
-      entityId = design?.data?.data?.filter(
-        (item) => item.designId == twoWindings?.data?.designId
-      )[0]?.id;
+    let entityId = id && id !== "new" ? id : "";
+
+    if (!entityId && activeDesignData?.designId) {
+      entityId = design?.data?.data?.find(
+        (item) => item.designId == activeDesignData?.designId
+      )?.id;
     }
-    actions.addCalc(payload, "core", undefined, entityId);
+
+    actions.addCalc(payload, "core", undefined, entityId || undefined);
   };
 
   const handleInputChange = (fieldPath, value) => {
@@ -138,9 +146,7 @@ const CoreModel = () => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Check if Ctrl (or Cmd on Mac) and Enter are pressed
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        console.log("Ctrl + Enter pressed");
         e.preventDefault();
         if (!core?.isLoading) {
           triggerCoreApi(formState);
@@ -150,14 +156,12 @@ const CoreModel = () => {
 
     window.addEventListener("keydown", handleKeyDown);
 
-    // Clean up the event listener on unmount
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [core?.isLoading, triggerCoreApi]);
+  }, [core?.isLoading, formState]);
 
   const handleRowSelect = (stepNo) => {
-    console.log("Row selected:", stepNo);
     setSelectedStep(stepNo);
     const selectedRow = stepsData.find((row) => row.stepNo === stepNo);
     setEditedValues({ width: selectedRow.width, stack: selectedRow.stack });
@@ -167,8 +171,6 @@ const CoreModel = () => {
     let prevData = stepsData.filter((row) => row.stepNo < selectedStep);
     let updatedWidth = editedValues.width;
     let updatedStack = editedValues.stack;
-    console.log("Updated Width:", updatedWidth);
-    console.log("Updated Stack:", updatedStack);
     let payload = {
       ...formState,
       prevCoreStackRequestList: prevData,
@@ -182,59 +184,16 @@ const CoreModel = () => {
     };
     triggerCoreApi(payload);
   };
-
-// const findMinStack = (stepsData) => {
-//   if (!stepsData || stepsData.length === 0) return null;
-
-//   return stepsData.reduce((min, step) => {
-//     if (step.stack < min) {
-//       return step.stack;
-//     }
-//     return min;
-//   }, stepsData[0].stack);
-// };
-
-
-// const minStack = findMinStack(stepsData);
-// console.log("minStack:", minStack);
-
-// const calculateNoOfSteps = (coreDia, minWidth) => {
-//   if (!coreDia || !minWidth) return 0;
-
-//   const result = Math.sqrt(Math.pow(coreDia, 2) - Math.pow(minWidth, 2));
-//   return Math.round(result);
-// };
-
-// const noOfSteps = calculateNoOfSteps(twoWindings?.data?.core?.coreDiatwoWindings?.data?.core?.coreDia, minStack);
-// console.log("No. of Steps:", noOfSteps);
-
-
-
-const calculateLimitedStacks = (steps, coreDia) => {
-  let sumPrev = 0;
-
-  return steps?.map(step => {
-    const limit = Math.sqrt(coreDia ** 2 - step.width ** 2) - sumPrev;
-    const newStack = Math.min(step.stack, Math.max(0, Math.floor(limit)));
-    //console.log("newStack:", newStack);
-    sumPrev += newStack;
-    //console.log("sumPrev:", sumPrev);
-    return Math.floor(limit);
-  });
-};
-const limitedStacks = calculateLimitedStacks(stepsData, twoWindings?.data?.core?.coreDia);
-console.log("stepsData:", stepsData);
-console.log("Limited Stacks:", limitedStacks);
-
-
-
+  const currentPath = activeDesignData?.designId || (id === "new" ? "Core" : id);
+  const revisedFluxDensity =
+    activeDesignData?.lvFormulas?.revisedFluxDensity ?? activeDesignData?.fluxDensity;
 
   return (
     <Layout
       id={id}
       isThinHeader={true}
       headProps={{
-        currentPath: twoWindings.data.designId,
+        currentPath,
       }}
     >
       <div className={`core-model-page ${isDarkMode ? "core-model-page-dark" : ""}`}>
@@ -247,7 +206,7 @@ console.log("Limited Stacks:", limitedStacks);
                 <CustomInput
                   label="Core Diameter"
                   type="text"
-                  value={twoWindings?.data?.core?.coreDia}
+                  value={activeCore?.coreDia}
                 />
                 <CustomInput
                   label="Minimum Step Width"
@@ -385,7 +344,7 @@ console.log("Limited Stacks:", limitedStacks);
                     <TextTypo
                       text={
                         <>
-                          <strong>Flux Density</strong> = {twoWindings?.data?.lvFormulas?.revisedFluxDensity?.toFixed(3)} T
+                          <strong>Flux Density</strong> = {Number(revisedFluxDensity || 0).toFixed(3)} T
                         </>
                       }
                       fontColor="var(--core-page-text)"
@@ -528,7 +487,7 @@ console.log("Limited Stacks:", limitedStacks);
                 <CircularDiagram
                   stepsData={stepsData}
                   highlightedStep={selectedStep}
-                  coreDiameter={twoWindings?.data?.core?.coreDia}
+                  coreDiameter={activeCore?.coreDia}
                 />
               )}
             </div>
@@ -540,6 +499,7 @@ console.log("Limited Stacks:", limitedStacks);
           open={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
           coreData={coreData}
+          designData={activeDesignData}
         >
           core
         </PrintPreview>

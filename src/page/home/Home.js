@@ -21,7 +21,6 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { IconButton } from "@mui/material";
 import ConfirmationDialog from "../../components/DeletingConfirmation";
 import { deleteEntity } from "../../actions/EntityActions";
-import { selectCalc } from "../../selectors/CalcSelector";
 import { IoMdPerson } from "react-icons/io";
 import { IoLogOutOutline, IoSettingsOutline } from "react-icons/io5";
 import { signOut } from "../../actions/AuthActions";
@@ -41,12 +40,13 @@ const Home = () => {
   const [selectedDesigns, setSelectedDesigns] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [designTypeModalOpen, setDesignTypeModalOpen] = useState(false);
+  const [activeDesignTab, setActiveDesignTab] = useState("two");
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("appTheme") === "dark";
   });
-  const showMultiWdgOption = false;
+  const showMultiWdgOption = true;
   const profileMenuRef = useRef(null);
   const settingsMenuRef = useRef(null);
 
@@ -55,7 +55,6 @@ const Home = () => {
   const totalEntries = design?.data?.total || 0;
   const totalPages = Math.ceil(totalEntries / size);
   const { generate3d } = useSelector(selectGenerate3D);
-  const { twoWindings } = useSelector(selectCalc);
   const [sortOption, setSortOption] = useState("updatedAt-DESC");
   
   const actions = useActions({
@@ -311,6 +310,45 @@ const Home = () => {
   );
 
   const isSingleDesignTypeOption = designTypeOptions.length === 1;
+  const designRows = design?.data?.data || [];
+  const twoWindingRows = useMemo(
+    () =>
+      designRows.filter(
+        (row) => row?.designType !== "multi" && !(row?.multiWindings && !row?.twoWindings)
+      ),
+    [designRows]
+  );
+  const multiWindingRows = useMemo(
+    () =>
+      designRows.filter(
+        (row) => row?.designType === "multi" || (!row?.designType && !!row?.multiWindings)
+      ),
+    [designRows]
+  );
+  const designTabs = [
+    {
+      key: "two",
+      label: "2 Winding Designs",
+      subtitle: "Two-winding designs open directly into the classic workflow.",
+      rows: twoWindingRows,
+    },
+    {
+      key: "multi",
+      label: "Multi Winding Designs",
+      subtitle:
+        "Multi-winding designs stay in their own list so their saved ids and routes remain distinct.",
+      rows: multiWindingRows,
+      hidden: !showMultiWdgOption,
+    },
+  ].filter((tab) => !tab.hidden);
+  const currentTab =
+    designTabs.find((tab) => tab.key === activeDesignTab) || designTabs[0];
+
+  useEffect(() => {
+    if (!designTabs.some((tab) => tab.key === activeDesignTab) && designTabs[0]) {
+      setActiveDesignTab(designTabs[0].key);
+    }
+  }, [activeDesignTab, designTabs]);
 
   // let a;
   // console.log(a.name)
@@ -417,27 +455,97 @@ const Home = () => {
           </FlexContainer>
         </Container>
 
-        <Container
-          bgColor={isDarkMode ? "#1a2534" : "white"}
-          padding="0px"
-          borderRadius="8px"
-          boxShadow={isDarkMode ? "0px 18px 34px rgba(0, 0, 0, 0.35)" : "0px 4px 8px rgba(0, 0, 0, 0.1)"}
-        >
+        <div>
           {design?.isLoading ? ( // Show loading spinner if isLoading is true
             <FlexContainer align="center" justify="center" padding="20px">
               <CircularProgress />
             </FlexContainer>
           ) : (
-            <CheckedTable
-              currentPage={currentPage}
-              rows={design?.data?.data || []}
-              size={size}
-              selectedDesigns={selectedDesigns}
-              setSelectedDesigns={setSelectedDesigns}
-              isDarkMode={isDarkMode}
-            />
+            <Container
+              bgColor={isDarkMode ? "#1a2534" : "white"}
+              padding="0px"
+              borderRadius="8px"
+              boxShadow={
+                isDarkMode
+                  ? "0px 18px 34px rgba(0, 0, 0, 0.35)"
+                  : "0px 4px 8px rgba(0, 0, 0, 0.1)"
+              }
+            >
+              <div style={{ padding: "18px 18px 10px 18px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    flexWrap: "wrap",
+                    marginBottom: "12px",
+                  }}
+                >
+                  {designTabs.map((tab) => {
+                    const isActive = currentTab?.key === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setActiveDesignTab(tab.key)}
+                        style={{
+                          border: "none",
+                          borderRadius: "999px",
+                          padding: "10px 18px",
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          backgroundColor: isActive
+                            ? isDarkMode
+                              ? "#4d8dff"
+                              : "#111111"
+                            : isDarkMode
+                              ? "#243246"
+                              : "#eef2f7",
+                          color: isActive
+                            ? "#ffffff"
+                            : isDarkMode
+                              ? "#cfe0ff"
+                              : "#425466",
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "14px",
+                    color: isDarkMode ? "#9eb0ca" : "#5f6b7a",
+                  }}
+                >
+                  {currentTab?.subtitle}
+                </p>
+              </div>
+              {currentTab?.rows?.length > 0 ? (
+                <CheckedTable
+                  currentPage={currentPage}
+                  rows={currentTab.rows}
+                  size={size}
+                  selectedDesigns={selectedDesigns}
+                  setSelectedDesigns={setSelectedDesigns}
+                  isDarkMode={isDarkMode}
+                />
+              ) : (
+                <div
+                  style={{
+                    padding: "18px",
+                    color: isDarkMode ? "#9eb0ca" : "#5f6b7a",
+                    fontSize: "14px",
+                  }}
+                >
+                  No designs in this tab for the current search or page.
+                </div>
+              )}
+            </Container>
           )}
-        </Container>
+        </div>
 
         <ConfirmationDialog
           isDelete={true}

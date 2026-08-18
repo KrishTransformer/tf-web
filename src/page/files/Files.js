@@ -53,6 +53,7 @@ import { useActions } from "../../app/use-Actions";
 import { fetchFile, addDataToLom, deleteDataFromLom, addCustomer } from "../../actions/FileActions";
 import { selectEntity } from "../../selectors/EntitySelector";
 import { fetchEntity, addEntity } from "../../actions/EntityActions";
+import { generateMultiWindingDesignPDF } from "./multiWindingPdf";
 import "./FilesTheme.css";
 
 const buildLomPayload = ({ fabrication, twoWindings, materialData, rateOverrides = {} }) => {
@@ -177,17 +178,287 @@ const buildLomPayload = ({ fabrication, twoWindings, materialData, rateOverrides
   };
 };
 
+const hasFilledValue = (value) => value !== undefined && value !== null && value !== "";
+
+const pickFirstFilled = (...values) => values.find(hasFilledValue);
+
+const formatGtpDimensionParts = (overallDimension) => {
+  const parts = String(overallDimension || "")
+    .split(" x ")
+    .map((part) => part.split(".")[0]);
+
+  return {
+    length: parts[0] || "",
+    breadth: parts[1] || "",
+    height: parts[2] || "",
+  };
+};
+
+const formatLargestPackDimension = (overallDimension) => {
+  const parts = String(overallDimension || "").split(" x ");
+
+  if (parts.length !== 3) {
+    return "";
+  }
+
+  return parts
+    .map((value, index) => `${(parseFloat(value) / 1000).toFixed(2)}${["L", "B", "H"][index]}`)
+    .join(" x ");
+};
+
+const calculateTotalLoss = (noLoadLoss, loadLoss) => {
+  const noLoadLossValue = Number(noLoadLoss);
+  const loadLossValue = Number(loadLoss);
+
+  if (!Number.isFinite(noLoadLossValue) || !Number.isFinite(loadLossValue)) {
+    return "";
+  }
+
+  return noLoadLossValue + loadLossValue;
+};
+
+const sumIfAnyValues = (...values) => {
+  const numericValues = values
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value));
+
+  if (!numericValues.length) {
+    return "";
+  }
+
+  return numericValues.reduce((sum, value) => sum + value, 0);
+};
+
+const sanitizeGtpValue = (value) => {
+  if (value === undefined || value === null) {
+    return "";
+  }
+
+  if (typeof value === "number" && !Number.isFinite(value)) {
+    return "";
+  }
+
+  if (typeof value === "string" && value.toLowerCase() === "undefined") {
+    return "";
+  }
+
+  return value;
+};
+
+const buildGtpData = (designData = {}, isMultiWindingDesign = false) => {
+  const mwResults = designData?.calculationResponse?.results || {};
+  const lvTerminal = isMultiWindingDesign
+    ? pickFirstFilled(designData?.part2Windings?.lv?.terminal, designData?.innerWindings?.terminal)
+    : designData?.innerWindings?.terminal;
+  const hvTerminal = isMultiWindingDesign
+    ? pickFirstFilled(designData?.part2Windings?.hvMain?.terminal, designData?.outerWindings?.terminal)
+    : designData?.outerWindings?.terminal;
+  const noLoadLoss = isMultiWindingDesign
+    ? pickFirstFilled(
+      designData?.hvFormulas?.coreLoss,
+      mwResults?.noLoadLoss,
+      mwResults?.coreLoss,
+      designData?.coreLoss
+    )
+    : pickFirstFilled(
+      designData?.coreLoss,
+      designData?.hvFormulas?.coreLoss
+    );
+  const loadLoss = pickFirstFilled(
+    designData?.loadLoss,
+    designData?.hvFormulas?.totalLoadLoss
+  );
+  const overallDimension = designData?.tank?.overallDimension || "";
+  const overallDimensions = formatGtpDimensionParts(overallDimension);
+  const efficiencyAndVr = designData?.efficiencyAndVr || {};
+  const noOfRadiatorsPerTrf = pickFirstFilled(
+    hasFilledValue(designData?.tankAndOilFormulas?.radiatorHeight) &&
+      hasFilledValue(designData?.tankAndOilFormulas?.radiatorWidth) &&
+      hasFilledValue(designData?.tankAndOilFormulas?.radiatorSection) &&
+      hasFilledValue(designData?.tankAndOilFormulas?.noOfRadiators)
+      ? `${designData.tankAndOilFormulas.radiatorHeight} x ${designData.tankAndOilFormulas.radiatorWidth} - ${designData.tankAndOilFormulas.radiatorSection} x ${designData.tankAndOilFormulas.noOfRadiators}`
+      : "",
+    designData?.tankAndOilFormulas?.coolingStatement,
+    ""
+  );
+
+  const rawGtpData = {
+    kVA: designData?.kVA,
+    nameOfTheManuFacture: "",
+    service: lvTerminal === "Cable Box" && hvTerminal === "Cable Box" ? "INDOOR" : "OUTDOOR",
+    hvKVARating: designData?.hVConductorMaterial === "Cu" ? "COPPER" : "ALUMINIUM",
+    lvKVARating: designData?.lVConductorMaterial === "Cu" ? "COPPER" : "ALUMINIUM",
+    noOfPhases: 3,
+    connectionSymbol: designData?.vectorGroup,
+    tappingsRange:
+      hasFilledValue(designData?.tapStepsPercent) &&
+      hasFilledValue(designData?.tapStepsPositive) &&
+      hasFilledValue(designData?.tapStepsNegative)
+        ? `+${designData.tapStepsPercent * designData.tapStepsPositive}% To -${designData.tapStepsPercent * designData.tapStepsNegative}% @ ${designData.tapStepsPercent}%`
+        : "",
+    tappingsNoOfSteps: `${Number(designData?.tapStepsPositive || 0) + Number(designData?.tapStepsNegative || 0) + 1}`,
+    tapppingFor: "HV VARIATION",
+    refAmbientTemp: hasFilledValue(designData?.ambientTemp) ? `${designData.ambientTemp}°C` : "",
+    typeOfCooling: pickFirstFilled(
+      designData?.coolingType,
+      designData?.tankAndOilFormulas?.coolingType,
+      "ONAN"
+    ),
+    tempRiseTopOil: hasFilledValue(designData?.topOilTemp) ? `${designData.topOilTemp}°C` : "",
+    tempRiseWinding: hasFilledValue(designData?.windingTemp) ? `${designData.windingTemp}°C` : "",
+    totallossRatedVoltage: calculateTotalLoss(noLoadLoss, loadLoss),
+    totallossNominalTap: loadLoss,
+    componentLossesNoLoadLoss: noLoadLoss,
+    componentLossesLoadLoss: loadLoss,
+    hvRatedVoltage: isMultiWindingDesign
+      ? pickFirstFilled(designData?.primaryVoltage, designData?.lowVoltage)
+      : designData?.lowVoltage,
+    lvRatedVoltage: isMultiWindingDesign
+      ? pickFirstFilled(designData?.secondaryVoltage, designData?.highVoltage)
+      : designData?.highVoltage,
+    hvConnection: designData?.vectorGroup?.charAt(0) === "D" ? "DELTA" : "STAR",
+    lvConnection: designData?.vectorGroup?.charAt(1) === "y" ? "STAR" : "DELTA",
+    impedanceVolt: pickFirstFilled(designData?.ez, designData?.commonFormulas?.ek),
+    reactanceRatedVoltage: designData?.commonFormulas?.ex,
+    noLoadCurrentRV: pickFirstFilled(
+      designData?.nlcurrentPercentage,
+      mwResults?.nlCurrentPercentage
+    ),
+    insulationLevelPfHv: "",
+    insulationLevelPfLv: "",
+    impulseWithStandHv: "",
+    impulseWithStandLv: "",
+    teritiaryWindingData: isMultiWindingDesign
+      ? pickFirstFilled(designData?.windingConfiguration, "N.A.")
+      : "N.A.",
+    efficienciesFullLoad: efficiencyAndVr?.efficiencyAtUnity_100 || "",
+    efficiencies75FullLoad: efficiencyAndVr?.efficiencyAtUnity_75 || "",
+    efficiencies50FullLoad: efficiencyAndVr?.efficiencyAtUnity_50 || "",
+    regulationUpf: efficiencyAndVr?.voltageRegulation_100 || "",
+    regulation80: efficiencyAndVr?.voltageRegulation_80 || "",
+    equipmentForOnanCooling: "YES",
+    equipmentForOfafCooling: "",
+    noOfRadiatorsPerTrf,
+    ratingOfEachRadiator: "",
+    offCircuitVariationTapSwitch: "YES",
+    offCircuitVariationLink: "N.A.",
+    detailOfOnLoadTapCharger: "",
+    terminalLV: lvTerminal || "",
+    terminalHV: hvTerminal || "",
+    approxMassesCoreAndWinging: designData?.tankAndOilFormulas?.weightsOfActivePart,
+    approxMassesTankFittingAndAcc: designData?.tankAndOilFormulas?.weightOfTankAndAcc,
+    approxMassesOil: designData?.tankAndOilFormulas?.oilWeight,
+    approxMassesTotal: sumIfAnyValues(
+      designData?.tankAndOilFormulas?.weightsOfActivePart,
+      designData?.tankAndOilFormulas?.weightOfTankAndAcc,
+      designData?.tankAndOilFormulas?.oilWeight
+    ),
+    approxQtyOfOilForFirstFill: designData?.tankAndOilFormulas?.totalOil,
+    approxOverallDimLength: overallDimensions.length,
+    approxOverallDimBreadth: overallDimensions.breadth,
+    approxOverallDimHeight: overallDimensions.height,
+    despatchDetailsMassOfHeaviestPack: sumIfAnyValues(
+      designData?.tankAndOilFormulas?.weightsOfActivePart,
+      designData?.tankAndOilFormulas?.weightOfTankAndAcc,
+      designData?.tankAndOilFormulas?.oilWeight
+    ),
+    despatchDetailsDimOfLargestPack: formatLargestPackDimension(overallDimension),
+    unTankingHeight: "",
+    refStandardsTransformer: "IS - 2026   Trafo-Standard",
+    refStandardsOil: "IS - 335",
+    refStandardsBushing: "IS - 2099",
+    refStandardsLoading: "IS - 6600",
+  };
+
+  return Object.fromEntries(
+    Object.entries(rawGtpData).map(([key, value]) => [key, sanitizeGtpValue(value)])
+  );
+};
+
+const pickFirstFilledValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "");
+
+const formatCorePrintVoltage = (designData, isMultiWindingDesign) => {
+  const primaryVoltage = isMultiWindingDesign
+    ? pickFirstFilledValue(designData?.primaryVoltage, designData?.lowVoltage)
+    : designData?.lowVoltage;
+  const secondaryVoltage = isMultiWindingDesign
+    ? pickFirstFilledValue(designData?.secondaryVoltage, designData?.highVoltage)
+    : designData?.highVoltage;
+
+  if (
+    (primaryVoltage === undefined || primaryVoltage === null || primaryVoltage === "") &&
+    (secondaryVoltage === undefined || secondaryVoltage === null || secondaryVoltage === "")
+  ) {
+    return "";
+  }
+
+  return `${primaryVoltage ?? ""} / ${secondaryVoltage ?? ""}`.trim();
+};
+
+const buildCorePrintHeaderLine = (designData, isMultiWindingDesign) => {
+  const voltageText = formatCorePrintVoltage(designData, isMultiWindingDesign);
+  const parts = [];
+
+  if (voltageText) {
+    parts.push(`${voltageText}V`);
+  }
+
+  if (designData?.frequency !== undefined && designData?.frequency !== null && designData?.frequency !== "") {
+    parts.push(`Hz:${designData.frequency}`);
+  }
+
+  if (designData?.kVA !== undefined && designData?.kVA !== null && designData?.kVA !== "") {
+    parts.push(`${designData.kVA}kVA`);
+  }
+
+  return parts.join(", ");
+};
+
+const formatFixedNumber = (value, digits = 3) => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue.toFixed(digits) : "";
+};
+
+const hasCorePrintData = (coreData) =>
+  Boolean(
+    coreData?.eCoreBladeType &&
+    coreData?.coreFormulas?.noOfSteps &&
+    Array.isArray(coreData?.centerLimbStacking) &&
+    coreData.centerLimbStacking.length > 0 &&
+    Array.isArray(coreData?.bldStacks) &&
+    coreData.bldStacks.length > 0
+  );
+
+const buildCorePrintMetrics = (designData = {}) => ({
+  revisedFluxDensity: pickFirstFilledValue(
+    designData?.lvFormulas?.revisedFluxDensity,
+    designData?.fluxDensity
+  ),
+  revisedVoltsPerTurn: pickFirstFilledValue(
+    designData?.lvFormulas?.revisedVoltsPerTurn,
+    designData?.voltsPerTurn
+  ),
+  coreLoss: pickFirstFilledValue(
+    designData?.hvFormulas?.coreLoss,
+    designData?.coreLoss
+  ),
+  noLoadCurrent: pickFirstFilledValue(designData?.nlcurrentPercentage, ""),
+});
+
 const Files = () => {
   const { id } = useParams();
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("appTheme") === "dark"
   );
-  const { twoWindings } = useSelector(selectCalc);
+  const { twoWindings: twoWindingCalc, multiWindings } = useSelector(selectCalc);
   const { fabrication } = useSelector(selectFabrication);
   const { core } = useSelector(selectCore);
   const { design, lomMaterial } = useSelector(selectEntity);
   const { lom } = useSelector(selectFile);
   const { customer } = useSelector(selectFile);
+  const isMultiWindingDesign = sessionStorage.getItem("newDesignType") === "multi";
+  const twoWindings = isMultiWindingDesign ? multiWindings : twoWindingCalc;
   console.log("lomMaterial", lomMaterial);
   //console.log("design in file:", design);
   const actions = useActions({
@@ -199,10 +470,10 @@ const Files = () => {
     fetchEntity,
   });
 
-  const [coreData, setCoreData] = useState(core?.data);
+  const coreData = core?.data || {};
 
   const [openAccordions, setOpenAccordions] = useState({
-    LOM: true,
+    LOM: !isMultiWindingDesign,
     CCC: false,
   });
 
@@ -225,11 +496,15 @@ const Files = () => {
     //   title: "Tank Parameter",
     //   content: "Document details go here",
     // },
-    {
-      key: "LOM",
-      title: "LOM",
-      content: "table",
-    },
+    ...(!isMultiWindingDesign
+      ? [
+        {
+          key: "LOM",
+          title: "LOM",
+          content: "table",
+        },
+      ]
+      : []),
     {
       key: "CCC",
       title: "CCC",
@@ -336,28 +611,38 @@ const Files = () => {
   //Payload for LOM
   const materialData = lomMaterial?.data?.data || [];
   const [rateOverrides, setRateOverrides] = useState({});
-  const lomPayload = buildLomPayload({
-    fabrication,
-    twoWindings,
-    materialData,
-    rateOverrides,
-  });
-  const lomRateKeys = Object.keys(lomPayload.lomRate);
+  const lomPayload = !isMultiWindingDesign
+    ? buildLomPayload({
+      fabrication,
+      twoWindings: twoWindingCalc,
+      materialData,
+      rateOverrides,
+    })
+    : null;
+  const lomRateKeys = Object.keys(lomPayload?.lomRate || {});
   const lomRateKeySignature = lomRateKeys.join("|");
 
   useEffect(() => {
+    if (isMultiWindingDesign) {
+      return;
+    }
+
     if (!lomMaterial?.isLoading && materialData.length === 0) {
       actions.fetchEntity("lomMaterial", "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC");
     }
-  }, [lomMaterial?.isLoading, materialData.length]);
+  }, [actions, isMultiWindingDesign, lomMaterial?.isLoading, materialData.length]);
 
   useEffect(() => {
+    if (isMultiWindingDesign || !lomPayload) {
+      return;
+    }
+
     actions.fetchFile(lomPayload);
-  }, [fabrication, twoWindings, lomMaterial?.data, materialData.length, rateOverrides]);
+  }, [actions, fabrication, isMultiWindingDesign, lomMaterial?.data, lomPayload, materialData.length, rateOverrides, twoWindingCalc]);
 
 
   console.log("customer:", customer);
-  const [tableRows, setTableRows] = useState(lom.data);
+  const [tableRows, setTableRows] = useState(lom.data || []);
 
   //Green checkBox handler
   const handleAddItem = () => {
@@ -432,6 +717,11 @@ const Files = () => {
   };
 
   useEffect(() => {
+    if (isMultiWindingDesign) {
+      setTableRows([]);
+      return;
+    }
+
     setTableRows(
       (lom.data || []).map((row, index) => ({
         ...row,
@@ -440,7 +730,7 @@ const Files = () => {
         rateKey: row.isNew ? row.rateKey ?? null : row.rateKey ?? lomRateKeys[index] ?? null,
       }))
     );
-  }, [lom.data, lomRateKeySignature]);
+  }, [isMultiWindingDesign, lom.data, lomRateKeySignature]);
 
   useEffect(() => {
     const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
@@ -629,6 +919,14 @@ const Files = () => {
   };
 
   const desGeneratePDF = () => {
+    if (isMultiWindingDesign) {
+      generateMultiWindingDesignPDF({
+        designData: twoWindings?.data,
+        customer: customer?.data,
+      });
+      return;
+    }
+
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const isDryType = isDryTypeDesign(twoWindings?.data?.dryType);
 
@@ -1389,79 +1687,7 @@ const Files = () => {
     ];
 
     //GTP-DATA
-    let gtpData = {
-      kVA: twoWindings.data.kVA,
-      nameOfTheManuFacture: "",
-      service: (twoWindings.data.innerWindings.terminal == "Cable Box" &&
-        twoWindings.data.outerWindings.terminal == "Cable Box") ? "INDOOR" : "OUTDOOR",
-      hvKVARating: twoWindings.data.hVConductorMaterial == "Cu" ? "COPPER" : "ALUMINIUM",
-      lvKVARating: twoWindings.data.lVConductorMaterial == "Cu" ? "COPPER" : "ALUMINIUM",
-      noOfPhases: 3,
-      connectionSymbol: twoWindings.data.vectorGroup,
-      tappingsRange: `+${twoWindings.data.tapStepsPercent * twoWindings.data.tapStepsPositive
-        }% To -${twoWindings.data.tapStepsPercent * twoWindings.data.tapStepsNegative
-        }% @ ${twoWindings.data.tapStepsPercent
-        }%`,
-      tappingsNoOfSteps: `${twoWindings.data.tapStepsPositive + twoWindings.data.tapStepsNegative + 1}`,
-      tapppingFor: "HV VARIATION",
-      refAmbientTemp: `${twoWindings.data.ambientTemp}°C`,
-      typeOfCooling: "ONAN",
-      tempRiseTopOil: `${twoWindings.data.topOilTemp}°C`,
-      tempRiseWinding: `${twoWindings.data.windingTemp}°C`,
-      totallossRatedVoltage: "",
-      totallossNominalTap: twoWindings.data.hvFormulas.totalLoadLoss,
-      componentLossesNoLoadLoss: twoWindings.data.coreLoss,
-      componentLossesLoadLoss: "",
-      hvRatedVoltage: twoWindings.data.lowVoltage,
-      lvRatedVoltage: twoWindings.data.highVoltage,
-      hvConnection: twoWindings.data.vectorGroup.charAt(0) == "D" ? "DELTA" : "STAR",
-      lvConnection: twoWindings.data.vectorGroup.charAt(1) == "y" ? "STAR" : "DELTA",
-      impedanceVolt: twoWindings.data.ez,
-      reactanceRatedVoltage: twoWindings.data.commonFormulas.ex,
-      noLoadCurrentRV: twoWindings.data.nlcurrentPercentage,
-      insulationLevelPfHv: "",
-      insulationLevelPfLv: "",
-      impulseWithStandHv: "",
-      impulseWithStandLv: "",
-      teritiaryWindingData: "N.A.",
-      efficienciesFullLoad: twoWindings.data.efficiencyAndVr.efficiencyAtUnity_100,
-      efficiencies75FullLoad: twoWindings.data.efficiencyAndVr.efficiencyAtUnity_75,
-      efficiencies50FullLoad: twoWindings.data.efficiencyAndVr.efficiencyAtUnity_50,
-      regulationUpf: twoWindings.data.efficiencyAndVr.voltageRegulation_100,
-      regulation80: twoWindings.data.efficiencyAndVr.voltageRegulation_80,
-      equipmentForOnanCooling: "YES",
-      equipmentForOfafCooling: "",
-      noOfRadiatorsPerTrf: `${twoWindings.data.tankAndOilFormulas.radiatorHeight
-        } x ${twoWindings.data.tankAndOilFormulas.radiatorWidth
-        } - ${twoWindings.data.tankAndOilFormulas.radiatorSection
-        } x ${twoWindings.data.tankAndOilFormulas.noOfRadiators}`,
-      ratingOfEachRadiator: "",
-      offCircuitVariationTapSwitch: "YES",
-      offCircuitVariationLink: "N.A.",
-      detailOfOnLoadTapCharger: "",
-      terminalLV: twoWindings.data.innerWindings.terminal,
-      terminalHV: twoWindings.data.outerWindings.terminal,
-      approxMassesCoreAndWinging: twoWindings.data.tankAndOilFormulas.weightsOfActivePart,
-      approxMassesTankFittingAndAcc: twoWindings.data.tankAndOilFormulas.weightOfTankAndAcc,
-      approxMassesOil: twoWindings.data.tankAndOilFormulas.oilWeight,
-      approxMassesTotal: (twoWindings.data.tankAndOilFormulas.weightsOfActivePart +
-        twoWindings.data.tankAndOilFormulas.weightOfTankAndAcc +
-        twoWindings.data.tankAndOilFormulas.oilWeight),
-      approxQtyOfOilForFirstFill: twoWindings.data.tankAndOilFormulas.totalOil,
-      approxOverallDimLength: twoWindings.data.tank.overallDimension.split(" x ")[0].split(".")[0],
-      approxOverallDimBreadth: twoWindings.data.tank.overallDimension.split(" x ")[1].split(".")[0],
-      approxOverallDimHeight: twoWindings.data.tank.overallDimension.split(" x ")[2].split(".")[0],
-      despatchDetailsMassOfHeaviestPack: (twoWindings.data.tankAndOilFormulas.weightsOfActivePart +
-        twoWindings.data.tankAndOilFormulas.weightOfTankAndAcc +
-        twoWindings.data.tankAndOilFormulas.oilWeight),
-      despatchDetailsDimOfLargestPack: twoWindings.data.tank.overallDimension.split(" x ")
-        .map((v, i) => `${(parseFloat(v) / 1000).toFixed(2)}${['L', 'B', 'H'][i]}`).join(" x "),
-      unTankingHeight: "",
-      refStandardsTransformer: "IS - 2026   Trafo-Standard",
-      refStandardsOil: "IS - 335",
-      refStandardsBushing: "IS - 2099",
-      refStandardsLoading: "IS - 6600",
-    };
+    let gtpData = buildGtpData(twoWindings.data, isMultiWindingDesign);
 
     const tableHead = [["S.NO.", "DESCRIPTION", "PARTICULARS"]];
 
@@ -1808,6 +2034,10 @@ const Files = () => {
   // - D : singleNotchStacking
 
   const coreBladeGeneratePDF = () => {
+    if (!hasCorePrintData(coreData)) {
+      alert("Core data is not available for this design yet. Please generate the Core once and then try the printout again.");
+      return;
+    }
 
     const coreBladeTypeMap = {
       "CRUSI_3": "3Crusi",
@@ -1819,10 +2049,7 @@ const Files = () => {
 
 
     const PDFData = {
-      data1: `${twoWindings.data.lowVoltage
-        } / ${twoWindings.data.highVoltage
-        }V, Hz:${twoWindings.data.frequency
-        }, ${twoWindings.data.kVA}kVA`,
+      data1: buildCorePrintHeaderLine(twoWindings.data, isMultiWindingDesign),
       data2: `CORE Size: ${twoWindings.data.core.coreDia
         } / ${twoWindings.data.core.limbHt} / ${twoWindings.data.core.cenDist
         }, ${coreBladeType}`,
@@ -2112,7 +2339,7 @@ const Files = () => {
         columnStyles: columnStyles,
         body: tableBodyPart4,
         didDrawCell: function (data) {
-          if (data.section === 'body' && data.row.index === tableBodyPart3.length - 1 && data.column.index === 0) {
+          if (data.section === 'body' && data.row.index === tableBodyPart4.length - 1 && data.column.index === 0) {
             const totalY = data.cell.y + data.cell.height + 2;
             const totalText = totalLine + table4TotalWeight.toFixed(2);
             doc.setFontSize(tableFontSize);
@@ -2135,7 +2362,7 @@ const Files = () => {
               data.cell.styles.cellPadding = { top: 2, right: 0.2, bottom: 0.2, left: 0.2 };
             }
 
-            if (data.section === 'body' && data.row.index === tableBodyPart1.length - 1) {
+            if (data.section === 'body' && data.row.index === tableBodyPart4.length - 1) {
               data.cell.styles.cellPadding = { top: 0.2, right: 0.2, bottom: 2, left: 0.2 };
             }
 
@@ -2182,6 +2409,21 @@ const Files = () => {
   }
 
   const coreAssemblyGeneratePDF = () => {
+    if (!hasCorePrintData(coreData)) {
+      alert("Core data is not available for this design yet. Please generate the Core once and then try the printout again.");
+      return;
+    }
+
+    const {
+      revisedFluxDensity,
+      revisedVoltsPerTurn,
+      coreLoss,
+      noLoadCurrent,
+    } = buildCorePrintMetrics(twoWindings.data);
+    const revisedFluxDensityText = formatFixedNumber(revisedFluxDensity, 3);
+    const highestFluxDensityText = revisedFluxDensityText
+      ? formatFixedNumber(Number(revisedFluxDensity) * 1.125, 3)
+      : "";
 
     const coreBladeTypeMap = {
       "CRUSI_3": "3Crusi",
@@ -2193,9 +2435,7 @@ const Files = () => {
     const coreBladeType = coreBladeTypeMap[coreData.eCoreBladeType];
 
     const PDFData = {
-      data1: `${twoWindings.data.lowVoltage
-        } / ${twoWindings.data.highVoltage
-        }V, Hz:${twoWindings.data.frequency}, ${twoWindings.data.kVA}kVA`,
+      data1: buildCorePrintHeaderLine(twoWindings.data, isMultiWindingDesign),
       data2: `CORE Size: ${twoWindings.data.core.coreDia
         } / ${twoWindings.data.core.limbHt
         } / ${twoWindings.data.core.cenDist}, ${coreBladeType}`,
@@ -2280,11 +2520,11 @@ const Files = () => {
           "TOTAL CROSS-SECTION (sqcm)\t     :" + coreData.coreArea,
           "EFFECTIVE CROSS-SECTION(sqcm)\t  :" + coreData.designedCoreArea,
           "HIGHEST V/F CONDITION %\t\t:12.5 %",
-          "NORMAL FLUX DENSITY\t\t    :" + twoWindings.data.lvFormulas.revisedFluxDensity.toFixed(3) + "T",
-          "HIGHEST FLUX DENSITY Under V/F Condn.  :" + ((twoWindings.data.lvFormulas.revisedFluxDensity * 1.125).toFixed(3) + "T"),
+          "NORMAL FLUX DENSITY\t\t    :" + (revisedFluxDensityText ? revisedFluxDensityText + "T" : ""),
+          "HIGHEST FLUX DENSITY Under V/F Condn.  :" + (highestFluxDensityText ? highestFluxDensityText + "T" : ""),
           "SATURATION LEVEL FOR THE CORE MATERIAL :20,500 guass",
-          "VOLTS per TURN :" + twoWindings.data.lvFormulas.revisedVoltsPerTurn + "     Weight Of CORE :" + coreData.coreWeight + "kg",
-          "NO-LOAD Current:" + twoWindings.data.nlcurrentPercentage + "%  NO-LOAD Loss :" + twoWindings.data.hvFormulas.coreLoss + "kW"
+          "VOLTS per TURN :" + (revisedVoltsPerTurn ?? "") + "     Weight Of CORE :" + coreData.coreWeight + "kg",
+          "NO-LOAD Current:" + (noLoadCurrent ?? "") + "%  NO-LOAD Loss :" + (coreLoss ?? "") + "kW"
         ];
 
         lines.forEach((line, index) => {
@@ -2318,17 +2558,22 @@ const Files = () => {
   const handleSaveThisDesign = () => {
     console.log("lom selector:", lom);
     console.log("twoWindings?.data?.designId:", twoWindings?.data?.designId);
-    let entityId = "";
-    if (twoWindings?.data?.designId) {
-      entityId = design?.data?.data?.filter(
-        (item) => item.designId == twoWindings?.data?.designId
-      )[0]?.id;
-    }
-    console.log("entityId:", entityId);
-    let payload = design?.data?.data?.filter(
+    const matchingDesign = design?.data?.data?.find(
       (item) => item.designId == twoWindings?.data?.designId
-    )[0];
-    payload.lom = JSON.stringify(lom?.data);
+    );
+
+    if (!matchingDesign) {
+      return;
+    }
+
+    const payload = {
+      ...matchingDesign,
+    };
+
+    if (!isMultiWindingDesign) {
+      payload.lom = JSON.stringify(lom?.data);
+    }
+
     console.log("entity payload:", payload);
     actions.addEntity(payload, "design", true);
   };
@@ -2543,7 +2788,7 @@ const Files = () => {
             />
             <FlexContainer direction="column" margin="20px 0px" className="files-download-list">
               <IconBtn
-                text="Des. Prnt Out"
+                text="Design Printout"
                 icon={<FiDownload />}
                 onClick={desGeneratePDF}
                 bgColor="var(--files-download-blue)"
@@ -2570,85 +2815,89 @@ const Files = () => {
                 bgColor="var(--files-download-sky)"
                 borderColor={filesTheme.border}
               />
-              <IconBtn
-                text="LOM"
-                icon={<FiDownload />}
-                bgColor="var(--files-download-blue)"
-                borderColor={filesTheme.border}
-                onClick={generateLomPDF}
-              />
-              <IconBtn
-                text="Tank"
-                onClick={() => {
-                  window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Tank_GAD.pdf`,
-                    "_blank"
-                  );
-                }}
-                icon={<FiDownload />}
-                bgColor="var(--files-download-pink)"
-                borderColor={filesTheme.border}
-              />
-              <IconBtn
-                text="ActivePart"
-                onClick={() => {
-                  window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_ActivePart_GAD.pdf`,
-                    "_blank"
-                  );
-                }}
-                icon={<FiDownload />}
-                bgColor="var(--files-download-amber)"
-                borderColor={filesTheme.border}
-              />
-              <IconBtn
-                text="Conservator"
-                onClick={() => {
-                  window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Conservator.pdf`,
-                    "_blank"
-                  );
-                }}
-                icon={<FiDownload />}
-                bgColor="var(--files-download-sky)"
-                borderColor={filesTheme.border}
-              />
-              <IconBtn
-                text="Lid"
-                icon={<FiDownload />}
-                onClick={() => {
-                  window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Lid.pdf`,
-                    "_blank"
-                  );
-                }}
-                bgColor="var(--files-download-blue)"
-                borderColor={filesTheme.border}
-              />
-              <IconBtn
-                text="MainAssembly_GAD"
-                onClick={() => {
-                  window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_MainAssembly_GAD.pdf`,
-                    "_blank"
-                  );
-                }}
-                icon={<FiDownload />}
-                bgColor="var(--files-download-pink)"
-                borderColor={filesTheme.border}
-              />
-              <IconBtn
-                text="Rating Plate"
-                onClick={() => {
-                  window.open(
-                    `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Rating_plate.pdf`,
-                    "_blank"
-                  );
-                }}
-                icon={<FiDownload />}
-                bgColor="var(--files-download-amber)"
-                borderColor={filesTheme.border}
-              />
+              {!isMultiWindingDesign && (
+                <>
+                  <IconBtn
+                    text="LOM"
+                    icon={<FiDownload />}
+                    bgColor="var(--files-download-blue)"
+                    borderColor={filesTheme.border}
+                    onClick={generateLomPDF}
+                  />
+                  <IconBtn
+                    text="Tank"
+                    onClick={() => {
+                      window.open(
+                        `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Tank_GAD.pdf`,
+                        "_blank"
+                      );
+                    }}
+                    icon={<FiDownload />}
+                    bgColor="var(--files-download-pink)"
+                    borderColor={filesTheme.border}
+                  />
+                  <IconBtn
+                    text="ActivePart"
+                    onClick={() => {
+                      window.open(
+                        `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_ActivePart_GAD.pdf`,
+                        "_blank"
+                      );
+                    }}
+                    icon={<FiDownload />}
+                    bgColor="var(--files-download-amber)"
+                    borderColor={filesTheme.border}
+                  />
+                  <IconBtn
+                    text="Conservator"
+                    onClick={() => {
+                      window.open(
+                        `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Conservator.pdf`,
+                        "_blank"
+                      );
+                    }}
+                    icon={<FiDownload />}
+                    bgColor="var(--files-download-sky)"
+                    borderColor={filesTheme.border}
+                  />
+                  <IconBtn
+                    text="Lid"
+                    icon={<FiDownload />}
+                    onClick={() => {
+                      window.open(
+                        `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Lid.pdf`,
+                        "_blank"
+                      );
+                    }}
+                    bgColor="var(--files-download-blue)"
+                    borderColor={filesTheme.border}
+                  />
+                  <IconBtn
+                    text="MainAssembly_GAD"
+                    onClick={() => {
+                      window.open(
+                        `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_MainAssembly_GAD.pdf`,
+                        "_blank"
+                      );
+                    }}
+                    icon={<FiDownload />}
+                    bgColor="var(--files-download-pink)"
+                    borderColor={filesTheme.border}
+                  />
+                  <IconBtn
+                    text="Rating Plate"
+                    onClick={() => {
+                      window.open(
+                        `https://transformer.treffertech.com/000_delivery/${twoWindings.data.designId}/${twoWindings.data.designId}_Rating_plate.pdf`,
+                        "_blank"
+                      );
+                    }}
+                    icon={<FiDownload />}
+                    bgColor="var(--files-download-amber)"
+                    borderColor={filesTheme.border}
+                  />
+                </>
+              )}
             </FlexContainer>
             <IconBtn
               text="Print All"
