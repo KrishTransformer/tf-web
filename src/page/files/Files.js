@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Layout,
   FlexContainer,
@@ -15,7 +15,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiDownload } from "react-icons/fi";
 import { useParams } from "react-router-dom";
 import { selectCalc, selectCore, selectFile, selectFabrication } from "../../selectors/CalcSelector";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Description } from "@mui/icons-material";
 import Table from "@mui/material/Table";
@@ -54,7 +54,62 @@ import { fetchFile, addDataToLom, deleteDataFromLom, addCustomer } from "../../a
 import { selectEntity } from "../../selectors/EntitySelector";
 import { fetchEntity, addEntity } from "../../actions/EntityActions";
 import { generateMultiWindingDesignPDF } from "./multiWindingPdf";
+import { initialState as calcInitialState } from "../../reducers/CalcReducer";
 import "./FilesTheme.css";
+
+const mergeSection = (defaults = {}, value = {}) => ({
+  ...defaults,
+  ...(value || {}),
+});
+
+const normalizeDesignData = (designData = {}, defaults) => ({
+  ...defaults,
+  ...(designData || {}),
+  core: mergeSection(defaults?.core, designData?.core),
+  commonFormulas: mergeSection(defaults?.commonFormulas, designData?.commonFormulas),
+  tank: mergeSection(defaults?.tank, designData?.tank),
+  innerWindings: mergeSection(defaults?.innerWindings, designData?.innerWindings),
+  outerWindings: mergeSection(defaults?.outerWindings, designData?.outerWindings),
+  coilDimensions: mergeSection(defaults?.coilDimensions, designData?.coilDimensions),
+  lvFormulas: mergeSection(defaults?.lvFormulas, designData?.lvFormulas),
+  hvFormulas: mergeSection(defaults?.hvFormulas, designData?.hvFormulas),
+  tankAndOilFormulas: mergeSection(defaults?.tankAndOilFormulas, designData?.tankAndOilFormulas),
+  cost: mergeSection(defaults?.cost, designData?.cost),
+  lockedAttributes: {
+    ...defaults?.lockedAttributes,
+    ...(designData?.lockedAttributes || {}),
+    coreLock: mergeSection(
+      defaults?.lockedAttributes?.coreLock,
+      designData?.lockedAttributes?.coreLock
+    ),
+    innerWindings: mergeSection(
+      defaults?.lockedAttributes?.innerWindings,
+      designData?.lockedAttributes?.innerWindings
+    ),
+    outerWindings: mergeSection(
+      defaults?.lockedAttributes?.outerWindings,
+      designData?.lockedAttributes?.outerWindings
+    ),
+  },
+});
+
+const normalizeFabricationData = (fabricationData = {}) => {
+  const defaults = calcInitialState.fabrication.data;
+
+  return {
+    ...defaults,
+    ...(fabricationData || {}),
+    hvcb: mergeSection(defaults?.hvcb, fabricationData?.hvcb),
+    lvcb: mergeSection(defaults?.lvcb, fabricationData?.lvcb),
+    drain_Vlv: mergeSection(defaults?.drain_Vlv, fabricationData?.drain_Vlv),
+    fill_Vlv: mergeSection(defaults?.fill_Vlv, fabricationData?.fill_Vlv),
+    smpl_Vlv: mergeSection(defaults?.smpl_Vlv, fabricationData?.smpl_Vlv),
+    mog: mergeSection(defaults?.mog, fabricationData?.mog),
+    roller: mergeSection(defaults?.roller, fabricationData?.roller),
+    cons: mergeSection(defaults?.cons, fabricationData?.cons),
+    restOfVariables: mergeSection(defaults?.restOfVariables, fabricationData?.restOfVariables),
+  };
+};
 
 const buildLomPayload = ({ fabrication, twoWindings, materialData, rateOverrides = {} }) => {
   const lomBooleans = {
@@ -448,6 +503,7 @@ const buildCorePrintMetrics = (designData = {}) => ({
 
 const Files = () => {
   const { id } = useParams();
+  const dispatch = useDispatch();
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("appTheme") === "dark"
   );
@@ -458,7 +514,30 @@ const Files = () => {
   const { lom } = useSelector(selectFile);
   const { customer } = useSelector(selectFile);
   const isMultiWindingDesign = sessionStorage.getItem("newDesignType") === "multi";
-  const twoWindings = isMultiWindingDesign ? multiWindings : twoWindingCalc;
+  const normalizedTwoWindingCalc = useMemo(
+    () => ({
+      ...(twoWindingCalc || {}),
+      data: normalizeDesignData(twoWindingCalc?.data, calcInitialState.twoWindings.data),
+    }),
+    [twoWindingCalc]
+  );
+  const normalizedMultiWindingCalc = useMemo(
+    () => ({
+      ...(multiWindings || {}),
+      data: normalizeDesignData(multiWindings?.data, calcInitialState.multiWindings.data),
+    }),
+    [multiWindings]
+  );
+  const normalizedFabrication = useMemo(
+    () => ({
+      ...(fabrication || {}),
+      data: normalizeFabricationData(fabrication?.data),
+    }),
+    [fabrication]
+  );
+  const twoWindings = isMultiWindingDesign
+    ? normalizedMultiWindingCalc
+    : normalizedTwoWindingCalc;
   console.log("lomMaterial", lomMaterial);
   //console.log("design in file:", design);
   const actions = useActions({
@@ -609,16 +688,26 @@ const Files = () => {
   }
 
   //Payload for LOM
-  const materialData = lomMaterial?.data?.data || [];
+  const materialData = useMemo(() => lomMaterial?.data?.data || [], [lomMaterial?.data?.data]);
   const [rateOverrides, setRateOverrides] = useState({});
-  const lomPayload = !isMultiWindingDesign
-    ? buildLomPayload({
-      fabrication,
-      twoWindings: twoWindingCalc,
+  const lomPayload = useMemo(
+    () =>
+      !isMultiWindingDesign
+        ? buildLomPayload({
+            fabrication: normalizedFabrication,
+            twoWindings: normalizedTwoWindingCalc,
+            materialData,
+            rateOverrides,
+          })
+        : null,
+    [
+      isMultiWindingDesign,
       materialData,
+      normalizedFabrication,
+      normalizedTwoWindingCalc,
       rateOverrides,
-    })
-    : null;
+    ]
+  );
   const lomRateKeys = Object.keys(lomPayload?.lomRate || {});
   const lomRateKeySignature = lomRateKeys.join("|");
 
@@ -628,17 +717,17 @@ const Files = () => {
     }
 
     if (!lomMaterial?.isLoading && materialData.length === 0) {
-      actions.fetchEntity("lomMaterial", "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC");
+      dispatch(fetchEntity("lomMaterial", "offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC"));
     }
-  }, [actions, isMultiWindingDesign, lomMaterial?.isLoading, materialData.length]);
+  }, [dispatch, isMultiWindingDesign, lomMaterial?.isLoading, materialData.length]);
 
   useEffect(() => {
     if (isMultiWindingDesign || !lomPayload) {
       return;
     }
 
-    actions.fetchFile(lomPayload);
-  }, [actions, fabrication, isMultiWindingDesign, lomMaterial?.data, lomPayload, materialData.length, rateOverrides, twoWindingCalc]);
+    dispatch(fetchFile(lomPayload));
+  }, [dispatch, isMultiWindingDesign, lomPayload]);
 
 
   console.log("customer:", customer);
