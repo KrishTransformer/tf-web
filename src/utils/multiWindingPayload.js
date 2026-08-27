@@ -47,6 +47,13 @@ const UI_TO_BACKEND_WINDING_KEY = {
   fine: "fineWindings",
   outer: "outerWindings",
 };
+const LOCKED_WINDING_FIELDS = [
+  "turnsPerPhase",
+  "conductorSizes",
+  "noInParallel",
+  "condBreadth",
+  "condHeight",
+];
 
 const hasValue = (value) => value !== undefined && value !== null && value !== "";
 
@@ -267,9 +274,10 @@ const buildWindingPayload = (winding = {}, windingType, lockState = {}) => {
 
   const conductorSizesLocked = Boolean(lockState.conductorSizes);
   const noInParallelLocked = Boolean(lockState.noInParallel);
+  const turnsPerPhaseLocked = Boolean(lockState.turnsPerPhase);
 
   return omitEmptyEntries({
-    turnsPerPhase: toNumberOrNull(winding.turnsPerPhase),
+    turnsPerPhase: turnsPerPhaseLocked ? toNumberOrNull(winding.turnsPerPhase) : null,
     conductorSizes: conductorSizesLocked ? formatConductorSizes(winding) : "",
     condInsulation: toNumberOrNull(winding.condInsulation),
     noInParallel: noInParallelLocked ? formatNoInParallel(winding) : "",
@@ -288,11 +296,35 @@ const buildWindingPayload = (winding = {}, windingType, lockState = {}) => {
   });
 };
 
+const normalizeLockedAttributes = (value = {}, legacyLockedCore) => {
+  const source = value && typeof value === "object" ? value : {};
+  const coreLock = legacyLockedCore || source.coreLock || {};
+
+  return {
+    coreLock: {
+      coreDia: Boolean(coreLock.coreDia),
+      limbHt: Boolean(coreLock.limbHt),
+    },
+    ...Object.fromEntries(
+      Object.entries(UI_TO_BACKEND_WINDING_KEY).map(([uiKey, backendKey]) => {
+        const group = source[backendKey] || source[uiKey] || {};
+        return [
+          backendKey,
+          Object.fromEntries(
+            LOCKED_WINDING_FIELDS.map((field) => [field, Boolean(group[field])])
+          ),
+        ];
+      })
+    ),
+  };
+};
+
 export const buildMultiWindingPayload = (
   formState = {},
-  lockedPart2Windings = {},
-  lockedCore = {}
+  lockedAttributes = {},
+  legacyLockedCore
 ) => {
+  const normalizedLocks = normalizeLockedAttributes(lockedAttributes, legacyLockedCore);
   const windingConfiguration =
     formState.windingConfiguration || "2_WDG_LV_HV_MAIN";
   const lvWindingType = asNullable(normalizeWindingTypeCode(formState.lvWindingType));
@@ -326,7 +358,7 @@ export const buildMultiWindingPayload = (
       buildWindingPayload(
         formState.part2Windings?.[uiKey],
         windingTypesByUiKey[uiKey],
-        lockedPart2Windings?.[uiKey]
+        normalizedLocks[UI_TO_BACKEND_WINDING_KEY[uiKey]]
       ),
     ])
   );
@@ -363,13 +395,14 @@ export const buildMultiWindingPayload = (
     lvWindings: windingPayloads.lvWindings ?? null,
     hvWindings: windingPayloads.hvWindings ?? null,
     core: {
-      coreDia: lockedCore?.coreDia
+      coreDia: normalizedLocks.coreLock.coreDia
         ? toIntegerOrNull(formState.core?.coreDia)
         : null,
-      limbHt: lockedCore?.limbHt
+      limbHt: normalizedLocks.coreLock.limbHt
         ? toIntegerOrNull(formState.core?.limbHt)
         : null,
     },
+    lockedAttributes: normalizedLocks,
     cost: buildCostPayload(formState),
     radialGaps,
   };

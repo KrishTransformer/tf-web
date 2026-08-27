@@ -48,7 +48,9 @@ describe("buildMultiWindingPayload", () => {
           lvhvgap: 10,
         },
       },
-      {},
+      {
+        outerWindings: { turnsPerPhase: true },
+      },
       { coreDia: true, limbHt: true }
     );
 
@@ -150,6 +152,9 @@ describe("buildMultiWindingPayload", () => {
           conductorSizes: true,
           noInParallel: true,
         },
+        outer: {
+          turnsPerPhase: true,
+        },
       }
     );
 
@@ -211,6 +216,24 @@ describe("buildMultiWindingPayload", () => {
     expect(payload.lvWindings).toEqual({
       isEnamel: false,
     });
+  });
+
+  test("sends turns only when the native winding lock is enabled", () => {
+    const formState = {
+      part2Windings: {
+        lv: { turnsPerPhase: "99" },
+      },
+    };
+
+    const unlockedPayload = buildMultiWindingPayload(formState);
+    const lockedPayload = buildMultiWindingPayload(formState, {
+      lvWindings: { turnsPerPhase: true },
+    });
+
+    expect(unlockedPayload.lvWindings).not.toHaveProperty("turnsPerPhase");
+    expect(lockedPayload.lvWindings.turnsPerPhase).toBe(99);
+    expect(lockedPayload.lockedAttributes.lvWindings.turnsPerPhase).toBe(true);
+    expect(lockedPayload.lockedAttributes.hvWindings.turnsPerPhase).toBe(false);
   });
 
   test("casts edited voltages to integers before sending", () => {

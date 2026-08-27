@@ -1172,6 +1172,26 @@ initialState.multiWindings.data = {
   corseWindingType: "HELICAL",
   fineWindingType: "HELICAL",
   outerWindingType: "HELICAL",
+  lockedAttributes: {
+    coreLock: {
+      coreDia: false,
+      limbHt: false,
+    },
+    ...Object.fromEntries(
+      ["lvWindings", "hvWindings", "corseWindings", "fineWindings", "outerWindings"].map(
+        (winding) => [
+          winding,
+          {
+            turnsPerPhase: false,
+            conductorSizes: false,
+            noInParallel: false,
+            condBreadth: false,
+            condHeight: false,
+          },
+        ]
+      )
+    ),
+  },
   cost: {
     ...initialState.multiWindings.data.cost,
     ...MULTI_WDG_DEFAULT_COST,

@@ -9,6 +9,20 @@ const SELECTED_CODE_TO_CONFIGURATION = {
   "4_WDG_F": "4_WDG_LV_HV_MAIN_FINE_OUTER",
   "5_WDG": "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
 };
+const MULTI_WDG_LOCK_GROUPS = [
+  "lvWindings",
+  "hvWindings",
+  "corseWindings",
+  "fineWindings",
+  "outerWindings",
+];
+const LOCKED_WINDING_FIELDS = [
+  "turnsPerPhase",
+  "conductorSizes",
+  "noInParallel",
+  "condBreadth",
+  "condHeight",
+];
 
 const roundIfNumber = (value, digits = 3) =>
   typeof value === "number" ? Number(value.toFixed(digits)) : value;
@@ -18,6 +32,28 @@ const pickDefined = (...values) =>
 
 const asObject = (value) =>
   value !== null && typeof value === "object" && !Array.isArray(value) ? value : {};
+
+const normalizeLockedAttributes = (value) => {
+  const source = asObject(value);
+  const coreLock = asObject(source.coreLock);
+  return {
+    coreLock: {
+      coreDia: Boolean(coreLock.coreDia),
+      limbHt: Boolean(coreLock.limbHt),
+    },
+    ...Object.fromEntries(
+      MULTI_WDG_LOCK_GROUPS.map((group) => {
+        const locks = asObject(source[group]);
+        return [
+          group,
+          Object.fromEntries(
+            LOCKED_WINDING_FIELDS.map((field) => [field, Boolean(locks[field])])
+          ),
+        ];
+      })
+    ),
+  };
+};
 
 const normalizeUiConductorMaterial = (value) => {
   if (value === undefined || value === null || value === "") {
@@ -197,6 +233,9 @@ export const mapMultiWindingResponseToFormState = (responseData = {}) => {
   const corseWinding = asObject(results.corseWinding);
   const fineWinding = asObject(results.fineWinding);
   const outerWinding = asObject(results.outerWinding);
+  const lockedAttributes = normalizeLockedAttributes(
+    responseData.lockedAttributes ?? results.lockedAttributes
+  );
   const configuration =
     SELECTED_CODE_TO_CONFIGURATION[responseData.selectedCode] ||
     "2_WDG_LV_HV_MAIN";
@@ -293,6 +332,7 @@ export const mapMultiWindingResponseToFormState = (responseData = {}) => {
       ...(results.core || inputs.core || {}),
       area: results.core?.area ?? inputs.core?.area ?? "",
     },
+    lockedAttributes,
     commonFormulas: {
       ampereTurns: common.ampereTurns ?? "",
       er: results.impedance?.er ?? common.er ?? "",

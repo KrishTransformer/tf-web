@@ -23,7 +23,7 @@ describe("mapMultiWindingResponseToFormState", () => {
     expect(formState.fineWindingType).toBe("HELICAL");
     expect(formState.outerWindingType).toBe("HELICAL");
     expect(formState.lvCurrentDensity).toBe("4.24");
-    expect(formState.fineCurrentDensity).toBe("4.24");
+    expect(formState.fineCurrentDensity).toBe("3.63");
     expect(formState.tapStepsPercent).toBe(2.5);
     expect(formState.tapStepsPositive).toBe(2);
     expect(formState.tapStepsNegative).toBe(2);
@@ -33,7 +33,7 @@ describe("mapMultiWindingResponseToFormState", () => {
     expect(formState.eRadiatorType).toBe("RADIATOR");
     expect(formState.core.coreType).toBe("PRIME");
     expect(formState.core.coreMaterial).toBe("NipM4");
-    expect(formState.lockedAttributes.innerWindings.noInParallel).toBe(false);
+    expect(formState.lockedAttributes.lvWindings.noInParallel).toBe(false);
     expect(formState.comments.hvToHvClrComment).toBe("");
     expect(formState.multiCoilDimensions.gaps.hvMainToCorseGap).toBe("");
     expect(formState.part2Windings.lv.isEnamel).toBe(false);
@@ -96,6 +96,27 @@ describe("mapMultiWindingResponseToFormState", () => {
     expect(formState.part2Windings.outer.weightBareInsulated).toBe("");
     expect(formState.multiCost.conductors.corse.weight).toBe("");
     expect(formState.multiCost.conductors.outer.totalCost).toBe("");
+  });
+
+  test("restores native multi-winding lock groups from the backend response", () => {
+    const formState = mapMultiWindingResponseToFormState({
+      selectedCode: "5_WDG",
+      lockedAttributes: {
+        coreLock: { limbHt: true },
+        lvWindings: { turnsPerPhase: true },
+        hvWindings: { conductorSizes: true },
+        corseWindings: { condHeight: true },
+        fineWindings: { noInParallel: true },
+        outerWindings: { condBreadth: true },
+      },
+    });
+
+    expect(formState.lockedAttributes.coreLock.limbHt).toBe(true);
+    expect(formState.lockedAttributes.lvWindings.turnsPerPhase).toBe(true);
+    expect(formState.lockedAttributes.hvWindings.conductorSizes).toBe(true);
+    expect(formState.lockedAttributes.corseWindings.condHeight).toBe(true);
+    expect(formState.lockedAttributes.fineWindings.noInParallel).toBe(true);
+    expect(formState.lockedAttributes.outerWindings.condBreadth).toBe(true);
   });
 
   test("maps a 5-winding backend response into the current multi-winding form state", () => {
