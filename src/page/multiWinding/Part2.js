@@ -34,6 +34,14 @@ const windingColumns = [
   },
 ];
 
+const LOCK_GROUP_BY_WINDING_ID = {
+  lv: "lvWindings",
+  hvMain: "hvWindings",
+  corse: "corseWindings",
+  fine: "fineWindings",
+  outer: "outerWindings",
+};
+
 const configurationColumns = {
   "2_WDG_LV_HV_MAIN": ["lv", "hvMain"],
   "3_WDG_LV_HV_MAIN_OUTER": ["lv", "hvMain", "outer"],
@@ -129,7 +137,7 @@ const Part2 = ({
   formState,
   handleInputChange,
   handleToggleLock,
-  lockedPart2Windings,
+  lockedAttributes,
 }) => {
   const selectedConfiguration =
     formState?.windingConfiguration || "2_WDG_LV_HV_MAIN";
@@ -174,7 +182,7 @@ const Part2 = ({
 
                 {visibleColumns.map((column) => {
                   const winding = getPart2Winding(formState, column.id);
-                  const lockState = lockedPart2Windings?.[column.id] || {};
+                  const lockState = lockedAttributes?.[LOCK_GROUP_BY_WINDING_ID[column.id]] || {};
 
                   return (
                     <div
@@ -284,6 +292,15 @@ const Part2 = ({
                           }
                           borderColor="var(--app-input-border)"
                           placeholder={column.label}
+                          showUnlockIcon={field.key === "turnsPerPhase"}
+                          readOnly={field.key === "turnsPerPhase" && lockState?.turnsPerPhase}
+                          handleToggleLock={() =>
+                            handleToggleLock(
+                              getPart2FieldPath(column.id, field.key),
+                              lockState?.turnsPerPhase
+                            )
+                          }
+                          isLocked={field.key === "turnsPerPhase" && lockState?.turnsPerPhase}
                         />
                       )}
                     </div>

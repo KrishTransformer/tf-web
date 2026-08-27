@@ -13,38 +13,62 @@ import Part3 from "./Part3";
 import "./MultiWindingTheme.css";
 
 const PART2_WINDING_IDS = ["lv", "hvMain", "corse", "fine", "outer"];
+const LOCK_GROUP_BY_WINDING_ID = {
+  lv: "lvWindings",
+  hvMain: "hvWindings",
+  corse: "corseWindings",
+  fine: "fineWindings",
+  outer: "outerWindings",
+};
+const LOCKED_WINDING_FIELDS = [
+  "turnsPerPhase",
+  "conductorSizes",
+  "noInParallel",
+  "condBreadth",
+  "condHeight",
+];
 
 const hasValue = (value) => value !== undefined && value !== null && value !== "";
-
-const createDefaultLockedPart2Windings = () =>
-  Object.fromEntries(
-    PART2_WINDING_IDS.map((windingId) => [
-      windingId,
-      {
-        conductorSizes: false,
-        noInParallel: false,
-      },
-    ])
-  );
-
-const cloneLockedPart2Windings = (source = {}) => {
-  const defaults = createDefaultLockedPart2Windings();
-
-  return Object.fromEntries(
-    PART2_WINDING_IDS.map((windingId) => [
-      windingId,
-      {
-        ...defaults[windingId],
-        ...(source?.[windingId] || {}),
-      },
-    ])
-  );
-};
 
 const createDefaultLockedCore = () => ({
   coreDia: false,
   limbHt: false,
 });
+
+const createDefaultLockedAttributes = () => ({
+  coreLock: createDefaultLockedCore(),
+  ...Object.fromEntries(
+    PART2_WINDING_IDS.map((windingId) => [
+      LOCK_GROUP_BY_WINDING_ID[windingId],
+      Object.fromEntries(LOCKED_WINDING_FIELDS.map((field) => [field, false])),
+    ])
+  ),
+});
+
+const cloneLockedAttributes = (source = {}) => {
+  const defaults = createDefaultLockedAttributes();
+  return {
+    coreLock: {
+      ...defaults.coreLock,
+      ...(source?.coreLock || {}),
+    },
+    ...Object.fromEntries(
+      PART2_WINDING_IDS.map((windingId) => {
+        const group = LOCK_GROUP_BY_WINDING_ID[windingId];
+        return [
+          group,
+          {
+            ...defaults[group],
+            ...(source?.[group] || {}),
+          },
+        ];
+      })
+    ),
+  };
+};
+
+const getWindingLocks = (lockedAttributes, windingId) =>
+  lockedAttributes?.[LOCK_GROUP_BY_WINDING_ID[windingId]] || {};
 
 const formatConductorSizesDisplay = (winding = {}) => {
   if (winding?.isConductorRound) {
@@ -151,11 +175,8 @@ const MultiWinding = () => {
   const [formState, setFormState] = useState(
     cloneMultiWindingState(multiWindings?.data)
   );
-  const [lockedPart2Windings, setLockedPart2Windings] = useState(() =>
-    cloneLockedPart2Windings(multiWindings?.data?.lockedPart2Windings)
-  );
-  const [lockedCore, setLockedCore] = useState(
-    () => multiWindings?.data?.lockedAttributes?.coreLock || createDefaultLockedCore()
+  const [lockedAttributes, setLockedAttributes] = useState(() =>
+    cloneLockedAttributes(multiWindings?.data?.lockedAttributes)
   );
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("appTheme") === "dark"
@@ -168,12 +189,7 @@ const MultiWinding = () => {
     }
 
     setFormState(cloneMultiWindingState(multiWindings.data));
-    setLockedPart2Windings(
-      cloneLockedPart2Windings(multiWindings.data?.lockedPart2Windings)
-    );
-    setLockedCore(
-      multiWindings.data?.lockedAttributes?.coreLock || createDefaultLockedCore()
-    );
+    setLockedAttributes(cloneLockedAttributes(multiWindings.data?.lockedAttributes));
   }, [multiWindings?.data, multiWindings?.isFullfilled]);
 
   useEffect(() => {
@@ -252,7 +268,7 @@ const MultiWinding = () => {
         const winding = {
           ...(nextState.part2Windings?.[windingId] || {}),
         };
-        const lockState = lockedPart2Windings?.[windingId] || {};
+        const lockState = getWindingLocks(lockedAttributes, windingId);
 
         if (field === "isEnamel") {
           winding.condInsulation = "";
@@ -295,10 +311,11 @@ const MultiWinding = () => {
 
     if (keys[0] === "coreLock" && keys.length === 2) {
       const field = keys[1];
-      setLockedCore((prevState) => ({
-        ...(prevState || createDefaultLockedCore()),
-        [field]: !value,
-      }));
+      setLockedAttributes((prevState) => {
+        const nextState = cloneLockedAttributes(prevState);
+        nextState.coreLock[field] = !value;
+        return nextState;
+      });
       return;
     }
 
@@ -308,19 +325,49 @@ const MultiWinding = () => {
 
     const windingId = keys[1];
     const field = keys[2];
+    const nextValue = !value;
 
-    setLockedPart2Windings((prevState) => {
-      const nextState = cloneLockedPart2Windings(prevState);
-      const nextValue = !value;
+    if (!nextValue && ["turnsPerPhase", "conductorSizes", "noInParallel"].includes(field)) {
+      setFormState((prevState) => {
+        const winding = {
+          ...(prevState.part2Windings?.[windingId] || {}),
+        };
 
-      nextState[windingId][field] = nextValue;
+        if (field === "turnsPerPhase") {
+          winding.turnsPerPhase = "";
+        } else if (field === "conductorSizes") {
+          winding.conductorSizes = "";
+          winding.condBreadth = "";
+          winding.condHeight = "";
+          winding.conductorDiameter = "";
+        } else {
+          winding.noInParallel = "";
+          winding.radialParallelCond = "";
+          winding.axialParallelCond = "";
+        }
+
+        return {
+          ...prevState,
+          part2Windings: {
+            ...prevState.part2Windings,
+            [windingId]: syncPart2WindingDisplayFields(winding),
+          },
+        };
+      });
+    }
+
+    setLockedAttributes((prevState) => {
+      const nextState = cloneLockedAttributes(prevState);
+      const lockGroup = LOCK_GROUP_BY_WINDING_ID[windingId];
+
+      nextState[lockGroup][field] = nextValue;
 
       if (field === "conductorSizes" && nextValue) {
-        nextState[windingId].noInParallel = false;
+        nextState[lockGroup].noInParallel = false;
       }
 
       if (field === "noInParallel" && nextValue) {
-        nextState[windingId].conductorSizes = false;
+        nextState[lockGroup].conductorSizes = false;
       }
 
       return nextState;
@@ -330,14 +377,13 @@ const MultiWinding = () => {
   const handleReset = () => {
     actions.clearCalc();
     setFormState(initialState.multiWindings.data);
-    setLockedPart2Windings(createDefaultLockedPart2Windings());
-    setLockedCore(createDefaultLockedCore());
+    setLockedAttributes(createDefaultLockedAttributes());
     window.scrollTo(0, 0);
   };
 
   const handleCalculate = () => {
     actions.addCalc(
-      buildMultiWindingPayload(formState, lockedPart2Windings, lockedCore),
+      buildMultiWindingPayload(formState, lockedAttributes),
       "multiwindings",
       undefined,
       undefined,
@@ -352,7 +398,7 @@ const MultiWinding = () => {
         event.preventDefault();
         if (!multiWindings?.isLoading) {
           actions.addCalc(
-            buildMultiWindingPayload(formState, lockedPart2Windings, lockedCore),
+            buildMultiWindingPayload(formState, lockedAttributes),
             "multiwindings",
             undefined,
             undefined,
@@ -371,8 +417,7 @@ const MultiWinding = () => {
   }, [
     actions,
     formState,
-    lockedCore,
-    lockedPart2Windings,
+    lockedAttributes,
     multiWindings?.isLoading,
     multiWindings?.metadata,
   ]);
@@ -387,7 +432,7 @@ const MultiWinding = () => {
           formState={formState}
           handleInputChange={handleInputChange}
           handleToggleLock={handleToggleLock}
-          lockedCore={lockedCore}
+          lockedCore={lockedAttributes.coreLock}
         />
       ),
     },
@@ -399,7 +444,7 @@ const MultiWinding = () => {
           formState={formState}
           handleInputChange={handleInputChange}
           handleToggleLock={handleToggleLock}
-          lockedPart2Windings={lockedPart2Windings}
+          lockedAttributes={lockedAttributes}
         />
       ),
     },
