@@ -1,12 +1,66 @@
 import axios from "axios";
 import CustomCookies from "./Cookies";
-import { clearAuthTokens, getIdToken } from "./authToken";
+import { clearAuthTokens, getIdToken, getRefreshToken, setAuthTokens } from "./authToken";
 import { COMMON_SERVICE } from "../constants/CommonConstants";
 import { sanitizeEntityPayload } from "../utils/entityPayload";
 
 const instance = axios.create({
   withCredentials: false,
 });
+
+let refreshRequest;
+
+const getTokenIdentity = (token) => {
+  try {
+    const payload = JSON.parse(window.atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return payload.email || payload.preferred_username || payload.username || "";
+  } catch (error) {
+    return "";
+  }
+};
+
+const expireSession = () => {
+  clearAuthTokens();
+  CustomCookies.setAuthRedirectMessage("Session expired. Please log in again.");
+  redirectToLogin();
+};
+
+const refreshIdToken = () => {
+  if (refreshRequest) {
+    return refreshRequest;
+  }
+
+  const idToken = getIdToken();
+  const refreshToken = getRefreshToken();
+  const identity = getTokenIdentity(idToken);
+
+  if (!identity || !refreshToken) {
+    return Promise.reject(new Error("No refresh session is available."));
+  }
+
+  const authorization = `Basic ${window.btoa(`${identity}:${refreshToken}`)}`;
+  refreshRequest = instance
+    .post(`${commonServiceConfig.API_URL}/auth/signInWithRefreshToken`, null, {
+      headers: { Authorization: authorization },
+    })
+    .then((response) => {
+      const refreshedIdToken = response.data?.idToken || response.data?.id_token;
+      const refreshedRefreshToken =
+        response.data?.refreshToken || response.data?.refresh_token || refreshToken;
+
+      if (!refreshedIdToken) {
+        throw new Error("The refresh response did not include an ID token.");
+      }
+
+      setAuthTokens({ idToken: refreshedIdToken, refreshToken: refreshedRefreshToken });
+      return refreshedIdToken;
+    })
+    .finally(() => {
+      refreshRequest = undefined;
+    });
+
+  return refreshRequest;
+};
 
 instance.interceptors.request.use(async (config) => {
   if (!config.headers) {
@@ -35,16 +89,28 @@ instance.interceptors.response.use(
   (res) => {
     return res;
   },
-  function (error) {
+  async function (error) {
+    const originalRequest = error?.config;
     const authorizationHeader =
-      error?.config?.headers?.Authorization || error?.config?.headers?.authorization || "";
+      originalRequest?.headers?.Authorization || originalRequest?.headers?.authorization || "";
     const isBearerRequest =
       typeof authorizationHeader === "string" && authorizationHeader.startsWith("Bearer ");
 
     if (error.response && [401, 403].includes(error.response.status) && isBearerRequest) {
-      clearAuthTokens();
-      CustomCookies.setAuthRedirectMessage("Session expired. Please log in again.");
-      redirectToLogin();
+      if (originalRequest?._retryAfterRefresh) {
+        expireSession();
+        return Promise.reject(error);
+      }
+
+      try {
+        const refreshedIdToken = await refreshIdToken();
+        originalRequest._retryAfterRefresh = true;
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${refreshedIdToken}`;
+        return instance(originalRequest);
+      } catch (refreshError) {
+        expireSession();
+      }
     }
     return Promise.reject(error);
   }
