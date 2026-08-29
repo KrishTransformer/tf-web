@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import {
-  CheckedTable,
-  Container,
-  CustomModal,
-  FlexContainer,
-  Layout,
-  SearchInput,
-} from "../../components";
+import { CheckedTable, CustomModal, Layout, SearchInput } from "../../components";
 import { useNavigate } from "react-router-dom";
 import { useActions } from "../../app/use-Actions";
 import { fetchEntity, fetchSearchEntity } from "../../actions/EntityActions";
@@ -14,11 +7,10 @@ import { clearCalc, generate3DCleared } from "../../actions/CalcActions";
 import { useSelector } from "react-redux";
 import Pagination from "../../components/Pagination/Pagination";
 import { selectEntity } from "../../selectors/EntitySelector";
-import CircularProgress from "@mui/material/CircularProgress"; // Import a loading spinner
-import { selectGenerate3D, } from "../../selectors/CalcSelector";
+import CircularProgress from "@mui/material/CircularProgress";
+import { selectGenerate3D } from "../../selectors/CalcSelector";
 import { resetCustomerData } from "../../actions/FileActions";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { IconButton } from "@mui/material";
 import ConfirmationDialog from "../../components/DeletingConfirmation";
 import { deleteEntity } from "../../actions/EntityActions";
 import { IoMdPerson } from "react-icons/io";
@@ -35,7 +27,7 @@ import "./Home.css";
 const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const size = 20; // Number of entries per page
+  const size = 20;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDesigns, setSelectedDesigns] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -56,7 +48,7 @@ const Home = () => {
   const totalPages = Math.ceil(totalEntries / size);
   const { generate3d } = useSelector(selectGenerate3D);
   const [sortOption, setSortOption] = useState("updatedAt-DESC");
-  
+
   const actions = useActions({
     fetchEntity,
     fetchSearchEntity,
@@ -97,26 +89,24 @@ const Home = () => {
   }, [name]);
 
   const searchPayload = {
-    "attributeName": ["designId"],
-    "attributeValue": searchQuery,
-    "sortAttribute": "updatedAt",
-    "sortOrder": "DESC"
-  }
+    attributeName: ["designId"],
+    attributeValue: searchQuery,
+    sortAttribute: "updatedAt",
+    sortOrder: "DESC",
+  };
 
-  let offset = (currentPage - 1);
+  let offset = currentPage - 1;
 
   useEffect(() => {
     if (searchQuery === "") {
       fetchData();
-    }
-    else {
+    } else {
       actions.fetchSearchEntity("design", `offset=${offset}&size=${size}`, searchPayload);
     }
     if (generate3d?.data?.blob?.startsWith?.("blob:")) {
       URL.revokeObjectURL(generate3d?.data?.blob);
-      actions.generate3DCleared()
+      actions.generate3DCleared();
     }
-
   }, [currentPage, sortOption]);
 
   useEffect(() => {
@@ -171,8 +161,10 @@ const Home = () => {
 
   const fetchData = () => {
     const [sortAttribute, sortOrder] = sortOption.split("-");
-    //let offset = (currentPage - 1);
-    actions.fetchEntity("design", `offset=${offset}&size=${size}&&sortAttribute=${sortAttribute}&sortOrder=${sortOrder}`);
+    actions.fetchEntity(
+      "design",
+      `offset=${offset}&size=${size}&&sortAttribute=${sortAttribute}&sortOrder=${sortOrder}`
+    );
   };
 
   const handleNewDesignClick = () => {
@@ -208,7 +200,6 @@ const Home = () => {
     setDeleteConfirmOpen(false);
     setSelectedDesigns([]);
   };
-
 
   const handlePageChange = (page) => {
     if (totalPages === 0) {
@@ -274,43 +265,34 @@ const Home = () => {
     navigate("/lomCost");
   };
 
-  const designTypeOptions = useMemo(
-    () => {
-      const options = [
-        {
-          key: "two",
-          designType: "two",
-          badge: "2W",
-          tag: "Production Flow",
-          title: "2 Winding",
-          description:
-            "Start the current two-winding design workflow with the full calculation page.",
-          features: ["Oil Type", "Dry Type", "Mechanical Design"],
-          cta: "Open 2 Winding",
-        },
-      ];
+  const designTypeOptions = useMemo(() => {
+    const options = [
+      {
+        key: "two",
+        designType: "two",
+        badge: "2W",
+        title: "2 Winding",
+        description: "Start the standard two-winding design workflow.",
+        cta: "Open 2 Winding",
+      },
+    ];
 
-      if (showMultiWdgOption) {
-        options.push({
-          key: "multi",
-          designType: "multi",
-          badge: "MW",
-          tag: "New Workspace",
-          title: "Multi Winding",
-          description:
-            "Open the multi-winding workspace prepared for the next design flow we are building out.",
-          features: ["Tap Winding", "Edge Winding", "Ideal for 33kV and above"],
-          cta: "Open Multi Winding",
-        });
-      }
+    if (showMultiWdgOption) {
+      options.push({
+        key: "multi",
+        designType: "multi",
+        badge: "MW",
+        title: "Multi Winding",
+        description: "Open the multi-winding design workspace.",
+        cta: "Open Multi Winding",
+      });
+    }
 
-      return options;
-    },
-    [showMultiWdgOption]
-  );
+    return options;
+  }, [showMultiWdgOption]);
 
   const isSingleDesignTypeOption = designTypeOptions.length === 1;
-  const designRows = design?.data?.data || [];
+  const designRows = useMemo(() => design?.data?.data || [], [design?.data?.data]);
   const twoWindingRows = useMemo(
     () =>
       designRows.filter(
@@ -329,18 +311,16 @@ const Home = () => {
     {
       key: "two",
       label: "2 Winding Designs",
-      subtitle: "Two-winding designs open directly into the classic workflow.",
       rows: twoWindingRows,
     },
     {
       key: "multi",
       label: "Multi Winding Designs",
-      subtitle:
-        "Multi-winding designs stay in their own list so their saved ids and routes remain distinct.",
       rows: multiWindingRows,
       hidden: !showMultiWdgOption,
     },
   ].filter((tab) => !tab.hidden);
+
   const currentTab =
     designTabs.find((tab) => tab.key === activeDesignTab) || designTabs[0];
 
@@ -350,202 +330,157 @@ const Home = () => {
     }
   }, [activeDesignTab, designTabs]);
 
-  // let a;
-  // console.log(a.name)
-  // console.log("selectedDesigns in home page:", selectedDesigns)
-
   return (
     <Layout hideSidebar>
       <div className={`home-page-wrapper ${isDarkMode ? "home-page-wrapper-dark" : ""}`}>
-        <FlexContainer align="center" justify="space-between" margin="2px 2px">
-          <FlexContainer align="center" gap="10px">
-            <h1 className="home-header-title" data-text="Krish Transformer Design Software">
-              Krish Transformer Design Software
-            </h1>
-          </FlexContainer>
-          <FlexContainer align="center">
-            <div className="home-settings-menu" ref={settingsMenuRef}>
-              <button
-                type="button"
-                className="home-settings-btn"
-                onClick={() => setIsSettingsOpen((prev) => !prev)}
-              >
-                <IoSettingsOutline className="home-settings-icon" />
-              </button>
-              {isSettingsOpen && (
-                <div className="home-settings-dropdown">
-                  <label className="home-settings-toggle">
-                    <span className="home-settings-toggle-label">Dark Mode</span>
+        <header className="home-topbar">
+            <div className="home-title-block">
+              <h1 className="home-header-title">Krish Transformer Design Software</h1>
+              <p className="home-title-subline">Design Library</p>
+            </div>
+
+            <div className="home-control-cluster">
+              <div className="home-settings-menu" ref={settingsMenuRef}>
+                <button
+                  type="button"
+                  className="home-settings-btn"
+                  onClick={() => setIsSettingsOpen((prev) => !prev)}
+                >
+                  <IoSettingsOutline className="home-settings-icon" />
+                </button>
+                {isSettingsOpen && (
+                  <div className="home-settings-dropdown">
+                    <label className="home-settings-toggle">
+                      <span className="home-settings-toggle-label">Dark Mode</span>
+                      <button
+                        type="button"
+                        className={`home-darkmode-switch ${isDarkMode ? "active" : ""}`}
+                        onClick={() => setIsDarkMode((prev) => !prev)}
+                        aria-pressed={isDarkMode}
+                      >
+                        <span className="home-darkmode-knob" />
+                      </button>
+                    </label>
                     <button
                       type="button"
-                      className={`home-darkmode-switch ${isDarkMode ? "active" : ""}`}
-                      onClick={() => setIsDarkMode((prev) => !prev)}
-                      aria-pressed={isDarkMode}
+                      className="home-settings-item"
+                      onClick={handleUpdateRates}
                     >
-                      <span className="home-darkmode-knob" />
+                      Update Rates
                     </button>
-                  </label>
-                  <button type="button" className="home-settings-item" onClick={handleUpdateRates}>
-                    Update Rates
-                  </button>
-                </div>
-              )}
-            </div>
-            <button className="home-new-design-btn" onClick={handleNewDesignClick}>
-              + New Design
-            </button>
-            
-            <div className="home-profile-menu" ref={profileMenuRef}>
-              <button
-                type="button"
-                className="home-profile-link"
-                onClick={() => setIsProfileCardOpen((prev) => !prev)}
-              >
-                <div className="home-profile-avatar">
-                  <IoMdPerson className="home-profile-icon" />
-                </div>
+                  </div>
+                )}
+              </div>
+
+              <button className="home-new-design-btn" onClick={handleNewDesignClick}>
+                + New Design
               </button>
 
-              {isProfileCardOpen && (
-                <div className="home-profile-card">
-                  <div className="home-profile-card-info">
-                    <p className="home-profile-name">{profileInfo.username}</p>
-                    <p className="home-profile-email">{profileInfo.email}</p>
+              <div className="home-profile-menu" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  className="home-profile-link"
+                  onClick={() => setIsProfileCardOpen((prev) => !prev)}
+                >
+                  <div className="home-profile-avatar">
+                    <IoMdPerson className="home-profile-icon" />
                   </div>
-                  <button type="button" className="home-logout-btn" onClick={handleLogout}>
-                    <IoLogOutOutline className="home-logout-icon" />
-                    Logout
-                  </button>
-                </div>
-              )}
+                </button>
+
+                {isProfileCardOpen && (
+                  <div className="home-profile-card">
+                    <div className="home-profile-card-info">
+                      <p className="home-profile-name">{profileInfo.username}</p>
+                      <p className="home-profile-email">{profileInfo.email}</p>
+                    </div>
+                    <button type="button" className="home-logout-btn" onClick={handleLogout}>
+                      <IoLogOutOutline className="home-logout-icon" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </FlexContainer>
-        </FlexContainer>
-        <div className="home-header-divider" />
+        </header>
 
-
-        <Container borderRadius="8px" margin="13px 2px">
-          <FlexContainer justify="left" align="center" gap="12px" padding="10px 12px">
-            <SearchInput placeholder="Search by Des Ref." onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-              onSortChange={handleSortChange} width="400px" />
+        <section className="home-shell">
+          <div className="home-toolbar">
+            <SearchInput
+              placeholder="Search by design reference"
+              value={searchQuery}
+              sortValue={sortOption}
+              inputWidth="min(420px, 100%)"
+              selectWidth="210px"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch();
+                }
+              }}
+              onSortChange={handleSortChange}
+            />
+            <button type="button" className="home-search-btn" onClick={handleSearch}>
+              Search
+            </button>
             {selectedDesigns.length > 0 && (
-              <IconButton
-                sx={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "white",
-                  backgroundColor: isDarkMode ? "#8f2727" : "#000000ff",
-                  padding: "7px 30px",
-                  borderRadius: "10px",
-                  cursor: "pointer",
-                  "&:hover": {
-                    backgroundColor: isDarkMode ? "#a93333" : "#000000ff",
-                  },
-                }}
-                onClick={handleTrashOpen}
-              >
-                <FaRegTrashAlt style={{ marginRight: "8px" }} />
-                Delete Design ({selectedDesigns?.length})
-              </IconButton>
+              <button type="button" className="home-delete-btn" onClick={handleTrashOpen}>
+                <FaRegTrashAlt />
+                Delete ({selectedDesigns.length})
+              </button>
             )}
-          </FlexContainer>
-        </Container>
+          </div>
 
-        <div>
-          {design?.isLoading ? ( // Show loading spinner if isLoading is true
-            <FlexContainer align="center" justify="center" padding="20px">
-              <CircularProgress />
-            </FlexContainer>
-          ) : (
-            <Container
-              bgColor={isDarkMode ? "#1a2534" : "white"}
-              padding="0px"
-              borderRadius="8px"
-              boxShadow={
-                isDarkMode
-                  ? "0px 18px 34px rgba(0, 0, 0, 0.35)"
-                  : "0px 4px 8px rgba(0, 0, 0, 0.1)"
-              }
-            >
-              <div style={{ padding: "18px 18px 10px 18px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "10px",
-                    flexWrap: "wrap",
-                    marginBottom: "12px",
-                  }}
+          <div className="home-library-header">
+            <div>
+              <h2 className="home-library-title">{currentTab?.label || "Saved Designs"}</h2>
+              <p className="home-library-summary">
+                {currentTab?.rows?.length || 0} shown • {totalEntries} total • Page{" "}
+                {totalPages === 0 ? 0 : currentPage} of {totalPages}
+              </p>
+            </div>
+          </div>
+
+          <div className="home-tab-row">
+            {designTabs.map((tab) => {
+              const isActive = currentTab?.key === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  className={`home-tab-chip ${isActive ? "active" : ""}`}
+                  onClick={() => setActiveDesignTab(tab.key)}
                 >
-                  {designTabs.map((tab) => {
-                    const isActive = currentTab?.key === tab.key;
-                    return (
-                      <button
-                        key={tab.key}
-                        type="button"
-                        onClick={() => setActiveDesignTab(tab.key)}
-                        style={{
-                          border: "none",
-                          borderRadius: "999px",
-                          padding: "10px 18px",
-                          fontSize: "14px",
-                          fontWeight: 700,
-                          cursor: "pointer",
-                          backgroundColor: isActive
-                            ? isDarkMode
-                              ? "#4d8dff"
-                              : "#111111"
-                            : isDarkMode
-                              ? "#243246"
-                              : "#eef2f7",
-                          color: isActive
-                            ? "#ffffff"
-                            : isDarkMode
-                              ? "#cfe0ff"
-                              : "#425466",
-                        }}
-                      >
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "14px",
-                    color: isDarkMode ? "#9eb0ca" : "#5f6b7a",
-                  }}
-                >
-                  {currentTab?.subtitle}
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="home-table-shell">
+            {design?.isLoading ? (
+              <div className="home-loading-state">
+                <CircularProgress size={34} />
+                <p className="home-loading-copy">Loading saved designs...</p>
+              </div>
+            ) : currentTab?.rows?.length > 0 ? (
+              <CheckedTable
+                currentPage={currentPage}
+                rows={currentTab.rows}
+                size={size}
+                selectedDesigns={selectedDesigns}
+                setSelectedDesigns={setSelectedDesigns}
+                isDarkMode={isDarkMode}
+              />
+            ) : (
+              <div className="home-empty-state">
+                <h3 className="home-empty-title">No designs match this view</h3>
+                <p className="home-empty-copy">
+                  Try a different tab, clear the search, or start a fresh design.
                 </p>
               </div>
-              {currentTab?.rows?.length > 0 ? (
-                <CheckedTable
-                  currentPage={currentPage}
-                  rows={currentTab.rows}
-                  size={size}
-                  selectedDesigns={selectedDesigns}
-                  setSelectedDesigns={setSelectedDesigns}
-                  isDarkMode={isDarkMode}
-                />
-              ) : (
-                <div
-                  style={{
-                    padding: "18px",
-                    color: isDarkMode ? "#9eb0ca" : "#5f6b7a",
-                    fontSize: "14px",
-                  }}
-                >
-                  No designs in this tab for the current search or page.
-                </div>
-              )}
-            </Container>
-          )}
-        </div>
+            )}
+          </div>
+        </section>
 
         <ConfirmationDialog
           isDelete={true}
@@ -581,17 +516,9 @@ const Home = () => {
                 >
                   <div className="home-design-type-card-top">
                     <span className="home-design-type-badge">{option.badge}</span>
-                    <span className="home-design-type-tag">{option.tag}</span>
                   </div>
                   <span className="home-design-type-title">{option.title}</span>
                   <span className="home-design-type-description">{option.description}</span>
-                  <div className="home-design-type-features">
-                    {option.features.map((feature) => (
-                      <span key={feature} className="home-design-type-feature">
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
                   <span className="home-design-type-cta">{option.cta}</span>
                 </button>
               ))}
@@ -599,16 +526,18 @@ const Home = () => {
           </div>
         </CustomModal>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onPageChange={handlePageChange}
-          totalEntries={totalEntries}
-          entriesPerPage={size}
-          activeColor={isDarkMode ? "#4d8dff" : "#444cf71a"}
-        />
+        <div className="home-pagination-wrap">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onPageChange={handlePageChange}
+            totalEntries={totalEntries}
+            entriesPerPage={size}
+            activeColor={isDarkMode ? "#4d8dff" : "#444cf71a"}
+          />
+        </div>
       </div>
     </Layout>
   );
