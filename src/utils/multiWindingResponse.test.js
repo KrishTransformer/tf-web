@@ -119,6 +119,21 @@ describe("mapMultiWindingResponseToFormState", () => {
     expect(formState.lockedAttributes.outerWindings.condBreadth).toBe(true);
   });
 
+  test("preserves request locks when an older backend response omits them", () => {
+    const formState = mapMultiWindingResponseToFormState(
+      { selectedCode: "2_WDG", inputs: {}, results: {} },
+      {
+        coreLock: { coreDia: true },
+        lvWindings: { conductorSizes: true },
+        hvWindings: { noInParallel: true },
+      }
+    );
+
+    expect(formState.lockedAttributes.coreLock.coreDia).toBe(true);
+    expect(formState.lockedAttributes.lvWindings.conductorSizes).toBe(true);
+    expect(formState.lockedAttributes.hvWindings.noInParallel).toBe(true);
+  });
+
   test("maps a 5-winding backend response into the current multi-winding form state", () => {
     const formState = mapMultiWindingResponseToFormState({
       selectedCode: "5_WDG",

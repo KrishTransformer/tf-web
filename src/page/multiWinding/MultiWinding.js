@@ -13,6 +13,13 @@ import Part3 from "./Part3";
 import "./MultiWindingTheme.css";
 
 const PART2_WINDING_IDS = ["lv", "hvMain", "corse", "fine", "outer"];
+const WINDING_IDS_BY_CONFIGURATION = {
+  "2_WDG_LV_HV_MAIN": ["lv", "hvMain"],
+  "3_WDG_LV_HV_MAIN_OUTER": ["lv", "hvMain", "outer"],
+  "4_WDG_LV_HV_MAIN_CORSE_OUTER": ["lv", "hvMain", "corse", "outer"],
+  "4_WDG_LV_HV_MAIN_FINE_OUTER": ["lv", "hvMain", "fine", "outer"],
+  "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER": ["lv", "hvMain", "corse", "fine", "outer"],
+};
 const LOCK_GROUP_BY_WINDING_ID = {
   lv: "lvWindings",
   hvMain: "hvWindings",
@@ -69,6 +76,23 @@ const cloneLockedAttributes = (source = {}) => {
 
 const getWindingLocks = (lockedAttributes, windingId) =>
   lockedAttributes?.[LOCK_GROUP_BY_WINDING_ID[windingId]] || {};
+
+const clearInactiveWindingLocks = (lockedAttributes, windingConfiguration) => {
+  const nextState = cloneLockedAttributes(lockedAttributes);
+  const activeWindings = new Set(
+    WINDING_IDS_BY_CONFIGURATION[windingConfiguration] || WINDING_IDS_BY_CONFIGURATION["2_WDG_LV_HV_MAIN"]
+  );
+
+  PART2_WINDING_IDS.forEach((windingId) => {
+    if (!activeWindings.has(windingId)) {
+      nextState[LOCK_GROUP_BY_WINDING_ID[windingId]] = Object.fromEntries(
+        LOCKED_WINDING_FIELDS.map((field) => [field, false])
+      );
+    }
+  });
+
+  return nextState;
+};
 
 const formatConductorSizesDisplay = (winding = {}) => {
   if (winding?.isConductorRound) {
@@ -190,7 +214,7 @@ const MultiWinding = () => {
 
     setFormState(cloneMultiWindingState(multiWindings.data));
     setLockedAttributes(cloneLockedAttributes(multiWindings.data?.lockedAttributes));
-  }, [multiWindings?.data, multiWindings?.isFullfilled]);
+  }, [multiWindings?.data]);
 
   useEffect(() => {
     const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
@@ -208,6 +232,10 @@ const MultiWinding = () => {
   }, []);
 
   const handleInputChange = (fieldPath, value) => {
+    if (fieldPath === "windingConfiguration") {
+      setLockedAttributes((prevState) => clearInactiveWindingLocks(prevState, value));
+    }
+
     setFormState((prevState) => {
       const nextState = { ...prevState };
 
@@ -314,6 +342,13 @@ const MultiWinding = () => {
       setLockedAttributes((prevState) => {
         const nextState = cloneLockedAttributes(prevState);
         nextState.coreLock[field] = !value;
+
+        // Matching 2Wdg: fixed core dimensions release parallel-conductor locks.
+        if (nextState.coreLock.coreDia && nextState.coreLock.limbHt) {
+          PART2_WINDING_IDS.forEach((windingId) => {
+            nextState[LOCK_GROUP_BY_WINDING_ID[windingId]].noInParallel = false;
+          });
+        }
         return nextState;
       });
       return;
@@ -360,14 +395,22 @@ const MultiWinding = () => {
       const nextState = cloneLockedAttributes(prevState);
       const lockGroup = LOCK_GROUP_BY_WINDING_ID[windingId];
 
-      nextState[lockGroup][field] = nextValue;
+      if (field === "conductorSizes") {
+        // Breadth and height are one editable conductor-size setting in the UI.
+        nextState[lockGroup].conductorSizes = nextValue;
+        nextState[lockGroup].condBreadth = nextValue;
+        nextState[lockGroup].condHeight = nextValue;
+        if (nextValue) {
+          nextState[lockGroup].noInParallel = false;
+        }
+      } else {
+        nextState[lockGroup][field] = nextValue;
 
-      if (field === "conductorSizes" && nextValue) {
-        nextState[lockGroup].noInParallel = false;
-      }
-
-      if (field === "noInParallel" && nextValue) {
-        nextState[lockGroup].conductorSizes = false;
+        if (field === "noInParallel" && nextValue) {
+          nextState[lockGroup].conductorSizes = false;
+          nextState[lockGroup].condBreadth = false;
+          nextState[lockGroup].condHeight = false;
+        }
       }
 
       return nextState;

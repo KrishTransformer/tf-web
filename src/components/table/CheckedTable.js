@@ -146,15 +146,15 @@ export default function CheckedTable({
     <TableContainer
       component={Paper}
       sx={{
-        backgroundColor: isDarkMode ? "#1a2534" : "#ffffff",
-        color: isDarkMode ? "#edf3ff" : "#111111",
+        backgroundColor: isDarkMode ? "#1a2534" : "#fafffe",
+        color: isDarkMode ? "#edf3ff" : "#183d54",
         boxShadow: isDarkMode
           ? "0 18px 34px rgba(0, 0, 0, 0.35)"
           : undefined,
       }}
     >
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead sx={{ background: isDarkMode ? "#243246" : "#F4F4F4" }}>
+        <TableHead sx={{ background: isDarkMode ? "#243246" : "#dff4ec" }}>
           <TableRow>
             <TableCell padding="checkbox">
               <Checkbox
@@ -164,27 +164,27 @@ export default function CheckedTable({
                 checked={rowIds.length > 0 && selectedCount === rowIds.length}
                 onChange={handleSelectAllClick}
                 sx={{
-                  color: isDarkMode ? "#8fb5ff" : undefined,
+                  color: isDarkMode ? "#8fb5ff" : "#247e84",
                   "&.Mui-checked": {
-                    color: isDarkMode ? "#8fb5ff" : undefined,
+                    color: isDarkMode ? "#8fb5ff" : "#247e84",
                   },
                   "&.MuiCheckbox-indeterminate": {
-                    color: isDarkMode ? "#8fb5ff" : undefined,
+                    color: isDarkMode ? "#8fb5ff" : "#247e84",
                   },
                 }}
               />
             </TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>DATE</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>DESIGN REF.</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>CAPACITY(kVA)</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>VOLTAGE</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>IMPEDANCE</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>FRAME</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>VOLTS/TURN</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>CORE/LOAD LOSS</TableCell>
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}>COST(Rs)</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>DATE</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>DESIGN REF.</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>CAPACITY(kVA)</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>VOLTAGE</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>IMPEDANCE</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>FRAME</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>VOLTS/TURN</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>CORE/LOAD LOSS</TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}>COST(Rs)</TableCell>
             {/* <TableCell sx={styleCell}>FILE</TableCell> */}
-            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#111111" }}></TableCell>
+            <TableCell sx={{ ...styleCell, color: isDarkMode ? "#edf3ff" : "#183d54" }}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -205,13 +205,13 @@ export default function CheckedTable({
               <TableRow
                 key={row.id}
                 sx={{
-                  backgroundColor: isDarkMode ? "#1a2534" : "#ffffff",
+                  backgroundColor: isDarkMode ? "#1a2534" : "#fafffe",
                   "&:hover": {
-                    backgroundColor: isDarkMode ? "#202f44" : "#f8f8f8",
+                    backgroundColor: isDarkMode ? "#202f44" : "#eaf7f5",
                   },
                   "& td": {
-                    borderColor: isDarkMode ? "rgba(255, 255, 255, 0.08)" : "#e0e0e0",
-                    color: isDarkMode ? "#d7e5ff" : "#111111",
+                    borderColor: isDarkMode ? "rgba(255, 255, 255, 0.08)" : "#cfe6e3",
+                    color: isDarkMode ? "#d7e5ff" : "#183d54",
                   },
                   "&:last-child td, &:last-child th": { border: 0 },
                 }}
@@ -221,9 +221,9 @@ export default function CheckedTable({
                     checked={selectedDesigns.includes(row.id)}
                     onClick={() => handleClick(row.id)}
                     sx={{
-                      color: isDarkMode ? "#8fb5ff" : undefined,
+                      color: isDarkMode ? "#8fb5ff" : "#247e84",
                       "&.Mui-checked": {
-                        color: isDarkMode ? "#8fb5ff" : undefined,
+                        color: isDarkMode ? "#8fb5ff" : "#247e84",
                       },
                     }}
                   />

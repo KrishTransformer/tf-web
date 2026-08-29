@@ -103,18 +103,18 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
           yield put(addEntityFailed("design"));
         }
       } else if (calcName.includes("multiwindings")) {
-        const existingMetadata = metadata || {};
-        const mappedResponse = mapMultiWindingResponseToFormState(response.data);
-        const designId =
-          existingMetadata.designId ||
-          mappedResponse.designId ||
-          buildMultiWindingDesignId(
-            firstNonEmptyValue(
-              mappedResponse.kVA,
-              jsonBody?.kVA,
-              response?.data?.inputs?.ratings?.kVA
-            )
-          );
+        const mappedResponse = mapMultiWindingResponseToFormState(
+          response.data,
+          jsonBody?.lockedAttributes
+        );
+        // Match 2Wdg: every Calculate creates a separate, traceable design revision.
+        const designId = buildMultiWindingDesignId(
+          firstNonEmptyValue(
+            mappedResponse.kVA,
+            jsonBody?.kVA,
+            response?.data?.inputs?.ratings?.kVA
+          )
+        );
         const persistedPayload = {
           ...mappedResponse,
           designId,
@@ -122,7 +122,7 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
         };
         let multiWindingMetadataPayload = {
           designId,
-          entityId: existingMetadata.entityId || "",
+          entityId: "",
         };
 
         yield put(
@@ -142,20 +142,11 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
         try {
           let entityResponse;
 
-          if (multiWindingMetadataPayload.entityId) {
-            entityResponse = yield call(
-              entityApi.update,
-              "design",
-              multiWindingMetadataPayload.entityId,
-              entityDesignPayload
-            );
-          } else {
-            entityResponse = yield call(
-              entityApi.create,
-              "design",
-              entityDesignPayload
-            );
-          }
+          entityResponse = yield call(
+            entityApi.create,
+            "design",
+            entityDesignPayload
+          );
 
           if (entityResponse && entityResponse.data) {
             let persistedEntityId = resolvePersistedEntityId(

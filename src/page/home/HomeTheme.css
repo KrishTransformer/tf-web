@@ -1,41 +1,41 @@
 :root {
-  --home-page-text: #111111;
-  --home-page-text-muted: #666666;
-  --home-page-divider: #d9d9d9;
-  --home-page-surface: #ffffff;
-  --home-page-surface-muted: #f6f6f6;
-  --home-page-border: #e7e7e7;
-  --home-page-border-soft: #ececec;
-  --home-page-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
-  --home-page-danger-surface: #fff1f1;
+  --home-page-text: #183d54;
+  --home-page-text-muted: #56767c;
+  --home-page-divider: #bcdedb;
+  --home-page-surface: #fbfffe;
+  --home-page-surface-muted: #e9f6f3;
+  --home-page-border: #c5e2df;
+  --home-page-border-soft: #d8ece9;
+  --home-page-shadow: 0 14px 30px rgba(31, 94, 111, 0.16);
+  --home-page-danger-surface: #fff1eb;
 
-  --home-title-reflection: rgba(17, 17, 17, 0.28);
+  --home-title-reflection: rgba(24, 61, 84, 0.28);
 
-  --home-control-border: #1f1f1f;
-  --home-control-border-strong: #222222;
-  --home-control-surface: linear-gradient(145deg, #111111, #2d2d2d);
-  --home-control-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-  --home-control-shadow-hover: 0 10px 18px rgba(0, 0, 0, 0.24);
+  --home-control-border: #27777a;
+  --home-control-border-strong: #21666e;
+  --home-control-surface: linear-gradient(145deg, #207a82, #315c8d);
+  --home-control-shadow: 0 6px 16px rgba(35, 104, 117, 0.2);
+  --home-control-shadow-hover: 0 10px 18px rgba(35, 104, 117, 0.28);
   --home-control-text: #ffffff;
 
-  --home-settings-toggle-text: #222222;
-  --home-darkmode-switch-track: #d7dce5;
-  --home-darkmode-switch-track-active: #4d8dff;
+  --home-settings-toggle-text: #285567;
+  --home-darkmode-switch-track: #bddbd8;
+  --home-darkmode-switch-track-active: #237d82;
   --home-darkmode-switch-knob: #ffffff;
   --home-darkmode-switch-knob-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
   --home-logout-text: #c62828;
   --home-profile-dark-accent: #ff9f9f;
-  --home-input-bg: #ffffff;
-  --home-input-border: #cccccc;
-  --home-input-text: #111111;
-  --home-input-placeholder: #6f7782;
-  --home-icon-muted: #474646;
-  --home-pagination-bg: #ffffff;
-  --home-pagination-border: #dee2e6;
-  --home-pagination-text: #1f1f1f;
-  --home-pagination-disabled: #9aa3ad;
-  --home-summary-text: #6c757d;
+  --home-input-bg: #fafffe;
+  --home-input-border: #afd7d4;
+  --home-input-text: #183d54;
+  --home-input-placeholder: #6b8a91;
+  --home-icon-muted: #39727a;
+  --home-pagination-bg: #fafffe;
+  --home-pagination-border: #b9dedb;
+  --home-pagination-text: #245c70;
+  --home-pagination-disabled: #97afb4;
+  --home-summary-text: #56767c;
 }
 
 .home-page-wrapper-dark {

@@ -217,7 +217,10 @@ const deepMerge = (target, source) => {
 const createDefaultMultiWindingData = () =>
   JSON.parse(JSON.stringify(initialState.multiWindings.data));
 
-export const mapMultiWindingResponseToFormState = (responseData = {}) => {
+export const mapMultiWindingResponseToFormState = (
+  responseData = {},
+  fallbackLockedAttributes = {}
+) => {
   const inputs = responseData.inputs || {};
   const results = responseData.results || {};
   const ratings = inputs.ratings || {};
@@ -234,7 +237,7 @@ export const mapMultiWindingResponseToFormState = (responseData = {}) => {
   const fineWinding = asObject(results.fineWinding);
   const outerWinding = asObject(results.outerWinding);
   const lockedAttributes = normalizeLockedAttributes(
-    responseData.lockedAttributes ?? results.lockedAttributes
+    responseData.lockedAttributes ?? results.lockedAttributes ?? fallbackLockedAttributes
   );
   const configuration =
     SELECTED_CODE_TO_CONFIGURATION[responseData.selectedCode] ||

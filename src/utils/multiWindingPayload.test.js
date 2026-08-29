@@ -236,6 +236,34 @@ describe("buildMultiWindingPayload", () => {
     expect(lockedPayload.lockedAttributes.hvWindings.turnsPerPhase).toBe(false);
   });
 
+  test("normalizes grouped conductor locks and releases parallel locks for a fixed core", () => {
+    const payload = buildMultiWindingPayload(
+      {
+        core: { coreDia: "250", limbHt: "900" },
+        part2Windings: {
+          lv: {
+            condBreadth: "6.2",
+            condHeight: "2.8",
+            radialParallelCond: "2",
+            axialParallelCond: "1",
+          },
+        },
+      },
+      {
+        coreLock: { coreDia: true, limbHt: true },
+        lvWindings: { conductorSizes: true, noInParallel: true },
+      }
+    );
+
+    expect(payload.lockedAttributes.lvWindings.conductorSizes).toBe(true);
+    expect(payload.lockedAttributes.lvWindings.condBreadth).toBe(true);
+    expect(payload.lockedAttributes.lvWindings.condHeight).toBe(true);
+    expect(payload.lockedAttributes.lvWindings.noInParallel).toBe(false);
+    expect(payload.lvWindings).not.toHaveProperty("noInParallel");
+    expect(payload.lvWindings.condBreadth).toBe(6.2);
+    expect(payload.lvWindings.condHeight).toBe(2.8);
+  });
+
   test("casts edited voltages to integers before sending", () => {
     const payload = buildMultiWindingPayload({
       primaryVoltage: "433",

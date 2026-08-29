@@ -299,23 +299,35 @@ const buildWindingPayload = (winding = {}, windingType, lockState = {}) => {
 const normalizeLockedAttributes = (value = {}, legacyLockedCore) => {
   const source = value && typeof value === "object" ? value : {};
   const coreLock = legacyLockedCore || source.coreLock || {};
+  const normalizedCoreLock = {
+    coreDia: Boolean(coreLock.coreDia),
+    limbHt: Boolean(coreLock.limbHt),
+  };
+  const normalizedWindingLocks = Object.fromEntries(
+    Object.entries(UI_TO_BACKEND_WINDING_KEY).map(([uiKey, backendKey]) => {
+      const group = source[backendKey] || source[uiKey] || {};
+      const locks = Object.fromEntries(
+        LOCKED_WINDING_FIELDS.map((field) => [field, Boolean(group[field])])
+      );
+
+      if (locks.conductorSizes) {
+        locks.condBreadth = true;
+        locks.condHeight = true;
+      }
+
+      return [backendKey, locks];
+    })
+  );
+
+  if (normalizedCoreLock.coreDia && normalizedCoreLock.limbHt) {
+    Object.values(normalizedWindingLocks).forEach((locks) => {
+      locks.noInParallel = false;
+    });
+  }
 
   return {
-    coreLock: {
-      coreDia: Boolean(coreLock.coreDia),
-      limbHt: Boolean(coreLock.limbHt),
-    },
-    ...Object.fromEntries(
-      Object.entries(UI_TO_BACKEND_WINDING_KEY).map(([uiKey, backendKey]) => {
-        const group = source[backendKey] || source[uiKey] || {};
-        return [
-          backendKey,
-          Object.fromEntries(
-            LOCKED_WINDING_FIELDS.map((field) => [field, Boolean(group[field])])
-          ),
-        ];
-      })
-    ),
+    coreLock: normalizedCoreLock,
+    ...normalizedWindingLocks,
   };
 };
 
