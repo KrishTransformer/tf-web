@@ -10,7 +10,7 @@ import * as constants from "../constants/CalcConstants";
 import { postApi, putApi, deleteApi, entityApi, storageServiceConfig } from "../api";
 import { generateUniqueFiveDigitNumber } from "../utils/StringUtils";
 import {
-  COMMON_SERVICE,
+  CAD_SERVICE,
   STORAGE_SERVICE,
   MULTI_WDG_SERVICE,
   MULTI_WDG_CALCULATOR_PATH,
@@ -225,13 +225,19 @@ function* generate3DData({ payload, params, calcName }) {
       payload,
       {},
       params,
-      COMMON_SERVICE
+      CAD_SERVICE
     );
     if (response && response.data) {
-      yield put(generate3DFullfiled({
-        blob: "generate3d",
-        job: response.data,
-      }));
+      yield put(generate3DFullfiled(calcName, response.data));
+      if (response?.data?.message?.includes("fabrication")) {
+        let dataPayload = {};
+        dataPayload.designId = params.fileName;
+        dataPayload.message = "Generate 3D Requested";
+        dataPayload.status = "Success";
+        yield put(addEntity(dataPayload, "drawingsStatus",true));
+      } else {
+        console.log("Fabarication not in cad serivice response");
+      }
     } else {
       yield put(generate3DFailed(calcName));
     }

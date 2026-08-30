@@ -1308,10 +1308,7 @@ const calcReducer = (state = initialState, action) => {
           ...state[action.calcName],
           isLoading: false,
           isFullfilled: true,
-          data: {
-            ...state[action.calcName].data,
-            ...action.response,
-          },
+          data: action.response, // Consistently use `response`
         },
       };
 
