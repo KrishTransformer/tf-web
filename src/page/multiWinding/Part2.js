@@ -75,16 +75,9 @@ const getPart2Winding = (formState, columnId) =>
   formState?.part2Windings?.[columnId] || {};
 
 const getPart2FieldValue = (formState, columnId, fieldKey) => {
-  if (fieldKey === "discDuctSize" && columnId === "lv") {
-    return hasValue(formState?.part2Windings?.lv?.discDuctSize)
-      ? formState.part2Windings.lv.discDuctSize
-      : formState?.innerWindings?.discDuctSize ?? "";
-  }
-
-  if (fieldKey === "discDuctSize" && columnId === "hvMain") {
-    return hasValue(formState?.part2Windings?.hvMain?.discDuctSize)
-      ? formState.part2Windings.hvMain.discDuctSize
-      : formState?.outerWindings?.discDuctSize ?? "";
+  if (fieldKey === "discDuctSize") {
+    const legacyWinding = columnId === "lv" ? "innerWindings" : columnId === "hvMain" ? "outerWindings" : null;
+    return formState?.part2Windings?.[columnId]?.discDuctSize ?? formState?.[legacyWinding]?.discDuctSize ?? "";
   }
 
   return formState?.part2Windings?.[columnId]?.[fieldKey] ?? "";
@@ -293,7 +286,7 @@ const Part2 = ({
                           borderColor="var(--app-input-border)"
                           placeholder={column.label}
                           showUnlockIcon={field.key === "turnsPerPhase"}
-                          readOnly={field.key === "turnsPerPhase" && lockState?.turnsPerPhase}
+                          readOnly={field.key === "discDuctSize" ? false : field.key === "turnsPerPhase" && lockState?.turnsPerPhase}
                           handleToggleLock={() =>
                             handleToggleLock(
                               getPart2FieldPath(column.id, field.key),

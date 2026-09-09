@@ -94,9 +94,20 @@ const formatParallel = (radialParallelCond, axialParallelCond) => {
   return `Rad ${radial} X Axi ${axial} = ${total}`;
 };
 
-const buildPart2Winding = (inputModel = {}, resultModel = {}, extra = {}) => {
+const buildPart2Winding = (inputModel = {}, resultModel = {}, extra = {}, prefix = "") => {
   const normalizedInputModel = asObject(inputModel);
-  const normalizedResultModel = asObject(resultModel);
+  const result = asObject(resultModel);
+  const normalizedResultModel = {
+    ...result,
+    breadth: result.breadth ?? result[`${prefix}Breadth`],
+    height: result.height ?? result[`${prefix}Height`],
+    isConductorRound: result.isConductorRound ?? result[`${prefix}IsConductorRound`],
+    conductorDiameter: result.conductorDiameter ?? (result[`${prefix}IsConductorRound`] ? result[`${prefix}Breadth`] : undefined),
+    radialParallelCond: result.radialParallelCond ?? result[`${prefix}RadialParallelConductors`],
+    axialParallelCond: result.axialParallelCond ?? result[`${prefix}AxialParallelConductors`],
+    ducts: result.ducts ?? result[`${prefix}NoOfDuct`],
+    ductSize: result.ductSize ?? result[`${prefix}DuctThickness`],
+  };
 
   return ({
   turnsPerPhase: normalizedInputModel.turnsPerPhase ?? normalizedResultModel.turnsPerPhase ?? "",
@@ -121,7 +132,9 @@ const buildPart2Winding = (inputModel = {}, resultModel = {}, extra = {}) => {
     (normalizedResultModel.ducts !== undefined || normalizedResultModel.ductSize !== undefined
       ? `${normalizedResultModel.ducts ?? ""} / ${normalizedResultModel.ductSize ?? ""}`
       : ""),
-  discDuctSize: extra.discDuctSize ?? normalizedInputModel.discDuctSize ?? "",
+  ducts: normalizedInputModel.ducts ?? normalizedResultModel.ducts ?? "",
+  ductSize: normalizedInputModel.ductSize ?? normalizedResultModel.ductSize ?? "",
+  discDuctSize: extra.discDuctSize ?? normalizedInputModel.discDuctSize ?? normalizedResultModel.discDuctSize ?? "",
   turnsLayers: normalizedInputModel.turnsLayers ?? "",
   endClearances: normalizedInputModel.endClearances ?? normalizedResultModel.endClearance ?? "",
   eddyStrayLoss: normalizedInputModel.eddyStrayLoss ?? normalizedResultModel.strayLoss ?? "",
@@ -439,11 +452,11 @@ export const mapMultiWindingResponseToFormState = (
     },
     part2Windings: {
       lv: buildPart2Winding(windingModels.lv, lvWinding, {
-        discDuctSize: lvWinding.lvDiscDuctsSize ?? "",
-      }),
+        discDuctSize: lvWinding.lvDiscDuctsSize,
+      }, "lv"),
       hvMain: buildPart2Winding(windingModels.hv, hvWinding, {
-        discDuctSize: hvWinding.hvDiscDuctsSize ?? hvWinding.model?.ductSize ?? "",
-      }),
+        discDuctSize: hvWinding.hvDiscDuctsSize ?? hvWinding.model?.ductSize,
+      }, "hv"),
       corse: buildPart2Winding(windingModels.corse, corseWinding),
       fine: buildPart2Winding(windingModels.fine, fineWinding),
       outer: buildPart2Winding(windingModels.outer, outerWinding),

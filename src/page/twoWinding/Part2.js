@@ -429,7 +429,7 @@ const Part2 = ({
                     bgColor={field.bgColorLV}
                     borderColor={field.borderColorLV}
                     showUnlockIcon={field.showUnlockIconLv}
-                    readOnly={lockedAttributes?.innerWindings?.[field.key]}
+                    readOnly={field.key === "discDuctSize" ? false : lockedAttributes?.innerWindings?.[field.key]}
                     handleToggleLock={(e) =>
                       handleToggleLock(
                         `innerWindings.${field.key}`,
@@ -487,7 +487,7 @@ const Part2 = ({
                     bgColor={field.bgColorHV}
                     borderColor={field.borderColorHV}
                     showUnlockIcon={field.showUnlockIconHv}
-                    readOnly={lockedAttributes?.outerWindings?.[field.key]}
+                    readOnly={field.key === "discDuctSize" ? false : lockedAttributes?.outerWindings?.[field.key]}
                     handleToggleLock={(e) =>
                       handleToggleLock(
                         `outerWindings.${field.key}`,
