@@ -254,6 +254,17 @@ const MultiWinding = () => {
         return nextState;
       }
 
+      if (fieldPath === "secondaryVoltage") {
+        nextState.secondaryVoltage = value;
+        const voltage = Number(value);
+
+        if (Number.isFinite(voltage) && voltage > 0 && voltage < 11000) {
+          nextState.lvWindingType = "HELICAL";
+        }
+
+        return nextState;
+      }
+
       if (
         fieldPath === "lVConductorMaterial" ||
         fieldPath === "hVConductorMaterial" ||
@@ -362,35 +373,7 @@ const MultiWinding = () => {
     const field = keys[2];
     const nextValue = !value;
 
-    if (!nextValue && ["turnsPerPhase", "conductorSizes", "noInParallel"].includes(field)) {
-      setFormState((prevState) => {
-        const winding = {
-          ...(prevState.part2Windings?.[windingId] || {}),
-        };
-
-        if (field === "turnsPerPhase") {
-          winding.turnsPerPhase = "";
-        } else if (field === "conductorSizes") {
-          winding.conductorSizes = "";
-          winding.condBreadth = "";
-          winding.condHeight = "";
-          winding.conductorDiameter = "";
-        } else {
-          winding.noInParallel = "";
-          winding.radialParallelCond = "";
-          winding.axialParallelCond = "";
-        }
-
-        return {
-          ...prevState,
-          part2Windings: {
-            ...prevState.part2Windings,
-            [windingId]: syncPart2WindingDisplayFields(winding),
-          },
-        };
-      });
-    }
-
+    // Keep displayed values when unlocking; the payload already omits unlocked overrides.
     setLockedAttributes((prevState) => {
       const nextState = cloneLockedAttributes(prevState);
       const lockGroup = LOCK_GROUP_BY_WINDING_ID[windingId];

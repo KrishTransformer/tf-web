@@ -27,24 +27,24 @@ const Input2WithRadioModal = ({
   handleToggleLock,
   isLocked,
 }) => {
-  const [modalValue1, setModalValue1] = useState(value1);
-  const [modalValue2, setModalValue2] = useState(value2);
-  const [modalValue3, setModalValue3] = useState(value3);
+  const [modalValue1, setModalValue1] = useState(value1 ?? "");
+  const [modalValue2, setModalValue2] = useState(value2 ?? "");
+  const [modalValue3, setModalValue3] = useState(value3 ?? "");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConductorRoundModal, setIsConductorRoundModal] = useState(isConductorRound);
 
   useEffect(() => {
-    setModalValue1(value1);
-    setModalValue2(value2);
-    setModalValue3(value3);
+    setModalValue1(value1 ?? "");
+    setModalValue2(value2 ?? "");
+    setModalValue3(value3 ?? "");
     setIsConductorRoundModal(isConductorRound)
   }, [value1, value2, value3, isConductorRound]);
 
   const handleInputClick = () => {
     if (!isLocked) {
-    setModalValue1(value1);
-    setModalValue2(value2);
-    setModalValue3(value3);
+    setModalValue1(value1 ?? "");
+    setModalValue2(value2 ?? "");
+    setModalValue3(value3 ?? "");
     setIsConductorRoundModal(isConductorRound);
     setIsModalOpen(true);
     }
@@ -74,7 +74,7 @@ const Input2WithRadioModal = ({
         onClick={handleInputClick}
         bgColor="var(--app-input-accent-bg, #D7F3FC)"
         borderColor="var(--app-input-border, #00000033)"
-        readOnly={isLocked} 
+        readOnly={true}
         showUnlockIcon={showUnlockIcon}
         handleToggleLock={() => handleToggleLock()}
         isLocked={isLocked}

@@ -22,19 +22,19 @@ const Input2WithModal = ({
   onMouseEnter = () => {},
   onMouseLeave = () => {},
 }) => {
-  const [modalValue1, setModalValue1] = useState(value);
-  const [modalValue2, setModalValue2] = useState(value);
+  const [modalValue1, setModalValue1] = useState(value1 ?? "");
+  const [modalValue2, setModalValue2] = useState(value2 ?? "");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    setModalValue1(value1);
-    setModalValue2(value2);
+    setModalValue1(value1 ?? "");
+    setModalValue2(value2 ?? "");
   }, [value1, value2]);
 
   const handleInputClick = () => {
     if (!isLocked) {
-      setModalValue1(value1);
-      setModalValue2(value2);
+      setModalValue1(value1 ?? "");
+      setModalValue2(value2 ?? "");
       setIsModalOpen(true);
     }
   };
@@ -62,7 +62,7 @@ const Input2WithModal = ({
         onClick={handleInputClick}
         bgColor="var(--app-input-accent-bg, #D7F3FC)"
         borderColor="var(--app-input-border, #00000033)"
-        readOnly={isLocked}
+        readOnly={true}
         showUnlockIcon={showUnlockIcon}
         handleToggleLock={() => handleToggleLock()}
         isLocked={isLocked}

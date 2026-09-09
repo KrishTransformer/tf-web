@@ -47,6 +47,19 @@ const UI_TO_BACKEND_WINDING_KEY = {
   fine: "fineWindings",
   outer: "outerWindings",
 };
+const CONDUCTOR_MATERIAL_FIELDS = {
+  lv: ["lVConductorMaterial", "lvConductorMaterial"],
+  hvMain: ["hVConductorMaterial", "hvConductorMaterial"],
+  corse: ["corseConductorMaterial", "corseConductorMaterial"],
+  fine: ["fineConductorMaterial", "fineConductorMaterial"],
+  outer: ["outerConductorMaterial", "outerConductorMaterial"],
+};
+const CONDUCTOR_MATERIAL_CODES = {
+  Cu: "COPPER",
+  Al: "ALUMINIUM",
+  COPPER: "COPPER",
+  ALUMINIUM: "ALUMINIUM",
+};
 const LOCKED_WINDING_FIELDS = [
   "turnsPerPhase",
   "conductorSizes",
@@ -258,7 +271,7 @@ const formatNoInParallel = (winding = {}) => {
 
 const getResolvedDuctSize = (winding = {}, windingType) => {
   if (
-    normalizeWindingTypeCode(windingType) === "DISC" &&
+    ["DISC", "LAYERDISC", "LAYER_DISC"].includes(normalizeWindingTypeCode(windingType)) &&
     hasValue(winding.discDuctSize)
   ) {
     return toIntegerOrNull(winding.discDuctSize);
@@ -464,6 +477,14 @@ export const buildMultiWindingPayload = (
     }
     payload.outerWindings = windingPayloads.outerWindings ?? null;
   }
+
+  activeWindings.forEach((windingKey) => {
+    const [uiField, backendField] = CONDUCTOR_MATERIAL_FIELDS[windingKey];
+    const material = CONDUCTOR_MATERIAL_CODES[formState[uiField]];
+    if (material) {
+      payload[backendField] = material;
+    }
+  });
 
   return pruneInactiveWindings(payload, activeWindings);
 };
