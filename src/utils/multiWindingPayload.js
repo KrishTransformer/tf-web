@@ -147,6 +147,13 @@ const buildCostPayload = (formState = {}) =>
     ])
   );
 
+const buildTankPayload = (formState = {}) => ({
+  tankLoss: toNumberOrNull(formState.tank?.tankLoss),
+  wdgToTankGap: toNumberOrNull(formState.tank?.wdgToTankGap),
+  connectionGap: toNumberOrNull(formState.tank?.connectionGap),
+  topYokeToCoverGap: toNumberOrNull(formState.tank?.topYokeToCoverGap),
+});
+
 const buildRadialGaps = (formState = {}) => {
   const multiCoilGaps = formState.multiCoilDimensions?.gaps || {};
 
@@ -214,9 +221,17 @@ const filterRadialGapsForConfiguration = (radialGaps, windingConfiguration) => {
     CONFIGURATION_TO_ACTIVE_RADIAL_GAPS["2_WDG_LV_HV_MAIN"];
 
   return Object.fromEntries(
-    activeGapKeys.map((key) => [key, asNullable(radialGaps[key])])
+    activeGapKeys.map((key) => [key, toNumberOrNull(radialGaps[key])])
   );
 };
+
+const normalizeRadialGaps = (radialGaps) =>
+  Object.fromEntries(
+    Object.keys(buildRadialGaps()).map((key) => [
+      key,
+      toNumberOrNull(radialGaps[key]),
+    ])
+  );
 
 const pruneInactiveWindings = (payload, activeWindings) => {
   const removableFieldsByWinding = {
@@ -368,8 +383,9 @@ export const buildMultiWindingPayload = (
     fine: fineWindingType,
     outer: outerWindingType,
   };
-  const radialGaps = filterRadialGapsForConfiguration(
-    buildRadialGaps(formState),
+  const radialGaps = normalizeRadialGaps(buildRadialGaps(formState));
+  const activeRadialGaps = filterRadialGapsForConfiguration(
+    radialGaps,
     windingConfiguration
   );
   const lvCurrentDensity = toNumberOrNull(formState.lvCurrentDensity);
@@ -397,8 +413,20 @@ export const buildMultiWindingPayload = (
       ) || "2 Wdg (LV and HV-Main)",
     kVA: toIntegerOrNull(formState.kVA),
     kValue: 0.45,
+    frequency: toNumberOrNull(formState.frequency),
     fluxDensity: toNumberOrNull(formState.fluxDensity),
     vectorGroup: asNullable(formState.vectorGroup),
+    buildFactor: toNumberOrNull(formState.buildFactor),
+    limitW: toNumberOrNull(formState.limitW),
+    limitEz: toNumberOrNull(formState.limitEz),
+    tankLoss: toNumberOrNull(formState.tank?.tankLoss),
+    loadLoss: toNumberOrNull(formState.loadLoss),
+    coreLoss: toNumberOrNull(formState.coreLoss),
+    ambientTemp: toNumberOrNull(formState.ambientTemp),
+    windingTemp: toNumberOrNull(formState.windingTemp),
+    topOilTemp: toNumberOrNull(formState.topOilTemp),
+    eRadiatorType: asNullable(formState.eRadiatorType),
+    isOLTC: toBooleanOrNull(formState.isOLTC),
     lowVoltage: toIntegerOrNull(
       pickFirst(formState.primaryVoltage, formState.lowVoltage)
     ),
@@ -426,10 +454,14 @@ export const buildMultiWindingPayload = (
       limbHt: normalizedLocks.coreLock.limbHt
         ? toIntegerOrNull(formState.core?.limbHt)
         : null,
+      coreMaterial: asNullable(formState.core?.coreMaterial),
+      coreType: asNullable(formState.core?.coreType),
     },
+    tank: buildTankPayload(formState),
     lockedAttributes: normalizedLocks,
     cost: buildCostPayload(formState),
     radialGaps,
+    ...activeRadialGaps,
   };
 
   if (hasValue(lvWindingType)) {
