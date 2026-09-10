@@ -28,11 +28,18 @@ const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const size = 20;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [activeDesignTab, setActiveDesignTab] = useState("two");
+  const [categoryPages, setCategoryPages] = useState({ two: 1, multi: 1 });
+  const currentPage = categoryPages[activeDesignTab] || 1;
+  const setCurrentPage = (page) => {
+    setCategoryPages((previousPages) => ({
+      ...previousPages,
+      [activeDesignTab]: page,
+    }));
+  };
   const [selectedDesigns, setSelectedDesigns] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [designTypeModalOpen, setDesignTypeModalOpen] = useState(false);
-  const [activeDesignTab, setActiveDesignTab] = useState("two");
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -42,7 +49,9 @@ const Home = () => {
   const profileMenuRef = useRef(null);
   const settingsMenuRef = useRef(null);
 
-  const { design } = useSelector(selectEntity);
+  const entities = useSelector(selectEntity);
+  const designStoreKey = activeDesignTab === "multi" ? "multiDesigns" : "twoDesigns";
+  const design = entities?.[designStoreKey];
   const { name } = useSelector(selectAuth);
   const totalEntries = design?.data?.total || 0;
   const totalPages = Math.ceil(totalEntries / size);
@@ -88,11 +97,16 @@ const Home = () => {
     }
   }, [name]);
 
+  const [sortAttribute, sortOrder] = sortOption.split("-");
+  const designTypeFilter = activeDesignTab === "multi"
+    ? { multiWindings: { exists: true } }
+    : { twoWindings: { exists: true } };
   const searchPayload = {
     attributeName: ["designId"],
     attributeValue: searchQuery,
-    sortAttribute: "updatedAt",
-    sortOrder: "DESC",
+    sortAttribute,
+    sortOrder,
+    filters: designTypeFilter,
   };
 
   let offset = currentPage - 1;
@@ -101,13 +115,18 @@ const Home = () => {
     if (searchQuery === "") {
       fetchData();
     } else {
-      actions.fetchSearchEntity("design", `offset=${offset}&size=${size}`, searchPayload);
+      actions.fetchSearchEntity(
+        "design",
+        `offset=${offset}&size=${size}`,
+        searchPayload,
+        designStoreKey
+      );
     }
     if (generate3d?.data?.blob?.startsWith?.("blob:")) {
       URL.revokeObjectURL(generate3d?.data?.blob);
       actions.generate3DCleared();
     }
-  }, [currentPage, sortOption]);
+  }, [currentPage, sortOption, activeDesignTab]);
 
   useEffect(() => {
     if (totalPages === 0 && currentPage !== 1) {
@@ -160,10 +179,11 @@ const Home = () => {
   }, [isDarkMode]);
 
   const fetchData = () => {
-    const [sortAttribute, sortOrder] = sortOption.split("-");
     actions.fetchEntity(
       "design",
-      `offset=${offset}&size=${size}&&sortAttribute=${sortAttribute}&sortOrder=${sortOrder}`
+      `offset=${offset}&size=${size}&sortAttribute=${sortAttribute}&sortOrder=${sortOrder}`,
+      designTypeFilter,
+      designStoreKey
     );
   };
 
@@ -193,8 +213,12 @@ const Home = () => {
   const handleTrashClose = () => setDeleteConfirmOpen(false);
   const handleTrashOpen = () => setDeleteConfirmOpen(true);
   const handleDeleteEntities = () => {
-    selectedDesigns.forEach((id) => {
-      actions.deleteEntity(id, "design");
+    const queryParam = `offset=${offset}&size=${size}&sortAttribute=${sortAttribute}&sortOrder=${sortOrder}`;
+    actions.deleteEntity(selectedDesigns, "design", false, {
+      queryParam,
+      requestPayload: searchQuery === "" ? designTypeFilter : searchPayload,
+      search: searchQuery !== "",
+      overWriteEntityName: designStoreKey,
     });
 
     setDeleteConfirmOpen(false);
@@ -225,13 +249,18 @@ const Home = () => {
 
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
-    setCurrentPage(1);
+    setCategoryPages({ two: 1, multi: 1 });
   };
 
   const handleSearch = () => {
     setCurrentPage(1);
     if (searchQuery !== "") {
-      actions.fetchSearchEntity("design", `offset=0&size=${size}`, searchPayload);
+      actions.fetchSearchEntity(
+        "design",
+        `offset=0&size=${size}`,
+        searchPayload,
+        designStoreKey
+      );
     } else {
       fetchData();
     }
@@ -293,30 +322,16 @@ const Home = () => {
 
   const isSingleDesignTypeOption = designTypeOptions.length === 1;
   const designRows = useMemo(() => design?.data?.data || [], [design?.data?.data]);
-  const twoWindingRows = useMemo(
-    () =>
-      designRows.filter(
-        (row) => row?.designType !== "multi" && !(row?.multiWindings && !row?.twoWindings)
-      ),
-    [designRows]
-  );
-  const multiWindingRows = useMemo(
-    () =>
-      designRows.filter(
-        (row) => row?.designType === "multi" || (!row?.designType && !!row?.multiWindings)
-      ),
-    [designRows]
-  );
   const designTabs = [
     {
       key: "two",
-      label: "2 Winding Designs",
-      rows: twoWindingRows,
+      label: "2Wdg",
+      rows: activeDesignTab === "two" ? designRows : [],
     },
     {
       key: "multi",
-      label: "Multi Winding Designs",
-      rows: multiWindingRows,
+      label: "MWdg",
+      rows: activeDesignTab === "multi" ? designRows : [],
       hidden: !showMultiWdgOption,
     },
   ].filter((tab) => !tab.hidden);
@@ -448,7 +463,10 @@ const Home = () => {
                   key={tab.key}
                   type="button"
                   className={`home-tab-chip ${isActive ? "active" : ""}`}
-                  onClick={() => setActiveDesignTab(tab.key)}
+                  onClick={() => {
+                    setActiveDesignTab(tab.key);
+                    setSelectedDesigns([]);
+                  }}
                 >
                   {tab.label}
                 </button>
@@ -535,7 +553,7 @@ const Home = () => {
             onPageChange={handlePageChange}
             totalEntries={totalEntries}
             entriesPerPage={size}
-            activeColor={isDarkMode ? "#4d8dff" : "#444cf71a"}
+            activeColor={isDarkMode ? "#4d8dff" : "#0f2e34"}
           />
         </div>
       </div>

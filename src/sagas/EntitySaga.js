@@ -10,11 +10,13 @@ import {
   updateEntityFailed,
   fetchSearchEntityFullfiled,
   fetchSearchEntityFailed,
+  fetchSearchEntity,
 } from "../actions/EntityActions";
 import * as constants from "../constants/EntityConstants";
 import { entityApi } from "../api";
 
 function* fetchEntityData(payload) {
+  const responseEntityName = payload.overWriteEntityName || payload.entityName;
   try {
     let queryParam = "";
     let payloadBody = {};
@@ -32,25 +34,23 @@ function* fetchEntityData(payload) {
       queryParam,
       payloadBody
     );
-    if (payload.overWriteEntityName) {
-      payload.entityName = payload.overWriteEntityName;
-    }
     if (response && response.data) {
       yield put(
         fetchEntityFullfiled({
           data: response.data,
-          entityName: payload.entityName,
+          entityName: responseEntityName,
         })
       );
     } else {
-      yield put(fetchEntityFailed(payload.entityName));
+      yield put(fetchEntityFailed(responseEntityName));
     }
   } catch (e) {
-    yield put(fetchEntityFailed(payload.entityName));
+    yield put(fetchEntityFailed(responseEntityName));
   }
 }
 
 function* fetchSearchEntityData(payload) {
+  const responseEntityName = payload.overWriteEntityName || payload.entityName;
   try {
     let queryParam = "";
     let payloadBody = payload.payload;
@@ -65,21 +65,18 @@ function* fetchSearchEntityData(payload) {
       queryParam,
       payloadBody
     );
-    if (payload.overWriteEntityName) {
-      payload.entityName = payload.overWriteEntityName;
-    }
     if (response && response.data) {
       yield put(
         fetchSearchEntityFullfiled({
           data: response.data,
-          entityName: payload.entityName,
+          entityName: responseEntityName,
         })
       );
     } else {
-      yield put(fetchSearchEntityFailed(payload.entityName));
+      yield put(fetchSearchEntityFailed(responseEntityName));
     }
   } catch (e) {
-    yield put(fetchSearchEntityFailed(payload.entityName));
+    yield put(fetchSearchEntityFailed(responseEntityName));
   }
 }
 
@@ -115,16 +112,31 @@ function* addEntityData(payload) {
 
 function* deleteEntityData(payload) {
   try {
-    const response = yield call(
-      entityApi.remove,
-      payload.entityName,
-      payload.entityId
-    );
-    if (payload.skipFetch === "undefined") {
-      payload.skipFetch = false;
+    const entityIds = Array.isArray(payload.entityId)
+      ? payload.entityId
+      : [payload.entityId];
+    let allDeleted = true;
+
+    for (const entityId of entityIds) {
+      const response = yield call(entityApi.remove, payload.entityName, entityId);
+      allDeleted = allDeleted && Boolean(response && response.data);
     }
-    if (response && response.data) {
+
+    if (allDeleted) {
       yield put(deleteEntityFullfiled(payload.entityName));
+      if (payload.refreshRequest) {
+        const { queryParam, requestPayload, search, overWriteEntityName } = payload.refreshRequest;
+        const refreshAction = search ? fetchSearchEntity : fetchEntity;
+        yield put(
+          refreshAction(
+            payload.entityName,
+            queryParam,
+            requestPayload,
+            overWriteEntityName
+          )
+        );
+        return;
+      }
       if (payload.entityName == "lomMaterial" || payload.entityName == "users") {
         yield put(fetchEntity(payload.entityName, `offset=0&size=100&sortAttribute=createdAt&sortOrder=ASC`));
       }

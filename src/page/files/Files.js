@@ -36,8 +36,6 @@ import {
 import tableData from "../files/Tabledata.json"; // Import JSON file
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import logo from "./../../assets/files/logo.png"
-import saraConsultants from "./../../assets/files/saraConsultants.png"
 import { data, get } from "jquery";
 import { registerDejaVuSansFont } from '../../assets/fonts/DejaVuSans-normal';
 import core1 from "../../assets/core1.png";
@@ -54,6 +52,7 @@ import { fetchFile, addDataToLom, deleteDataFromLom, addCustomer } from "../../a
 import { selectEntity } from "../../selectors/EntitySelector";
 import { fetchEntity, addEntity } from "../../actions/EntityActions";
 import { generateMultiWindingDesignPDF } from "./multiWindingPdf";
+import { drawLogoPlaceholder } from "./pdfLogoPlaceholder";
 import { initialState as calcInitialState } from "../../reducers/CalcReducer";
 import "./FilesTheme.css";
 
@@ -1066,7 +1065,7 @@ const Files = () => {
       ]
     });
 
-    // === Insert logo ===
+    // === Logo placeholder ===
     const lastTable = doc.lastAutoTable;
     const logoSize = 18;
     const tableRightEdge = lastTable?.table?.startX + lastTable?.table?.width || 200;
@@ -1074,7 +1073,7 @@ const Files = () => {
     const logoY = (lastTable?.table?.startY || 7) - 5; // Move 5 units up
 
 
-    doc.addImage(logo, "PNG", logoX, logoY, logoSize, logoSize);
+    drawLogoPlaceholder(doc, logoX, logoY, logoSize, logoSize);
 
     currentY = lastTable.finalY + spacing;
 
@@ -1754,9 +1753,8 @@ const Files = () => {
     doc.setDrawColor(204, 0, 204);
     doc.line(underlineX, underlineY, underlineX + underlineWidth, underlineY);
 
-    doc.addImage(
-      logo,
-      'PNG',
+    drawLogoPlaceholder(
+      doc,
       pageWidth - outerMargin - 25,
       headerY + 5,
       20,
@@ -2030,14 +2028,7 @@ const Files = () => {
     const imageX = pageWidth - imageWidth - paddingRight;
     const imageY = 5;
 
-    doc.addImage(
-      logo,
-      'PNG',
-      imageX,
-      imageY,
-      imageWidth,
-      imageHeight
-    );
+    drawLogoPlaceholder(doc, imageX, imageY, imageWidth, imageHeight);
 
 
     let currentY = titleY + 5;

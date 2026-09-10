@@ -188,6 +188,7 @@ const resetCalculationResults = (
   return {
     ...prevState,
     voltsPerTurn: defaults.voltsPerTurn,
+    revisedVoltsPerTurn: defaults.revisedVoltsPerTurn,
     kValue: defaults.kValue,
     loadLoss: defaults.loadLoss,
     coreLoss: defaults.coreLoss,
