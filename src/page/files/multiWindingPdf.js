@@ -1,7 +1,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import logo from "../../assets/files/logo.png";
 import { registerDejaVuSansFont } from "../../assets/fonts/DejaVuSans-normal";
+import { drawLogoPlaceholder } from "./pdfLogoPlaceholder";
 
 const twipsToMm = (twips) => Number(((twips * 25.4) / 1440).toFixed(2));
 const PAGE_MARGIN = 12.7;
@@ -449,7 +449,7 @@ export const generateMultiWindingDesignPDF = ({
     ],
   });
 
-  doc.addImage(logo, "PNG", pageWidth - PAGE_MARGIN - 18, currentY - 0.5, 18, 18);
+  drawLogoPlaceholder(doc, pageWidth - PAGE_MARGIN - 18, currentY - 0.5, 18, 18);
   currentY = doc.lastAutoTable.finalY + SECTION_GAP;
 
   const temperatureDisplay = [

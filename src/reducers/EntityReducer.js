@@ -39,8 +39,8 @@ const entityReducer = (state, action) => {
       return {
         entity: {
           ...entityState.entity,
-          [action.entityName]: {
-            ...entityState.entity[action.entityName],
+          [action.overWriteEntityName || action.entityName]: {
+            ...entityState.entity[action.overWriteEntityName || action.entityName],
             isLoading: true,
             isFullfilled: false,
             isFailed: false,
@@ -75,8 +75,8 @@ const entityReducer = (state, action) => {
       return {
         entity: {
           ...entityState.entity,
-          [action.entityName]: {
-            ...entityState.entity[action.entityName],
+          [action.overWriteEntityName || action.entityName]: {
+            ...entityState.entity[action.overWriteEntityName || action.entityName],
             isLoading: true,
             isFullfilled: false,
             isFailed: false

@@ -36,6 +36,7 @@ const LOCKED_WINDING_FIELDS = [
 ];
 
 const hasValue = (value) => value !== undefined && value !== null && value !== "";
+const cloneData = (data) => JSON.parse(JSON.stringify(data));
 
 const createDefaultLockedCore = () => ({
   coreDia: false,
@@ -138,6 +139,127 @@ const syncPart2WindingDisplayFields = (winding = {}) => ({
   noOfDuctsWidth: formatNoOfDuctsWidthDisplay(winding),
 });
 
+const getDefaultPart2Winding = (windingId) =>
+  cloneData(initialState.multiWindings.data.part2Windings?.[windingId] || {});
+
+const resetPart2Winding = (prevState, windingId, lockedAttributes) => {
+  const previousWinding = prevState.part2Windings?.[windingId] || {};
+  const locks = getWindingLocks(lockedAttributes, windingId);
+  const resetWinding = getDefaultPart2Winding(windingId);
+
+  if (locks.turnsPerPhase) {
+    resetWinding.turnsPerPhase = previousWinding.turnsPerPhase;
+  }
+
+  if (locks.conductorSizes) {
+    resetWinding.conductorSizes = previousWinding.conductorSizes;
+    resetWinding.condBreadth = previousWinding.condBreadth;
+    resetWinding.condHeight = previousWinding.condHeight;
+    resetWinding.conductorDiameter = previousWinding.conductorDiameter;
+    resetWinding.isConductorRound = previousWinding.isConductorRound;
+  }
+
+  if (locks.noInParallel) {
+    resetWinding.noInParallel = previousWinding.noInParallel;
+    resetWinding.radialParallelCond = previousWinding.radialParallelCond;
+    resetWinding.axialParallelCond = previousWinding.axialParallelCond;
+  }
+
+  return syncPart2WindingDisplayFields(resetWinding);
+};
+
+const resetPart2Windings = (prevState, lockedAttributes, windingIds = PART2_WINDING_IDS) => ({
+  ...(prevState.part2Windings || {}),
+  ...Object.fromEntries(
+    windingIds.map((windingId) => [
+      windingId,
+      resetPart2Winding(prevState, windingId, lockedAttributes),
+    ])
+  ),
+});
+
+const resetCalculationResults = (
+  prevState,
+  lockedAttributes,
+  { windingIds = PART2_WINDING_IDS, resetCore = false } = {}
+) => {
+  const defaults = initialState.multiWindings.data;
+
+  return {
+    ...prevState,
+    voltsPerTurn: defaults.voltsPerTurn,
+    revisedVoltsPerTurn: defaults.revisedVoltsPerTurn,
+    kValue: defaults.kValue,
+    loadLoss: defaults.loadLoss,
+    coreLoss: defaults.coreLoss,
+    ez: defaults.ez,
+    lossesAt50Percent: defaults.lossesAt50Percent,
+    lossesAt100Percent: defaults.lossesAt100Percent,
+    radiatorWidth: defaults.radiatorWidth,
+    calculationResponse: defaults.calculationResponse,
+    commonFormulas: cloneData(defaults.commonFormulas),
+    hvFormulas: cloneData(defaults.hvFormulas),
+    lvFormulas: cloneData(defaults.lvFormulas),
+    innerWindings: cloneData(defaults.innerWindings),
+    outerWindings: cloneData(defaults.outerWindings),
+    part2Windings: resetPart2Windings(prevState, lockedAttributes, windingIds),
+    coilDimensions: {
+      ...cloneData(defaults.coilDimensions),
+      coreGap: prevState.coilDimensions?.coreGap || defaults.coilDimensions.coreGap,
+      lvhvgap: prevState.coilDimensions?.lvhvgap || defaults.coilDimensions.lvhvgap,
+      hvhvgap: prevState.coilDimensions?.hvhvgap || defaults.coilDimensions.hvhvgap,
+    },
+    multiCoilDimensions: {
+      ...cloneData(defaults.multiCoilDimensions),
+      gaps: {
+        ...cloneData(defaults.multiCoilDimensions.gaps),
+        ...(prevState.multiCoilDimensions?.gaps || {}),
+      },
+    },
+    core: resetCore
+      ? {
+          ...cloneData(defaults.core),
+          coreMaterial: prevState.core?.coreMaterial ?? defaults.core.coreMaterial,
+          coreType: prevState.core?.coreType ?? defaults.core.coreType,
+          ...(lockedAttributes.coreLock?.coreDia && {
+            coreDia: prevState.core?.coreDia,
+          }),
+          ...(lockedAttributes.coreLock?.limbHt && {
+            limbHt: prevState.core?.limbHt,
+          }),
+        }
+      : {
+          ...(prevState.core || {}),
+          area: defaults.core.area,
+          cenDist: defaults.core.cenDist,
+          coreWeight: defaults.core.coreWeight,
+          wkgGrade: defaults.core.wkgGrade,
+        },
+    tank: {
+      ...cloneData(defaults.tank),
+      wdgToTankGap: prevState.tank?.wdgToTankGap || defaults.tank.wdgToTankGap,
+      connectionGap: prevState.tank?.connectionGap || defaults.tank.connectionGap,
+      topYokeToCoverGap:
+        prevState.tank?.topYokeToCoverGap || defaults.tank.topYokeToCoverGap,
+    },
+    tankAndOilFormulas: cloneData(defaults.tankAndOilFormulas),
+    multiCost: cloneData(defaults.multiCost),
+    cost: {
+      ...cloneData(defaults.cost),
+      copperCostPerKg: prevState.cost?.copperCostPerKg ?? defaults.cost.copperCostPerKg,
+      aluminiumCostPerKg:
+        prevState.cost?.aluminiumCostPerKg ?? defaults.cost.aluminiumCostPerKg,
+      coreCostPerKg: prevState.cost?.coreCostPerKg ?? defaults.cost.coreCostPerKg,
+      steelCostPerKg: prevState.cost?.steelCostPerKg ?? defaults.cost.steelCostPerKg,
+      oilCostPerKg: prevState.cost?.oilCostPerKg ?? defaults.cost.oilCostPerKg,
+      insulationCostPerKg:
+        prevState.cost?.insulationCostPerKg ?? defaults.cost.insulationCostPerKg,
+      radiatorCostPerKg:
+        prevState.cost?.radiatorCostPerKg ?? defaults.cost.radiatorCostPerKg,
+    },
+  };
+};
+
 const getDefaultCurrentDensityForMaterial = (material) =>
   material === "Al" ? "2.37" : "3.63";
 
@@ -187,11 +309,61 @@ const getDefaultsForKva = (kvaValue) => {
   };
 };
 
+const VOLTAGE_FIELDS = [
+  "primaryVoltage",
+  "secondaryVoltage",
+  "lowVoltage",
+  "highVoltage",
+  "corseVoltage",
+  "fineVoltage",
+  "outerVoltage",
+];
+const WINDING_TYPE_FIELDS = [
+  "lvWindingType",
+  "hvWindingType",
+  "corseWindingType",
+  "fineWindingType",
+  "outerWindingType",
+];
+const CURRENT_DENSITY_FIELDS = [
+  "lvCurrentDensity",
+  "hvCurrentDensity",
+  "corseCurrentDensity",
+  "fineCurrentDensity",
+  "outerCurrentDensity",
+];
+const WINDING_ID_BY_WINDING_TYPE_FIELD = {
+  lvWindingType: "lv",
+  hvWindingType: "hvMain",
+  corseWindingType: "corse",
+  fineWindingType: "fine",
+  outerWindingType: "outer",
+};
+const WINDING_ID_BY_CURRENT_DENSITY_FIELD = {
+  lvCurrentDensity: "lv",
+  hvCurrentDensity: "hvMain",
+  corseCurrentDensity: "corse",
+  fineCurrentDensity: "fine",
+  outerCurrentDensity: "outer",
+};
+const WINDING_ID_BY_CONDUCTOR_MATERIAL_FIELD = {
+  lVConductorMaterial: "lv",
+  hVConductorMaterial: "hvMain",
+  corseConductorMaterial: "corse",
+  fineConductorMaterial: "fine",
+  outerConductorMaterial: "outer",
+};
+const TAP_STEP_FIELDS = [
+  "tapStepsPercent",
+  "tapStepsPositive",
+  "tapStepsNegative",
+];
+
 const MultiWinding = () => {
   const { id } = useParams();
   const { multiWindings } = useSelector(selectCalc);
   const cloneMultiWindingState = (state) =>
-    JSON.parse(JSON.stringify(state || initialState.multiWindings.data));
+    cloneData(state || initialState.multiWindings.data);
   const actions = useActions({
     addCalc,
     clearCalc,
@@ -237,9 +409,12 @@ const MultiWinding = () => {
     }
 
     setFormState((prevState) => {
-      const nextState = { ...prevState };
+      let nextState = { ...prevState };
 
       if (fieldPath === "kVA") {
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          resetCore: true,
+        });
         nextState.kVA = value;
         const defaults = getDefaultsForKva(value);
 
@@ -254,14 +429,38 @@ const MultiWinding = () => {
         return nextState;
       }
 
-      if (fieldPath === "secondaryVoltage") {
-        nextState.secondaryVoltage = value;
-        const voltage = Number(value);
+      if (VOLTAGE_FIELDS.includes(fieldPath)) {
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          resetCore: true,
+        });
+        nextState[fieldPath] = value;
 
-        if (Number.isFinite(voltage) && voltage > 0 && voltage < 11000) {
-          nextState.lvWindingType = "HELICAL";
+        if (fieldPath === "secondaryVoltage") {
+          const voltage = Number(value);
+
+          if (Number.isFinite(voltage) && voltage > 0 && voltage < 11000) {
+            nextState.lvWindingType = "HELICAL";
+          }
         }
 
+        return nextState;
+      }
+
+      if (WINDING_TYPE_FIELDS.includes(fieldPath)) {
+        const windingId = WINDING_ID_BY_WINDING_TYPE_FIELD[fieldPath];
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          windingIds: windingId ? [windingId] : PART2_WINDING_IDS,
+        });
+        nextState[fieldPath] = value;
+        return nextState;
+      }
+
+      if (CURRENT_DENSITY_FIELDS.includes(fieldPath)) {
+        const windingId = WINDING_ID_BY_CURRENT_DENSITY_FIELD[fieldPath];
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          windingIds: windingId ? [windingId] : PART2_WINDING_IDS,
+        });
+        nextState[fieldPath] = value;
         return nextState;
       }
 
@@ -272,6 +471,10 @@ const MultiWinding = () => {
         fieldPath === "fineConductorMaterial" ||
         fieldPath === "outerConductorMaterial"
       ) {
+        const windingId = WINDING_ID_BY_CONDUCTOR_MATERIAL_FIELD[fieldPath];
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          windingIds: windingId ? [windingId] : PART2_WINDING_IDS,
+        });
         nextState[fieldPath] = value;
 
         const densityFieldByMaterialField = {
@@ -288,6 +491,50 @@ const MultiWinding = () => {
         return nextState;
       }
 
+      if (fieldPath === "vectorGroup") {
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          resetCore: true,
+        });
+        nextState.vectorGroup = value;
+        return nextState;
+      }
+
+      if (fieldPath === "fluxDensity") {
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          resetCore: true,
+        });
+        const parsedKva = Number(prevState.kVA);
+        const parsedValue = Number(value);
+
+        if (
+          Number.isFinite(parsedKva) &&
+          Number.isFinite(parsedValue) &&
+          parsedKva <= 2500 &&
+          parsedValue > 1.7333
+        ) {
+          nextState.fluxDensity = 1.7333;
+        } else if (
+          Number.isFinite(parsedKva) &&
+          Number.isFinite(parsedValue) &&
+          parsedKva > 2500 &&
+          parsedValue > 1.69
+        ) {
+          nextState.fluxDensity = 1.69;
+        } else {
+          nextState.fluxDensity = value;
+        }
+
+        return nextState;
+      }
+
+      if (TAP_STEP_FIELDS.includes(fieldPath)) {
+        nextState = resetCalculationResults(prevState, lockedAttributes, {
+          windingIds: ["hvMain", "outer"],
+        });
+        nextState[fieldPath] = value;
+        return nextState;
+      }
+
       const keys = fieldPath.split(".");
       let current = nextState;
 
@@ -301,11 +548,29 @@ const MultiWinding = () => {
         current = current[key];
       });
 
+      if (fieldPath === "core.coreDia" || fieldPath === "core.limbHt") {
+        nextState = resetCalculationResults(nextState, lockedAttributes);
+      }
+
       if (keys[0] === "part2Windings" && keys.length === 3) {
         const windingId = keys[1];
         const field = keys[2];
+        const resetWindingIds =
+          field === "turnsPerPhase"
+            ? PART2_WINDING_IDS.slice(
+                Math.max(PART2_WINDING_IDS.indexOf(windingId), 0)
+              )
+            : [];
+
+        if (resetWindingIds.length > 0) {
+          nextState = resetCalculationResults(nextState, lockedAttributes, {
+            windingIds: resetWindingIds,
+          });
+        }
+
         const winding = {
           ...(nextState.part2Windings?.[windingId] || {}),
+          [field]: value,
         };
         const lockState = getWindingLocks(lockedAttributes, windingId);
 

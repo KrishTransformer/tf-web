@@ -1160,6 +1160,7 @@ initialState.multiWindings.data = {
   tapStepsPositive: 2,
   tapStepsNegative: 2,
   fluxDensity: 1.6888,
+  revisedVoltsPerTurn: 0,
   corseVoltage: "",
   fineVoltage: "",
   outerVoltage: "",

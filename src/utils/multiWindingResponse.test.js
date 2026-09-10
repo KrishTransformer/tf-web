@@ -296,6 +296,7 @@ describe("mapMultiWindingResponseToFormState", () => {
     expect(formState.fineVoltage).toBe(2476);
     expect(formState.outerVoltage).toBe(826);
     expect(formState.fineConductorMaterial).toBe("Al");
+    expect(formState.revisedVoltsPerTurn).toBe(14.208);
     expect(formState.voltsPerTurn).toBe(14.208);
     expect(formState.coilDimensions).toEqual({
       coreDia: 227,

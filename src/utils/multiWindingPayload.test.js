@@ -77,10 +77,10 @@ describe("buildMultiWindingPayload", () => {
         corseCurrentDensity: 3.5,
         fineCurrentDensity: 3.25,
         outerCurrentDensity: 3.1,
-        core: {
+        core: expect.objectContaining({
           coreDia: 520,
           limbHt: 1140,
-        },
+        }),
         outerWindings: expect.objectContaining({
           turnsPerPhase: 100,
         }),
@@ -99,7 +99,15 @@ describe("buildMultiWindingPayload", () => {
           hvToCorse: 8,
           corseToFine: 6,
           fineToOuter: 10,
+          hvToFine: null,
+          hvToOuter: null,
+          corseToOuter: null,
         },
+        coreToLv: 5,
+        lvToHv: 10,
+        hvToCorse: 8,
+        corseToFine: 6,
+        fineToOuter: 10,
       })
     );
   });
@@ -300,6 +308,59 @@ describe("buildMultiWindingPayload", () => {
     expect(payload.fluxDensity).toBe(1.7333);
   });
 
+  test("passes common two-winding style calculation inputs in the payload", () => {
+    const payload = buildMultiWindingPayload({
+      frequency: "50",
+      buildFactor: "1.3",
+      limitW: "1200",
+      limitEz: "5.5",
+      loadLoss: "3200",
+      coreLoss: "550",
+      ambientTemp: "40",
+      windingTemp: "55",
+      topOilTemp: "45",
+      eRadiatorType: "RADIATOR",
+      isOLTC: true,
+      core: {
+        coreMaterial: "NipM4",
+        coreType: "PRIME",
+      },
+      tank: {
+        tankLoss: "400",
+        wdgToTankGap: "75",
+        connectionGap: "120",
+        topYokeToCoverGap: "80",
+      },
+    });
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        frequency: 50,
+        buildFactor: 1.3,
+        limitW: 1200,
+        limitEz: 5.5,
+        tankLoss: 400,
+        loadLoss: 3200,
+        coreLoss: 550,
+        ambientTemp: 40,
+        windingTemp: 55,
+        topOilTemp: 45,
+        eRadiatorType: "RADIATOR",
+        isOLTC: true,
+        core: expect.objectContaining({
+          coreMaterial: "NipM4",
+          coreType: "PRIME",
+        }),
+        tank: {
+          tankLoss: 400,
+          wdgToTankGap: 75,
+          connectionGap: 120,
+          topYokeToCoverGap: 80,
+        },
+      })
+    );
+  });
+
   test("casts current density values to numbers before sending", () => {
     const payload = buildMultiWindingPayload({
       windingConfiguration: "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
@@ -329,10 +390,10 @@ describe("buildMultiWindingPayload", () => {
       { coreDia: true, limbHt: true }
     );
 
-    expect(payload.core).toEqual({
+    expect(payload.core).toEqual(expect.objectContaining({
       coreDia: 510,
       limbHt: 1180,
-    });
+    }));
   });
 
   test("sends null for fields without a value", () => {
@@ -350,6 +411,18 @@ describe("buildMultiWindingPayload", () => {
         kValue: 0.45,
         fluxDensity: null,
         vectorGroup: null,
+        frequency: null,
+        buildFactor: null,
+        limitW: null,
+        limitEz: null,
+        tankLoss: null,
+        loadLoss: null,
+        coreLoss: null,
+        ambientTemp: null,
+        windingTemp: null,
+        topOilTemp: null,
+        eRadiatorType: null,
+        isOLTC: null,
         lowVoltage: null,
         highVoltage: null,
         tapStepsPercentage: null,
@@ -358,6 +431,14 @@ describe("buildMultiWindingPayload", () => {
         core: {
           coreDia: null,
           limbHt: null,
+          coreMaterial: null,
+          coreType: null,
+        },
+        tank: {
+          tankLoss: null,
+          wdgToTankGap: null,
+          connectionGap: null,
+          topYokeToCoverGap: null,
         },
         lvWindings: {
           isEnamel: false,
@@ -389,6 +470,9 @@ describe("buildMultiWindingPayload", () => {
           hvToCorse: null,
           corseToFine: null,
           fineToOuter: null,
+          hvToFine: null,
+          hvToOuter: null,
+          corseToOuter: null,
         },
       })
     );
@@ -421,7 +505,48 @@ describe("buildMultiWindingPayload", () => {
       coreToLv: 5,
       lvToHv: 10,
       hvToCorse: 8,
+      corseToFine: 6,
+      fineToOuter: 10,
+      hvToFine: null,
+      hvToOuter: null,
       corseToOuter: 12,
+    });
+    expect(payload).toEqual(
+      expect.objectContaining({
+        coreToLv: 5,
+        lvToHv: 10,
+        hvToCorse: 8,
+        corseToOuter: 12,
+      })
+    );
+    expect(payload).not.toHaveProperty("corseToFine");
+    expect(payload).not.toHaveProperty("fineToOuter");
+  });
+
+  test("passes every radial clearance input under radialGaps", () => {
+    const payload = buildMultiWindingPayload({
+      windingConfiguration: "5_WDG_LV_HV_MAIN_CORSE_FINE_OUTER",
+      radialGaps: {
+        coreToLv: "5",
+        lvToHv: "10",
+        hvToCorse: "8",
+        corseToFine: "6",
+        fineToOuter: "10",
+        hvToFine: "8",
+        hvToOuter: "10",
+        corseToOuter: "10",
+      },
+    });
+
+    expect(payload.radialGaps).toEqual({
+      coreToLv: 5,
+      lvToHv: 10,
+      hvToCorse: 8,
+      corseToFine: 6,
+      fineToOuter: 10,
+      hvToFine: 8,
+      hvToOuter: 10,
+      corseToOuter: 10,
     });
   });
 
@@ -463,10 +588,14 @@ describe("buildMultiWindingPayload", () => {
     expect(unlockedPayload.core).toEqual({
       coreDia: null,
       limbHt: null,
+      coreMaterial: null,
+      coreType: null,
     });
     expect(lockedPayload.core).toEqual({
       coreDia: 510,
       limbHt: null,
+      coreMaterial: null,
+      coreType: null,
     });
   });
 });

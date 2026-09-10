@@ -80,11 +80,12 @@ export const addEntityFailed = (entityName) => ({
   entityName,
 });
 
-export const deleteEntity = (entityId, entityName,skipFetch) => ({
+export const deleteEntity = (entityId, entityName, skipFetch, refreshRequest) => ({
   type: constants.DELETE_ENTITY,
   entityId,
   entityName,
-  skipFetch
+  skipFetch,
+  refreshRequest,
 });
 
 export const deleteEntityFullfiled = (entityName) => ({

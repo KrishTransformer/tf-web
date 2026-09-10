@@ -78,6 +78,29 @@ test("round conductor and parallel popups restore calculated result values", () 
   expect(popup().getByDisplayValue("3")).toBeInTheDocument();
 });
 
+test("changing LV turns clears dependent winding results before calculating again", () => {
+  const actions = openDesign({
+    selectedCode: "3_WDG",
+    results: {
+      lvWinding: { turnsPerPhase: 100, currentDensity: 2.4 },
+      hvWinding: { turnsPerPhase: 200, currentDensity: 2.5 },
+      outerWinding: { turnsPerPhase: 300, currentDensity: 2.6 },
+    },
+  });
+
+  const turnsInput = cell("No. of Turns").querySelector("input");
+  fireEvent.change(turnsInput, { target: { value: "111" } });
+
+  expect(turnsInput).toHaveValue("111");
+  expect(cell("Current Density (A/mm2)").querySelector("input")).toHaveValue("");
+  expect(cell("Current Density (A/mm2)", 1).querySelector("input")).toHaveValue("");
+
+  fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+  const payload = actions.addCalc.mock.calls[0][0];
+  expect(payload.lvWindings).not.toHaveProperty("turnsPerPhase");
+  expect(payload.hvWindings).not.toHaveProperty("turnsPerPhase");
+});
+
 test("all five disc duct fields are editable and DISC and LAYER_DISC edits reach the request", () => {
   const actions = openDesign({
     selectedCode: "5_WDG",

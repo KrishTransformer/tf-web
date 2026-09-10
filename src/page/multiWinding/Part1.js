@@ -606,7 +606,7 @@ const Part1 = ({
           <div className="multi-winding-vpt-card">
             <span className="multi-winding-vpt-label">Volts Per Turn</span>
             <strong className="multi-winding-vpt-value">
-              {formState?.voltsPerTurn || "-"}
+              {formState?.revisedVoltsPerTurn ?? "-"}
             </strong>
           </div>
 

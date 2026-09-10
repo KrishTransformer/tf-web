@@ -262,6 +262,10 @@ export const mapMultiWindingResponseToFormState = (
 
   const getRateForMaterial = (material) =>
     normalizeUiConductorMaterial(material) === "Al" ? aluminiumRate : copperRate;
+  const revisedVoltsPerTurn = pickDefined(
+    results.revisedVoltsPerTurn,
+    results.voltsPerTurn
+  );
 
   return deepMerge(createDefaultMultiWindingData(), {
     designId: pickDefined(inputs.designId, ""),
@@ -338,7 +342,8 @@ export const mapMultiWindingResponseToFormState = (
     ),
     lossesAt50Percent: pickDefined(results.lossesAt50Percent),
     lossesAt100Percent: pickDefined(results.lossesAt100Percent),
-    voltsPerTurn: pickDefined(results.revisedVoltsPerTurn, results.voltsPerTurn),
+    revisedVoltsPerTurn,
+    voltsPerTurn: revisedVoltsPerTurn,
     ambientTemp: pickDefined(lvWinding.ambientTemp),
     windingTemp: pickDefined(lvWinding.windingTemp),
     topOilTemp: pickDefined(tankAndOil.topOilTemperature),
