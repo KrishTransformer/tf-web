@@ -110,31 +110,142 @@ const normalizeFabricationData = (fabricationData = {}) => {
   };
 };
 
+const toNumber = (value) => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value.trim());
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+};
+
+const isTruthy = (value) => {
+  if (value === true) {
+    return true;
+  }
+  if (value === false || value === undefined || value === null) {
+    return false;
+  }
+  if (typeof value === "number") {
+    return value !== 0;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return normalized !== "" &&
+      normalized !== "false" &&
+      normalized !== "0" &&
+      normalized !== "no" &&
+      normalized !== "no_formula_given" &&
+      normalized !== "skipped_for_now";
+  }
+  return true;
+};
+
+const positiveQuantity = (value, fallback = 1) => {
+  const quantity = toNumber(value);
+  return quantity && quantity > 0 ? quantity : fallback;
+};
+
+const countTruthy = (...values) => values.filter(isTruthy).length;
+
+const calculatePermaWoodWeightKg = (twoWindings) => {
+  const design = twoWindings?.data || {};
+  const heightMm = toNumber(
+    design.permaWoodRing ??
+      design.lvFormulas?.permaWoodRing ??
+      design.coilDimensions?.permaWoodRing
+  );
+  const outerDiameterMm = toNumber(
+    design.coilDimensions?.hvod ?? design.coilDimensions?.HVOD
+  );
+  const innerDiameterMm = toNumber(
+    design.core?.coreDia ?? design.coilDimensions?.coreDia
+  );
+
+  if (
+    !heightMm ||
+    !outerDiameterMm ||
+    !innerDiameterMm ||
+    heightMm <= 0 ||
+    outerDiameterMm <= innerDiameterMm ||
+    innerDiameterMm <= 0
+  ) {
+    return 0;
+  }
+
+  const volumeCubicMeters =
+    (Math.PI / 4) *
+    (outerDiameterMm ** 2 - innerDiameterMm ** 2) *
+    heightMm /
+    1000000000;
+
+  return volumeCubicMeters * 1100;
+};
+
 const buildLomPayload = ({ fabrication, twoWindings, rateOverrides = {} }) => {
+  const fab = fabrication.data || {};
+  const permaWoodWeightKg = calculatePermaWoodWeightKg(twoWindings);
+  const buchholzRelaySelected = isTruthy(fab.gorPipe?.buchholz_Relay);
+  const relayShutOffValveQuantity = buchholzRelaySelected
+    ? isTruthy(fab.gorPipe?.single_Valve)
+      ? 1
+      : 2
+    : 0;
+  const thermometerPocketQuantity = countTruthy(
+    fab.thermoPkt?.thermoPkt1,
+    fab.thermoPkt?.thermoPkt2
+  );
+  const marshallingBoxSelected = isTruthy(
+    fab.restOfVariables?.mbox ?? fab.mbox
+  );
+  const marshallingBoxQuantity = marshallingBoxSelected
+    ? positiveQuantity(fab.restOfVariables?.mbox_Inst_Nos ?? fab.marshlingBox)
+    : 0;
+  const pressureReliefValveSelected = isTruthy(
+    fab.restOfVariables?.prv ?? fab.pressureRelief
+  );
+  const explosionVentSelected = isTruthy(fab.exp_Vent?.exp_Vent);
+  const radiatorValvesSelected = isTruthy(fab.radiator?.radiator_Vlv);
+  const radiatorValvesQuantity = radiatorValvesSelected
+    ? positiveQuantity(fab.radiator?.radiator_Nos, 1) * 2
+    : 0;
+  const liftingLugsSelected = isTruthy(fab.lid_LiftLug?.lid_LiftLug);
+  const thermoSiphonSelected = isTruthy(
+    fab.restOfVariables?.thrmo_Syphn ?? fab.thermoSiphon
+  );
+
   const lomBooleans = {
-    hvCableBox: fabrication.data.hvcb.hvcb == false ? false : true,
-    lvCableBox: fabrication.data.lvcb.lvcb == false ? false : true,
-    hvBushing: fabrication.data.hvcb.hvcb == false ? true : false,
-    lvBushing: fabrication.data.lvcb.lvcb == false ? true : false,
-    permaWood: true,
-    drainValve: fabrication.data.drain_Vlv.drain_Vlv,
-    filterValve: fabrication.data.fill_Vlv.fill_Vlv,
-    samplingValve: fabrication.data.smpl_Vlv.smpl_Vlv,
-    relayShutOffValve: true,
-    thermometerPocket: true,
+    hvCableBox: isTruthy(fab.hvcb?.hvcb),
+    lvCableBox: isTruthy(fab.lvcb?.lvcb),
+    hvBushing: !isTruthy(fab.hvcb?.hvcb),
+    lvBushing: !isTruthy(fab.lvcb?.lvcb),
+    permaWood: permaWoodWeightKg > 0,
+    drainValve: isTruthy(fab.drain_Vlv?.drain_Vlv),
+    filterValve: isTruthy(fab.fill_Vlv?.fill_Vlv),
+    samplingValve: isTruthy(fab.smpl_Vlv?.smpl_Vlv),
+    relayShutOffValve: relayShutOffValveQuantity > 0,
+    thermometerPocket: thermometerPocketQuantity > 0,
     airReleasePlug: true,
     oltc: twoWindings.data.isOLTC,
     octc: twoWindings.data.isOLTC === true ? false : true,
     oti: true,
     wti: true,
-    buchholzRelay: true,
-    marshallingBox: true,
+    buchholzRelay: buchholzRelaySelected,
+    marshallingBox: marshallingBoxSelected,
     oilLevelGauge: twoWindings.data.isCSP === false ? true : false,
-    mog: fabrication.data.mog.mog,
-    pressureReliefValve: fabrication.data.restOfVariables.prv,
+    mog: isTruthy(fab.mog?.mog),
+    pressureReliefValve: pressureReliefValveSelected,
+    explosionVent: explosionVentSelected,
+    radiatorValves: radiatorValvesQuantity > 0,
+    liftingLugs: liftingLugsSelected,
+    thermoSiphon: thermoSiphonSelected,
     oilCirculatingPump: true,
     avrrtcc: true,
-    rollers: fabrication.data.roller.roller,
+    rollers: isTruthy(fab.roller?.roller),
     pumpControlCubicle: true,
     biMetallicConnector: true,
     fasteners: true,
@@ -154,28 +265,38 @@ const buildLomPayload = ({ fabrication, twoWindings, rateOverrides = {} }) => {
     hvBushing: twoWindings.data.vectorGroup.charAt(0) == "D" ? 3 : 4,
     lvBushing: twoWindings.data.vectorGroup.charAt(1) == "d" ? 3 : 4,
     radiatorsAndHeatExc: twoWindings.data.tankAndOilFormulas.totalRadiatorWeight,
-    permaWood: 0.0,
-    drainValve: fabrication.data.drain_Vlv.drain_Vlv_Nos,
-    filterValve: fabrication.data.fill_Vlv.fill_Vlv_Nos,
-    samplingValve: fabrication.data.smpl_Vlv.smpl_Vlv_Nos,
-    relayShutOffValve: 0.0,
+    permaWood: permaWoodWeightKg,
+    drainValve: isTruthy(fab.drain_Vlv?.drain_Vlv)
+      ? positiveQuantity(fab.drain_Vlv?.drain_Vlv_Nos)
+      : 0.0,
+    filterValve: isTruthy(fab.fill_Vlv?.fill_Vlv)
+      ? positiveQuantity(fab.fill_Vlv?.fill_Vlv_Nos)
+      : 0.0,
+    samplingValve: isTruthy(fab.smpl_Vlv?.smpl_Vlv)
+      ? positiveQuantity(fab.smpl_Vlv?.smpl_Vlv_Nos)
+      : 0.0,
+    relayShutOffValve: relayShutOffValveQuantity,
     breatherSilicaGel: 1,
     ratingPlate: 1,
-    thermometerPocket: 1,
+    thermometerPocket: thermometerPocketQuantity,
     airReleasePlug: 0.0,
     coreBoltsAndTieRods: twoWindings.data.tankAndOilFormulas.channelWeight,
     oltc: 1,
     octc: 1,
     oti: 0.0,
     wti: 0.0,
-    buchholzRelay: 0.0,
-    marshallingBox: 0.0,
-    oilLevelGauge: fabrication.data.cons.cons_Olg_Nos,
+    buchholzRelay: buchholzRelaySelected ? 1 : 0.0,
+    marshallingBox: marshallingBoxQuantity,
+    oilLevelGauge: fab.cons?.cons_Olg_Nos,
     mog: 1,
-    pressureReliefValve: 0.0,
+    pressureReliefValve: pressureReliefValveSelected ? 1 : 0.0,
+    explosionVent: explosionVentSelected ? 1 : 0.0,
+    radiatorValves: radiatorValvesQuantity,
+    liftingLugs: liftingLugsSelected ? 1 : 0.0,
+    thermoSiphon: thermoSiphonSelected ? 1 : 0.0,
     oilCirculatingPump: 0.0,
     avrrtcc: 0.0,
-    rollers: 4,
+    rollers: isTruthy(fab.roller?.roller) ? 4 : 0.0,
     pumpControlCubicle: 0.0,
     biMetallicConnector: 0.0,
     fasteners: 0.0,
@@ -189,15 +310,21 @@ const buildLomPayload = ({ fabrication, twoWindings, rateOverrides = {} }) => {
     lomBooleans,
     lomQuantity,
     lomRate,
+    hvConductorRateSelection: {
+      material: twoWindings.data?.hVConductorMaterial,
+    },
+    lvConductorRateSelection: {
+      material: twoWindings.data?.lVConductorMaterial,
+    },
     hvBushingRateSelection: {
-      voltage: fabrication.data?.hvb?.hvb_Volt ?? twoWindings.data?.highVoltage,
-      current: fabrication.data?.hvb?.hvb_Amp ?? twoWindings.data?.tankAndOilFormulas?.hvBushingCurrent,
-      type: fabrication.data?.hvBushingType,
+      voltage: fab?.hvb?.hvb_Volt ?? twoWindings.data?.highVoltage,
+      current: fab?.hvb?.hvb_Amp ?? twoWindings.data?.tankAndOilFormulas?.hvBushingCurrent,
+      type: fab?.hvBushingType,
     },
     lvBushingRateSelection: {
-      voltage: fabrication.data?.lvb?.lvb_Volt ?? twoWindings.data?.lowVoltage,
-      current: fabrication.data?.lvb?.lvb_Amp ?? twoWindings.data?.tankAndOilFormulas?.lvBushingCurrent,
-      type: fabrication.data?.lvBushingType,
+      voltage: fab?.lvb?.lvb_Volt ?? twoWindings.data?.lowVoltage,
+      current: fab?.lvb?.lvb_Amp ?? twoWindings.data?.tankAndOilFormulas?.lvBushingCurrent,
+      type: fab?.lvBushingType,
     },
   };
 };

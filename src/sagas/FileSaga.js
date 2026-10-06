@@ -28,6 +28,10 @@ const LOM_BOOLEAN_KEYS = [
     "oilLevelGauge",
     "mog",
     "pressureReliefValve",
+    "explosionVent",
+    "radiatorValves",
+    "liftingLugs",
+    "thermoSiphon",
     "oilCirculatingPump",
     "avrrtcc",
     "rollers",
@@ -69,6 +73,10 @@ const LOM_QUANTITY_KEYS = [
     "oilLevelGauge",
     "mog",
     "pressureReliefValve",
+    "explosionVent",
+    "radiatorValves",
+    "liftingLugs",
+    "thermoSiphon",
     "oilCirculatingPump",
     "avrrtcc",
     "rollers",
@@ -111,6 +119,10 @@ const LOM_RATE_KEYS = [
     "oilLevelGauge",
     "mog",
     "pressureReliefValve",
+    "explosionVent",
+    "radiatorValves",
+    "liftingLugs",
+    "thermoSiphon",
     "oilCirculatingPump",
     "avrrtcc",
     "rollers",
@@ -133,6 +145,10 @@ const CONDITIONAL_RATE_KEYS = {
     oilLevelGauge: "oilLevelGauge",
     mog: "mog",
     pressureReliefValve: "pressureReliefValve",
+    explosionVent: "explosionVent",
+    radiatorValves: "radiatorValves",
+    liftingLugs: "liftingLugs",
+    thermoSiphon: "thermoSiphon",
     rollers: "rollers",
 };
 
@@ -171,6 +187,8 @@ const normalizeLomPayload = (payload = {}) => {
         lomRate,
         hvBushingRateSelection: payload.hvBushingRateSelection,
         lvBushingRateSelection: payload.lvBushingRateSelection,
+        hvConductorRateSelection: payload.hvConductorRateSelection,
+        lvConductorRateSelection: payload.lvConductorRateSelection,
     };
 };
 
