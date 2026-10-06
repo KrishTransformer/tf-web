@@ -171,6 +171,8 @@ const normalizeLomPayload = (payload = {}) => {
         lomRate,
         hvBushingRateSelection: payload.hvBushingRateSelection,
         lvBushingRateSelection: payload.lvBushingRateSelection,
+        hvConductorRateSelection: payload.hvConductorRateSelection,
+        lvConductorRateSelection: payload.lvConductorRateSelection,
     };
 };
 

@@ -189,6 +189,12 @@ const buildLomPayload = ({ fabrication, twoWindings, rateOverrides = {} }) => {
     lomBooleans,
     lomQuantity,
     lomRate,
+    hvConductorRateSelection: {
+      material: twoWindings.data?.hVConductorMaterial,
+    },
+    lvConductorRateSelection: {
+      material: twoWindings.data?.lVConductorMaterial,
+    },
     hvBushingRateSelection: {
       voltage: fabrication.data?.hvb?.hvb_Volt ?? twoWindings.data?.highVoltage,
       current: fabrication.data?.hvb?.hvb_Amp ?? twoWindings.data?.tankAndOilFormulas?.hvBushingCurrent,
