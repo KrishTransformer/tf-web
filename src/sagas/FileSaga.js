@@ -169,6 +169,8 @@ const normalizeLomPayload = (payload = {}) => {
         lomBooleans,
         lomQuantity,
         lomRate,
+        hvBushingRateSelection: payload.hvBushingRateSelection,
+        lvBushingRateSelection: payload.lvBushingRateSelection,
     };
 };
 

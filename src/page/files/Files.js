@@ -110,7 +110,7 @@ const normalizeFabricationData = (fabricationData = {}) => {
   };
 };
 
-const buildLomPayload = ({ fabrication, twoWindings, materialData, rateOverrides = {} }) => {
+const buildLomPayload = ({ fabrication, twoWindings, rateOverrides = {} }) => {
   const lomBooleans = {
     hvCableBox: fabrication.data.hvcb.hvcb == false ? false : true,
     lvCableBox: fabrication.data.lvcb.lvcb == false ? false : true,
@@ -182,53 +182,23 @@ const buildLomPayload = ({ fabrication, twoWindings, materialData, rateOverrides
     otherMaterials: 0.0,
   };
 
-  const lomRate = {
-    lamination: rateOverrides.lamination ?? materialData[0]?.materialRate ?? 0.0,
-    hvConductor: rateOverrides.hvConductor ?? materialData[1]?.materialRate ?? 0.0,
-    lvConductor: rateOverrides.lvConductor ?? materialData[2]?.materialRate ?? 0.0,
-    hvConnectionLeads: rateOverrides.hvConnectionLeads ?? materialData[3]?.materialRate ?? 0.0,
-    lvConnectionLeads: rateOverrides.lvConnectionLeads ?? materialData[4]?.materialRate ?? 0.0,
-    insulationMaterial: rateOverrides.insulationMaterial ?? materialData[5]?.materialRate ?? 0.0,
-    transformerOil: rateOverrides.transformerOil ?? materialData[6]?.materialRate ?? 0.0,
-    tankLidEtc: rateOverrides.tankLidEtc ?? materialData[7]?.materialRate ?? 0.0,
-    ...(lomBooleans.hvCableBox && { hvCableBox: rateOverrides.hvCableBox ?? materialData[8]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.lvCableBox && { lvCableBox: rateOverrides.lvCableBox ?? materialData[9]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.hvBushing && { hvBushing: rateOverrides.hvBushing ?? materialData[10]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.lvBushing && { lvBushing: rateOverrides.lvBushing ?? materialData[11]?.materialRate ?? 0.0 }),
-    radiatorsAndHeatExc: rateOverrides.radiatorsAndHeatExc ?? materialData[12]?.materialRate ?? 0.0,
-    permaWood: rateOverrides.permaWood ?? materialData[13]?.materialRate ?? 0.0,
-    ...(lomBooleans.drainValve && { drainValve: rateOverrides.drainValve ?? materialData[14]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.filterValve && { filterValve: rateOverrides.filterValve ?? materialData[15]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.samplingValve && { samplingValve: rateOverrides.samplingValve ?? materialData[16]?.materialRate ?? 0.0 }),
-    relayShutOffValve: rateOverrides.relayShutOffValve ?? materialData[17]?.materialRate ?? 0.0,
-    breatherSilicaGel: rateOverrides.breatherSilicaGel ?? materialData[18]?.materialRate ?? 0.0,
-    ratingPlate: rateOverrides.ratingPlate ?? materialData[19]?.materialRate ?? 0.0,
-    thermometerPocket: rateOverrides.thermometerPocket ?? materialData[20]?.materialRate ?? 0.0,
-    airReleasePlug: rateOverrides.airReleasePlug ?? materialData[21]?.materialRate ?? 0.0,
-    coreBoltsAndTieRods: rateOverrides.coreBoltsAndTieRods ?? materialData[22]?.materialRate ?? 0.0,
-    ...(lomBooleans.oltc && { oltc: rateOverrides.oltc ?? materialData[23]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.octc && { octc: rateOverrides.octc ?? materialData[24]?.materialRate ?? 0.0 }),
-    oti: rateOverrides.oti ?? materialData[25]?.materialRate ?? 0.0,
-    wti: rateOverrides.wti ?? materialData[26]?.materialRate ?? 0.0,
-    buchholzRelay: rateOverrides.buchholzRelay ?? materialData[27]?.materialRate ?? 0.0,
-    marshallingBox: rateOverrides.marshallingBox ?? materialData[28]?.materialRate ?? 0.0,
-    ...(lomBooleans.oilLevelGauge && { oilLevelGauge: rateOverrides.oilLevelGauge ?? materialData[29]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.mog && { mog: rateOverrides.mog ?? materialData[30]?.materialRate ?? 0.0 }),
-    ...(lomBooleans.pressureReliefValve && { pressureReliefValve: rateOverrides.pressureReliefValve ?? materialData[31]?.materialRate ?? 0.0 }),
-    oilCirculatingPump: rateOverrides.oilCirculatingPump ?? materialData[32]?.materialRate ?? 0.0,
-    avrrtcc: rateOverrides.avrrtcc ?? materialData[33]?.materialRate ?? 0.0,
-    ...(lomBooleans.rollers && { rollers: rateOverrides.rollers ?? materialData[34]?.materialRate ?? 0.0 }),
-    pumpControlCubicle: rateOverrides.pumpControlCubicle ?? materialData[35]?.materialRate ?? 0.0,
-    biMetallicConnector: rateOverrides.biMetallicConnector ?? materialData[36]?.materialRate ?? 0.0,
-    fasteners: rateOverrides.fasteners ?? materialData[37]?.materialRate ?? 0.0,
-    otherMaterials: rateOverrides.otherMaterials ?? materialData[38]?.materialRate ?? 0.0,
-  };
+  const lomRate = { ...rateOverrides };
 
   return {
     isTrue: true,
     lomBooleans,
     lomQuantity,
     lomRate,
+    hvBushingRateSelection: {
+      voltage: fabrication.data?.hvb?.hvb_Volt ?? twoWindings.data?.highVoltage,
+      current: fabrication.data?.hvb?.hvb_Amp ?? twoWindings.data?.tankAndOilFormulas?.hvBushingCurrent,
+      type: fabrication.data?.hvBushingType,
+    },
+    lvBushingRateSelection: {
+      voltage: fabrication.data?.lvb?.lvb_Volt ?? twoWindings.data?.lowVoltage,
+      current: fabrication.data?.lvb?.lvb_Amp ?? twoWindings.data?.tankAndOilFormulas?.lvBushingCurrent,
+      type: fabrication.data?.lvBushingType,
+    },
   };
 };
 
@@ -695,20 +665,16 @@ const Files = () => {
         ? buildLomPayload({
             fabrication: normalizedFabrication,
             twoWindings: normalizedTwoWindingCalc,
-            materialData,
             rateOverrides,
           })
         : null,
     [
       isMultiWindingDesign,
-      materialData,
       normalizedFabrication,
       normalizedTwoWindingCalc,
       rateOverrides,
     ]
   );
-  const lomRateKeys = Object.keys(lomPayload?.lomRate || {});
-  const lomRateKeySignature = lomRateKeys.join("|");
 
   useEffect(() => {
     if (isMultiWindingDesign) {
@@ -789,7 +755,7 @@ const Files = () => {
     targetRow.rate = updatedRate;
 
     if (!targetRow.isNew) {
-      const rateKey = targetRow.rateKey ?? lomRateKeys[rowIndex];
+      const rateKey = targetRow.rateKey;
       if (rateKey) {
         setRateOverrides((prevRateOverrides) => ({
           ...prevRateOverrides,
@@ -815,10 +781,10 @@ const Files = () => {
         ...row,
         index: typeof row.index === "number" ? row.index : index,
         isNew: Boolean(row.isNew),
-        rateKey: row.isNew ? row.rateKey ?? null : row.rateKey ?? lomRateKeys[index] ?? null,
+        rateKey: row.isNew ? row.rateKey ?? null : row.rateKey ?? null,
       }))
     );
-  }, [isMultiWindingDesign, lom.data, lomRateKeySignature]);
+  }, [isMultiWindingDesign, lom.data]);
 
   useEffect(() => {
     const darkModeEnabled = localStorage.getItem("appTheme") === "dark";
