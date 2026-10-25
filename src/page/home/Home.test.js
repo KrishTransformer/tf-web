@@ -37,8 +37,9 @@ describe("Home pagination", () => {
     let selectorCall = 0;
     const selectorValues = [
       {
-        twoDesigns: { data: { data: [], total: 41 } },
-        multiDesigns: { data: { data: [], total: 41 } },
+        "designLibrary-all": { data: { data: [], total: 41 } },
+        "designLibrary-two": { data: { data: [], total: 21 } },
+        "designLibrary-multi": { data: { data: [], total: 25 } },
       },
       { name: "Tester" },
       { generate3d: {} },
@@ -48,15 +49,15 @@ describe("Home pagination", () => {
     );
   });
 
-  test("requests and paginates only the active design tab", async () => {
+  test("paginates all designs and applies the selected design type", async () => {
     render(<Home />);
 
     await waitFor(() =>
       expect(actions.fetchEntity).toHaveBeenCalledWith(
         "design",
         "offset=0&size=20&sortAttribute=updatedAt&sortOrder=DESC",
-        { twoWindings: { exists: true } },
-        "twoDesigns"
+        {},
+        "designLibrary-all"
       )
     );
 
@@ -66,30 +67,47 @@ describe("Home pagination", () => {
       expect(actions.fetchEntity).toHaveBeenLastCalledWith(
         "design",
         "offset=1&size=20&sortAttribute=updatedAt&sortOrder=DESC",
-        { twoWindings: { exists: true } },
-        "twoDesigns"
+        {},
+        "designLibrary-all"
       )
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "MWdg" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Design type" }), {
+      target: { value: "multi" },
+    });
 
     await waitFor(() =>
       expect(actions.fetchEntity).toHaveBeenLastCalledWith(
         "design",
         "offset=0&size=20&sortAttribute=updatedAt&sortOrder=DESC",
-        { multiWindings: { exists: true } },
-        "multiDesigns"
+        { designType: ["multi"] },
+        "designLibrary-multi"
       )
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "2Wdg" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Design type" }), {
+      target: { value: "two" },
+    });
 
     await waitFor(() =>
       expect(actions.fetchEntity).toHaveBeenLastCalledWith(
         "design",
-        "offset=1&size=20&sortAttribute=updatedAt&sortOrder=DESC",
-        { twoWindings: { exists: true } },
-        "twoDesigns"
+        "offset=0&size=20&sortAttribute=updatedAt&sortOrder=DESC",
+        { designType: ["two", null] },
+        "designLibrary-two"
+      )
+    );
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Design type" }), {
+      target: { value: "all" },
+    });
+
+    await waitFor(() =>
+      expect(actions.fetchEntity).toHaveBeenLastCalledWith(
+        "design",
+        "offset=0&size=20&sortAttribute=updatedAt&sortOrder=DESC",
+        {},
+        "designLibrary-all"
       )
     );
   });

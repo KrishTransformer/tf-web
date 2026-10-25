@@ -950,10 +950,25 @@ const TwoWinding = () => {
               fontSize="16px"
             >
               <div
-                className={`two-winding-comments-stack${
-                  !hasPersistentComments && !hasHoverComment ? " is-empty" : ""
-                }`}
+                className="two-winding-comments-stack"
               >
+                <div className="two-winding-comment-section">
+                  <div className="two-winding-comment-label">Losses</div>
+                  <div className="two-winding-comment-body">
+                    <div>
+                      Losses at 50% load: {formState?.lossesAt50Percent === "" ||
+                      formState?.lossesAt50Percent == null
+                        ? "—"
+                        : `${formState.lossesAt50Percent} W`}
+                    </div>
+                    <div>
+                      Losses at 100% load: {formState?.lossesAt100Percent === "" ||
+                      formState?.lossesAt100Percent == null
+                        ? "—"
+                        : `${formState.lossesAt100Percent} W`}
+                    </div>
+                  </div>
+                </div>
                 {hasPersistentComments && (
                   <div className="two-winding-comment-section accent">
                     <div className="two-winding-comment-label">Disc Winding Notes</div>

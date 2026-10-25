@@ -244,6 +244,7 @@ describe("mapMultiWindingResponseToFormState", () => {
           insulatedWeight: 7.5,
         },
         coilDimensions: {
+          coilCoilGap: 16,
           coreDia: 227,
           coreGap: 8,
           lVID: 243,
@@ -299,6 +300,7 @@ describe("mapMultiWindingResponseToFormState", () => {
     expect(formState.revisedVoltsPerTurn).toBe(14.208);
     expect(formState.voltsPerTurn).toBe(14.208);
     expect(formState.coilDimensions).toEqual({
+      coilCoilGap: 16,
       coreDia: 227,
       coreGap: 8,
       activePartSize: "1469 L X 479 W X 974 H mm",

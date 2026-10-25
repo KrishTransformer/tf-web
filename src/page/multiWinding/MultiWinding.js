@@ -208,6 +208,7 @@ const resetCalculationResults = (
       coreGap: prevState.coilDimensions?.coreGap || defaults.coilDimensions.coreGap,
       lvhvgap: prevState.coilDimensions?.lvhvgap || defaults.coilDimensions.lvhvgap,
       hvhvgap: prevState.coilDimensions?.hvhvgap || defaults.coilDimensions.hvhvgap,
+      coilCoilGap: prevState.coilDimensions?.coilCoilGap ?? "",
     },
     multiCoilDimensions: {
       ...cloneData(defaults.multiCoilDimensions),
