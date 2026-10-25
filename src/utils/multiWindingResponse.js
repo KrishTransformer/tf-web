@@ -424,6 +424,7 @@ export const mapMultiWindingResponseToFormState = (
       radiatorWidth: tankAndOil.radiatorWidth ?? "",
     },
     coilDimensions: {
+      coilCoilGap: resultCoilDimensions.coilCoilGap ?? resultCoilDimensions.hVHVGap ?? inputs.coilDimensions?.coilCoilGap ?? "",
       coreDia: resultCoilDimensions.coreDia ?? "",
       coreGap: resultCoilDimensions.coreGap ?? "",
       activePartSize: resultCoilDimensions.activePartSize ?? "",

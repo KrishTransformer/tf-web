@@ -207,7 +207,7 @@ describe("buildMultiWindingPayload", () => {
     expect(payload).not.toHaveProperty("fineCurrentDensity");
   });
 
-  test("sends unlocked conductor and parallel fields as null", () => {
+  test("sends parallel counts even when unlocked while omitting unlocked conductor sizes", () => {
     const payload = buildMultiWindingPayload(
       {
         part2Windings: {
@@ -222,6 +222,8 @@ describe("buildMultiWindingPayload", () => {
     );
 
     expect(payload.lvWindings).toEqual({
+      radialParallelCond: 2,
+      axialParallelCond: 1,
       isEnamel: false,
     });
   });
@@ -267,6 +269,8 @@ describe("buildMultiWindingPayload", () => {
     expect(payload.lockedAttributes.lvWindings.condBreadth).toBe(true);
     expect(payload.lockedAttributes.lvWindings.condHeight).toBe(true);
     expect(payload.lockedAttributes.lvWindings.noInParallel).toBe(false);
+    expect(payload.lvWindings.radialParallelCond).toBe(2);
+    expect(payload.lvWindings.axialParallelCond).toBe(1);
     expect(payload.lvWindings).not.toHaveProperty("noInParallel");
     expect(payload.lvWindings.condBreadth).toBe(6.2);
     expect(payload.lvWindings.condHeight).toBe(2.8);

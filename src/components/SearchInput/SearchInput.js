@@ -13,30 +13,41 @@ const SearchInput = ({
   inputWidth,
   selectWidth,
   margin,
+  showField = true,
+  showSort = true,
 }) => {
   return (
     <>
-      <div className="search-container search-container-field" style={{ width: inputWidth, margin }}>
-        <FaSearch className="search-icon" />
-        <input
-          type="text"
-          className="search-input"
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
-        />
-      </div>
+      {showField && (
+        <div className="search-container search-container-field" style={{ width: inputWidth, margin }}>
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            className="search-input"
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            onKeyDown={onKeyDown}
+          />
+        </div>
+      )}
 
-      <div className="search-container search-container-sort" style={{ width: selectWidth, margin }}>
-        <BsSortAlphaDown className="search-icon" />
-        <select className="search-input" onChange={onSortChange} value={sortValue}>
-          <option value="updatedAt-DESC">Recently Updated</option>
-          <option value="updatedAt-ASC">Oldest Updated</option>
-          <option value="designId-ASC">Design Ref A-Z</option>
-          <option value="designId-DESC">Design Ref Z-A</option>
-        </select>
-      </div>
+      {showSort && (
+        <div className="search-container search-container-sort" style={{ width: selectWidth, margin }}>
+          <BsSortAlphaDown className="search-icon" />
+          <select
+            className="search-input"
+            aria-label="Sort designs"
+            onChange={onSortChange}
+            value={sortValue}
+          >
+            <option value="updatedAt-DESC">Recently Updated</option>
+            <option value="updatedAt-ASC">Oldest Updated</option>
+            <option value="designId-ASC">Design Ref A-Z</option>
+            <option value="designId-DESC">Design Ref Z-A</option>
+          </select>
+        </div>
+      )}
     </>
   );
 };

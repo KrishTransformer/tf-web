@@ -28,15 +28,8 @@ const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const size = 20;
-  const [activeDesignTab, setActiveDesignTab] = useState("two");
-  const [categoryPages, setCategoryPages] = useState({ two: 1, multi: 1 });
-  const currentPage = categoryPages[activeDesignTab] || 1;
-  const setCurrentPage = (page) => {
-    setCategoryPages((previousPages) => ({
-      ...previousPages,
-      [activeDesignTab]: page,
-    }));
-  };
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedDesignType, setSelectedDesignType] = useState("all");
   const [selectedDesigns, setSelectedDesigns] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [designTypeModalOpen, setDesignTypeModalOpen] = useState(false);
@@ -50,7 +43,7 @@ const Home = () => {
   const settingsMenuRef = useRef(null);
 
   const entities = useSelector(selectEntity);
-  const designStoreKey = activeDesignTab === "multi" ? "multiDesigns" : "twoDesigns";
+  const designStoreKey = `designLibrary-${selectedDesignType}`;
   const design = entities?.[designStoreKey];
   const { name } = useSelector(selectAuth);
   const totalEntries = design?.data?.total || 0;
@@ -98,9 +91,12 @@ const Home = () => {
   }, [name]);
 
   const [sortAttribute, sortOrder] = sortOption.split("-");
-  const designTypeFilter = activeDesignTab === "multi"
-    ? { multiWindings: { exists: true } }
-    : { twoWindings: { exists: true } };
+  const designTypeFilter = selectedDesignType === "all"
+    ? {}
+    : {
+        // MongoDB treats null in an $in filter as matching null or a missing field.
+        designType: selectedDesignType === "two" ? ["two", null] : [selectedDesignType],
+      };
   const searchPayload = {
     attributeName: ["designId"],
     attributeValue: searchQuery,
@@ -126,7 +122,7 @@ const Home = () => {
       URL.revokeObjectURL(generate3d?.data?.blob);
       actions.generate3DCleared();
     }
-  }, [currentPage, sortOption, activeDesignTab]);
+  }, [currentPage, sortOption, selectedDesignType]);
 
   useEffect(() => {
     if (totalPages === 0 && currentPage !== 1) {
@@ -249,7 +245,13 @@ const Home = () => {
 
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
-    setCategoryPages({ two: 1, multi: 1 });
+    setCurrentPage(1);
+  };
+
+  const handleDesignFilterChange = (event) => {
+    setSelectedDesignType(event.target.value);
+    setCurrentPage(1);
+    setSelectedDesigns([]);
   };
 
   const handleSearch = () => {
@@ -262,7 +264,12 @@ const Home = () => {
         designStoreKey
       );
     } else {
-      fetchData();
+      actions.fetchEntity(
+        "design",
+        `offset=0&size=${size}&sortAttribute=${sortAttribute}&sortOrder=${sortOrder}`,
+        designTypeFilter,
+        designStoreKey
+      );
     }
   };
 
@@ -322,28 +329,14 @@ const Home = () => {
 
   const isSingleDesignTypeOption = designTypeOptions.length === 1;
   const designRows = useMemo(() => design?.data?.data || [], [design?.data?.data]);
-  const designTabs = [
-    {
-      key: "two",
-      label: "2Wdg",
-      rows: activeDesignTab === "two" ? designRows : [],
-    },
-    {
-      key: "multi",
-      label: "MWdg",
-      rows: activeDesignTab === "multi" ? designRows : [],
-      hidden: !showMultiWdgOption,
-    },
-  ].filter((tab) => !tab.hidden);
-
-  const currentTab =
-    designTabs.find((tab) => tab.key === activeDesignTab) || designTabs[0];
-
-  useEffect(() => {
-    if (!designTabs.some((tab) => tab.key === activeDesignTab) && designTabs[0]) {
-      setActiveDesignTab(designTabs[0].key);
-    }
-  }, [activeDesignTab, designTabs]);
+  const designFilterOptions = [
+    { value: "all", label: "All designs" },
+    { value: "two", label: "2Wdg" },
+    { value: "multi", label: "MWdg" },
+  ];
+  const selectedDesignTypeLabel = designFilterOptions.find(
+    (option) => option.value === selectedDesignType
+  )?.label;
 
   return (
     <Layout hideSidebar>
@@ -420,58 +413,64 @@ const Home = () => {
 
         <section className="home-shell">
           <div className="home-toolbar">
-            <SearchInput
-              placeholder="Search by design reference"
-              value={searchQuery}
-              sortValue={sortOption}
-              inputWidth="min(420px, 100%)"
-              selectWidth="210px"
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearch();
-                }
-              }}
-              onSortChange={handleSortChange}
-            />
-            <button type="button" className="home-search-btn" onClick={handleSearch}>
-              Search
-            </button>
-            {selectedDesigns.length > 0 && (
-              <button type="button" className="home-delete-btn" onClick={handleTrashOpen}>
-                <FaRegTrashAlt />
-                Delete ({selectedDesigns.length})
+            <div className="home-search-group">
+              <SearchInput
+                placeholder="Search by design reference"
+                value={searchQuery}
+                inputWidth="min(420px, 100%)"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                showSort={false}
+              />
+              <button type="button" className="home-search-btn" onClick={handleSearch}>
+                Search
               </button>
-            )}
+              {selectedDesigns.length > 0 && (
+                <button type="button" className="home-delete-btn" onClick={handleTrashOpen}>
+                  <FaRegTrashAlt />
+                  Delete ({selectedDesigns.length})
+                </button>
+              )}
+            </div>
+            <label className="home-design-filter">
+              <span className="home-design-filter-label">Design type</span>
+              <select
+                className="home-design-filter-select"
+                value={selectedDesignType}
+                onChange={handleDesignFilterChange}
+                aria-label="Design type"
+              >
+                {designFilterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="home-sort-filter">
+              <SearchInput
+                sortValue={sortOption}
+                selectWidth="210px"
+                onSortChange={handleSortChange}
+                showField={false}
+              />
+            </div>
           </div>
 
           <div className="home-library-header">
             <div>
-              <h2 className="home-library-title">{currentTab?.label || "Saved Designs"}</h2>
+              <h2 className="home-library-title">
+                {selectedDesignTypeLabel || "All designs"}
+              </h2>
               <p className="home-library-summary">
-                {currentTab?.rows?.length || 0} shown • {totalEntries} total • Page{" "}
+                {designRows.length} shown • {totalEntries} total • Page{" "}
                 {totalPages === 0 ? 0 : currentPage} of {totalPages}
               </p>
             </div>
-          </div>
-
-          <div className="home-tab-row">
-            {designTabs.map((tab) => {
-              const isActive = currentTab?.key === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`home-tab-chip ${isActive ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveDesignTab(tab.key);
-                    setSelectedDesigns([]);
-                  }}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
           </div>
 
           <div className="home-table-shell">
@@ -480,10 +479,10 @@ const Home = () => {
                 <CircularProgress size={34} />
                 <p className="home-loading-copy">Loading saved designs...</p>
               </div>
-            ) : currentTab?.rows?.length > 0 ? (
+            ) : designRows.length > 0 ? (
               <CheckedTable
                 currentPage={currentPage}
-                rows={currentTab.rows}
+                rows={designRows}
                 size={size}
                 selectedDesigns={selectedDesigns}
                 setSelectedDesigns={setSelectedDesigns}
@@ -493,7 +492,7 @@ const Home = () => {
               <div className="home-empty-state">
                 <h3 className="home-empty-title">No designs match this view</h3>
                 <p className="home-empty-copy">
-                  Try a different tab, clear the search, or start a fresh design.
+                  Try a different design type, clear the search, or start a fresh design.
                 </p>
               </div>
             )}

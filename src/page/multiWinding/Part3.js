@@ -151,6 +151,10 @@ const Part3 = ({ formState, handleInputChange }) => {
   const gridTemplateColumns = `minmax(120px, 0.8fr) repeat(${visibleWindings.length}, minmax(105px, 1fr))`;
   const clearanceFields = [
     {
+      label: "Phase-to-phase gap (mm)",
+      path: "coilDimensions.coilCoilGap",
+    },
+    {
       label: "Core-LV Clr",
       path: "coilDimensions.coreGap",
     },
