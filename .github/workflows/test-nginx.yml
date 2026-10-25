@@ -1,0 +1,44 @@
+name: Nginx startup regression
+
+on:
+  pull_request:
+    paths:
+      - nginx.conf
+      - Dockerfile
+      - docker-entrypoint.d/**
+      - .github/workflows/test-nginx.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  startup-with-unavailable-model-dns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare an unavailable model host
+        run: |
+          mkdir -p "$RUNNER_TEMP/tf-web-smoke/site"
+          printf 'website-is-running\n' > "$RUNNER_TEMP/tf-web-smoke/site/index.html"
+          sed 's/design\.trafointel\.com/models.invalid/g' nginx.conf > "$RUNNER_TEMP/tf-web-smoke/nginx.conf"
+          chmod +x docker-entrypoint.d/15-configure-dns.sh
+      - name: Start the production Nginx version
+        run: |
+          docker run -d --name tf-web-nginx-smoke -p 8080:8080 \
+            -v "$RUNNER_TEMP/tf-web-smoke/site:/data/www:ro" \
+            -v "$RUNNER_TEMP/tf-web-smoke/nginx.conf:/etc/nginx/nginx.conf:ro" \
+            -v "$GITHUB_WORKSPACE/docker-entrypoint.d/15-configure-dns.sh:/docker-entrypoint.d/15-configure-dns.sh:ro" \
+            nginx:1.23.2
+      - name: Verify DNS failure affects only the model request
+        run: |
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://localhost:8080/ | grep website-is-running
+          status=$(curl --max-time 15 -s -o /dev/null -w '%{http_code}' http://localhost:8080/storage-proxy/models/test.glb)
+          test "$status" = 502
+          curl --fail http://localhost:8080/ | grep website-is-running
+      - name: Container logs
+        if: always()
+        run: docker logs tf-web-nginx-smoke
+      - name: Stop test container
+        if: always()
+        run: docker rm -f tf-web-nginx-smoke
