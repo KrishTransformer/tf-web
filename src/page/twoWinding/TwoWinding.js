@@ -8,6 +8,7 @@ import {
   Container,
 } from "../../components";
 import Part1 from "./Part1";
+import { applyLvLayerInput } from "../../utils/twoWindingPayload";
 import { applyCoreDimensionInputs, isRectangular } from "../../utils/rectangularDimensions";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
@@ -798,7 +799,7 @@ const TwoWinding = () => {
 
     // Send the modified data to the API
     console.log("dataToSubmit.innerWindings:", dataToSubmit.lockedAttributes);
-    dataToSubmit = applyCoreDimensionInputs(dataToSubmit);
+    dataToSubmit = applyLvLayerInput(applyCoreDimensionInputs(dataToSubmit));
     actions.addCalc(dataToSubmit, "2windings", isRectangular(dataToSubmit) ? "/rectangular" : "/circular", "", twoWindings?.metadata);
     console.log("dataToSubmit.innerWindings: after_call", dataToSubmit.lockedAttributes);
 
