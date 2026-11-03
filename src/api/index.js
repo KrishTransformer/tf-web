@@ -134,7 +134,7 @@ export const coreService = {
     API_URL: "https://tf-core-service.trafointel.com/tf/api/" + fullUrl,
   },
   local: {
-    API_URL: "https://tf-core-service.trafointel.com/tf/api/" + fullUrl,
+    API_URL: process.env.REACT_APP_CORE_API_URL || "https://tf-core-service.trafointel.com/tf/api/" + fullUrl,
   },
 };
 

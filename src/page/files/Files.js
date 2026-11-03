@@ -1,3 +1,4 @@
+import { designPrintDimensions, isRectangular } from "../../utils/rectangularDimensions";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Layout,
@@ -1185,7 +1186,7 @@ const Files = () => {
         3: { cellWidth: 50 }
       },
       body: [
-        ["Frame: " + twoWindings.data.core.coreDia + "/" + twoWindings.data.core.limbHt + "/" + twoWindings.data.core.cenDist,
+        ["Frame: " + designPrintDimensions(twoWindings.data).core + "/" + twoWindings.data.core.limbHt + "/" + twoWindings.data.core.cenDist,
         "Core Factor: " + (twoWindings.data.lvFormulas.netArea / twoWindings.data.lvFormulas.grossArea).toFixed(2),
         "Core Type: " + twoWindings.data.core.coreType,
         "Grade: " + `${twoWindings.data.core.coreMaterial} (${twoWindings.data.hvFormulas.specificLoss} W/kg)`],
@@ -1293,16 +1294,16 @@ const Files = () => {
       {
         title: "Coil Dimensions:",
         rows: [
-          twoWindings.data.coilDimensions.coreDia + "    Ø Core",
-          "2x" + twoWindings.data.coilDimensions.coreGap + "    δ 1",
-          twoWindings.data.coilDimensions.lvid + "    LV-ID",
-          "2x" + twoWindings.data.coilDimensions.lvradial,
-          twoWindings.data.coilDimensions.lvod + "    LV-OD",
-          "2x" + twoWindings.data.coilDimensions.lvhvgap + "    Δ",
-          twoWindings.data.coilDimensions.hvid + "    HV-ID",
-          "2x" + twoWindings.data.coilDimensions.hvradial,
-          twoWindings.data.coilDimensions.hvod + "    HV-OD",
-          twoWindings.data.coilDimensions.hvhvgap + "        δ 2",
+          designPrintDimensions(twoWindings.data).core + (isRectangular(twoWindings.data) ? "    Core Dim" : "    Ø Core"),
+          "2x" + designPrintDimensions(twoWindings.data).coreGap + "    δ 1",
+          designPrintDimensions(twoWindings.data).lvId + "    LV-ID",
+          "2x" + designPrintDimensions(twoWindings.data).lvRadial,
+          designPrintDimensions(twoWindings.data).lvOd + "    LV-OD",
+          "2x" + designPrintDimensions(twoWindings.data).lvHvGap + "    Δ",
+          designPrintDimensions(twoWindings.data).hvId + "    HV-ID",
+          "2x" + designPrintDimensions(twoWindings.data).hvRadial,
+          designPrintDimensions(twoWindings.data).hvOd + "    HV-OD",
+          designPrintDimensions(twoWindings.data).hvHvGap + "        δ 2",
           twoWindings.data.core.cenDist + "    Centre distance",
           // "Active Part Size:" + twoWindings.data.coilDimensions.activePartSize
         ]
@@ -1339,7 +1340,7 @@ const Files = () => {
           `Ls: ${twoWindings.data.commonFormulas.l.toFixed(1)}, ${twoWindings.data.commonFormulas.b.toFixed(1)}, ${twoWindings.data.commonFormulas.kR} → ${twoWindings.data.commonFormulas.ls}`,
           `Δ’: ${twoWindings.data.commonFormulas.delta.toFixed(2)} + ((${twoWindings.data.commonFormulas.h2.toFixed(2)} + ${twoWindings.data.commonFormulas.h1.toFixed(2)
           }) / 3) → ${twoWindings.data.commonFormulas.delta1.toFixed(2)}`,
-          `Ds: ${(twoWindings.data.lvFormulas.lvOd - twoWindings?.data?.innerWindings.condInsulation).toFixed(1)} + ${twoWindings.data.commonFormulas.delta.toFixed(2)} + (${twoWindings.data.commonFormulas.h2.toFixed(2)} - ${twoWindings.data.commonFormulas.h1.toFixed(2)
+          `Ds: ${designPrintDimensions(twoWindings.data).dsFirstTerm.toFixed(1)} + ${twoWindings.data.commonFormulas.delta.toFixed(2)} + (${twoWindings.data.commonFormulas.h2.toFixed(2)} - ${twoWindings.data.commonFormulas.h1.toFixed(2)
           }) / 3 → ${twoWindings.data.commonFormulas.ds.toFixed(2)}`,
           `  (H):${twoWindings.data.commonFormulas.ampereTurns}         V / T:${twoWindings.data.lvFormulas.revisedVoltsPerTurn}`,
           `ex = (1.24 * (H) * Δ’ * Ds * 10^-4) / (V / T * ls)`,
@@ -2223,7 +2224,7 @@ const Files = () => {
 
     const PDFData = {
       data1: buildCorePrintHeaderLine(twoWindings.data, isMultiWindingDesign),
-      data2: `CORE Size: ${twoWindings.data.core.coreDia
+      data2: `CORE Size: ${designPrintDimensions(twoWindings.data).core
         } / ${twoWindings.data.core.limbHt} / ${twoWindings.data.core.cenDist
         }, ${coreBladeType}`,
     };
@@ -2609,7 +2610,7 @@ const Files = () => {
 
     const PDFData = {
       data1: buildCorePrintHeaderLine(twoWindings.data, isMultiWindingDesign),
-      data2: `CORE Size: ${twoWindings.data.core.coreDia
+      data2: `CORE Size: ${designPrintDimensions(twoWindings.data).core
         } / ${twoWindings.data.core.limbHt
         } / ${twoWindings.data.core.cenDist}, ${coreBladeType}`,
     };

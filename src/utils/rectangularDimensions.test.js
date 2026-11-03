@@ -1,4 +1,4 @@
-import { applyCoreDimensionInputs, dimensionPair, retainCoreDimensionInputs } from "./rectangularDimensions";
+import { applyCoreDimensionInputs, dimensionPair, retainCoreDimensionInputs, designPrintDimensions } from "./rectangularDimensions";
 const response = { eTransBodyType: "RECTANGULAR", core: { coreWidth: 80, coreDepth: 160 } };
 test.each([[{}, null, null], [{ coreWidth: 90 }, 90, null], [{ coreDepth: 183 }, null, 183], [{ coreWidth: 90, coreDepth: 183 }, 90, 183]])("sends only explicit overrides %j", (overrides, width, depth) => {
   const result = applyCoreDimensionInputs({ ...response, coreDimensionOverrides: overrides });
@@ -16,3 +16,23 @@ test("circular payload and response remain unchanged", () => {
   expect(retainCoreDimensionInputs(circular, circular)).toBe(circular);
 });
 test("formats dimensions", () => expect(dimensionPair(90, 183)).toBe("90 X 183"));
+
+test("rectangular print uses physical dimensions and LV OD depth for Ds", () => {
+  const result = designPrintDimensions({ eTransBodyType: "RECTANGULAR", core: {},
+    rectCoilDimensions: { coreWidth: 90, coreDepth: 183, lvIdWidth: 100, lvIdDepth: 193,
+      lvOdWidth: 120, lvOdDepth: 213, hvIdWidth: 140, hvIdDepth: 233, hvOdWidth: 160, hvOdDepth: 253 },
+    innerWindings: { condInsulation: 0.4 }, lvFormulas: {} });
+  expect(result.core).toBe("90 X 183");
+  expect(result.lvId).toBe("100 X 193");
+  expect(result.lvOd).toBe("120 X 213");
+  expect(result.hvId).toBe("140 X 233");
+  expect(result.hvOd).toBe("160 X 253");
+  expect(result.dsFirstTerm).toBeCloseTo(212.6);
+});
+test("circular print keeps diameters and its Ds formula", () => {
+  const result = designPrintDimensions({ eTransBodyType: "CIRCULAR", core: { coreDia: 150 },
+    coilDimensions: { lvid: 170, lvod: 190 }, lvFormulas: { lvOd: 190 }, innerWindings: { condInsulation: 0.5 } });
+  expect(result.core).toBe(150);
+  expect(result.lvOd).toBe(190);
+  expect(result.dsFirstTerm).toBe(189.5);
+});

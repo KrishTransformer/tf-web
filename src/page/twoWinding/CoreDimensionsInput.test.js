@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import CoreDimensionsInput from "./CoreDimensionsInput";
 jest.mock("../../components", () => ({
+  FlexContainer: ({ children }) => <div>{children}</div>,
   CustomInput: ({ label, ...props }) => <label>{label}<input aria-label={label} {...props} /></label>,
   CustomModal: ({ open, children, onClose, onModalSubmit }) => open ? <div>{children}<button onClick={onClose}>Cancel</button><button onClick={onModalSubmit}>OK</button></div> : null,
 }));

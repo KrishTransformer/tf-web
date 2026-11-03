@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CustomInput, CustomModal } from "../../components";
+import { CustomInput, CustomModal, FlexContainer } from "../../components";
 import { dimensionPair } from "../../utils/rectangularDimensions";
 
 export default function CoreDimensionsInput({ formState, onSave }) {
@@ -37,19 +37,20 @@ export default function CoreDimensionsInput({ formState, onSave }) {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(); }
     }}>
       <CustomInput label="Core Dimensions" value={dimensionPair(current.coreWidth, current.coreDepth)}
-        readOnly onClick={show} style={{ cursor: "pointer" }} />
+        readOnly onClick={show} bgColor="var(--app-input-accent-bg, #D7F3FC)"
+        borderColor="var(--app-input-border, #00000033)" style={{ cursor: "pointer" }} />
     </div>
     <CustomModal open={open} title="Core Dimensions" onClose={() => setOpen(false)} onModalSubmit={save}>
-      {[ ["coreWidth", "Core Width (mm)"], ["coreDepth", "Core Depth (mm)"] ].map(([key, label]) =>
-        <label key={key} style={{ display: "block", marginBottom: 12 }}>{label}
-          <input aria-label={label} type="number" min="1" step="1" value={draft[key] ?? ""}
-            className="custominput-inputFeild box" style={{ display: "block", width: "100%", padding: 8,
-              color: "var(--tw-page-text)", background: "var(--app-input-bg)", border: "1px solid var(--app-input-border)", borderRadius: 4 }}
-            onChange={(e) => { setDraft({ ...draft, [key]: e.target.value }); setChanged({ ...changed, [key]: true }); }} />
-        </label>)}
+      <FlexContainer>
+        {[ ["coreWidth", "Core Width (mm)"], ["coreDepth", "Core Depth (mm)"] ].map(([key, label]) =>
+          <CustomInput key={key} label={label} value={draft[key] ?? ""}
+            bgColor="var(--app-input-accent-bg, #D7F3FC)"
+            borderColor="var(--app-input-border, #00000033)"
+            onChange={(e) => { setDraft({ ...draft, [key]: e.target.value }); setChanged({ ...changed, [key]: true }); }} />)}
+      </FlexContainer>
       <p>Leave a field blank to calculate it automatically. Width-only input calculates depth rounded up to 5 or 0.</p>
       {error && <p role="alert">{error}</p>}
-      <button type="button" onClick={() => {
+      <button type="button" className="custom-modal-btn custom-modal-btn-secondary" onClick={() => {
         setDraft({ coreWidth: "", coreDepth: "" });
         setChanged({ coreWidth: true, coreDepth: true });
         setError("");
