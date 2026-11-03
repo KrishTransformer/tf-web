@@ -1,4 +1,6 @@
 import React from "react";
+import CoreDimensionsInput from "./CoreDimensionsInput";
+import { isRectangular } from "../../utils/rectangularDimensions";
 import {
   CustomInput,
   Container,
@@ -316,6 +318,8 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             bgColor="var(--app-input-accent-bg)"
             borderColor="var(--app-input-border)"
           /> */}
+          {isRectangular(formState) ? <CoreDimensionsInput formState={formState}
+            onSave={(value) => handleInputChange("coreDimensionOverrides", value)} /> : (
           <CustomInput
             label="Core Diameter"
             //description={formState.lvFormulas?.possibleCoreDiaRange}
@@ -329,6 +333,7 @@ const Part1 = ({ formState, handleInputChange, handleToggleLock, lockedAttribute
             isLocked={lockedAttributes?.coreLock?.coreDia}
             readOnly={lockedAttributes?.coreLock?.coreDia}
           />
+          )}
           <CustomInput
             label="Limb Ht."
             //description={formState.lvFormulas?.possibleWindowHeightRange}
