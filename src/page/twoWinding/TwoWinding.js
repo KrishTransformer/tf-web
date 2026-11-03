@@ -8,6 +8,7 @@ import {
   Container,
 } from "../../components";
 import Part1 from "./Part1";
+import { applyCoreDimensionInputs, isRectangular } from "../../utils/rectangularDimensions";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
 import { useActions } from "../../app/use-Actions";
@@ -179,6 +180,14 @@ const TwoWinding = () => {
   //console.log("formState.innerWindings:", formState.innerWindings);
 
   const handleInputChange = (fieldPath, value) => {
+    if (fieldPath === "coreDimensionOverrides") {
+      setFormState((prev) => ({ ...prev, coreDimensionOverrides: value }));
+      return;
+    }
+    if (fieldPath === "eTransBodyType") {
+      setFormState((prev) => ({ ...prev, eTransBodyType: value, coreDimensionOverrides: {} }));
+      return;
+    }
     //console.log("fieldPath:", fieldPath, " value:", value);
 
     if (fieldPath === "dryType") {
@@ -789,7 +798,8 @@ const TwoWinding = () => {
 
     // Send the modified data to the API
     console.log("dataToSubmit.innerWindings:", dataToSubmit.lockedAttributes);
-    actions.addCalc(dataToSubmit, "2windings", "/circular", "", twoWindings?.metadata);
+    dataToSubmit = applyCoreDimensionInputs(dataToSubmit);
+    actions.addCalc(dataToSubmit, "2windings", isRectangular(dataToSubmit) ? "/rectangular" : "/circular", "", twoWindings?.metadata);
     console.log("dataToSubmit.innerWindings: after_call", dataToSubmit.lockedAttributes);
 
     window.scrollTo(0, 0);

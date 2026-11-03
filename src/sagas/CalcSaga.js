@@ -1,3 +1,4 @@
+import { retainCoreDimensionInputs } from "../utils/rectangularDimensions";
 import { call, put, takeEvery, takeLatest } from "redux-saga/effects";
 import {
   addCalcFullfiled,
@@ -47,7 +48,7 @@ export function* addCalcData({ jsonBody, calcName, bodyType, id, metadata }) {
         : yield call(postApi, `/calculate/` + calcName, jsonBody);
     if (response && response.data) {
       if (calcName.includes("2windings")) {
-        let twoWindingsDataPayload = response.data; 
+        let twoWindingsDataPayload = retainCoreDimensionInputs(response.data, jsonBody);
         const metadataDesignId = buildTwoWindingDesignId(response.data.kVA);
 
         let twoWindingsMetadataPayload = {}

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { dimensionPair, isRectangular } from "../../utils/rectangularDimensions";
 import {
   Container,
   CustomModal,
@@ -9,6 +10,13 @@ import {
 } from "../../components";
 
 const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
+  const rectangular = isRectangular(formState);
+  const rect = formState.rectCoilDimensions || {};
+  const dimensions = rectangular ? rect : (formState.coilDimensions || {});
+  const coreSize = rectangular ? dimensionPair(rect.coreWidth, rect.coreDepth) : dimensions.coreDia;
+  const windingSize = (prefix, edge) => rectangular
+    ? dimensionPair(rect[`${prefix}${edge}Width`], rect[`${prefix}${edge}Depth`])
+    : dimensions[`${prefix}${edge.toLowerCase()}`];
   const isDryType = formState.dryType === true || formState.dryType === "true";
   const [isRadiatorWidthModalOpen, setIsRadiatorWidthModalOpen] = useState(false);
   const [customRadiatorWidth, setCustomRadiatorWidth] = useState(
@@ -250,46 +258,46 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
           <FlexContainer margin="20px 0px 0px 0px">
             <table className="tableTabs">
               <tr>
-                <td>Core Dia:</td>
-                <td>{formState.coilDimensions?.coreDia}</td>
+                <td>{rectangular ? "Core Dim =" : "Core Dia:"}</td>
+                <td>{coreSize}</td>
               </tr>
               <tr>
                 <td>CoreGap x 2:</td>
-                <td>{formState.coilDimensions?.coreGap}</td>
+                <td>{dimensions.coreGap}</td>
               </tr>
               <tr>
                 <td>LV - ID:</td>
-                <td>{formState.coilDimensions?.lvid}</td>
+                <td>{windingSize("lv", "Id")}</td>
               </tr>
               <tr>
                 <td>LV- Radial x 2:</td>
-                <td>{formState.coilDimensions?.lvradial}</td>
+                <td>{dimensions.lvradial}</td>
               </tr>
               <tr>
                 <td>LV - OD:</td>
-                <td>{formState.coilDimensions?.lvod}</td>
+                <td>{windingSize("lv", "Od")}</td>
               </tr>
             </table>
             <table className="tableTabs">
               <tr>
                 <td>LV-HV Gap x 2:</td>
-                <td>{formState.coilDimensions?.lvhvgap}</td>
+                <td>{dimensions.lvhvgap}</td>
               </tr>
               <tr>
                 <td>HV -ID:</td>
-                <td>{formState.coilDimensions?.hvid}</td>
+                <td>{windingSize("hv", "Id")}</td>
               </tr>
               <tr>
                 <td>HV -Radial x 2:</td>
-                <td>{formState.coilDimensions?.hvradial}</td>
+                <td>{rectangular ? rect.hvRadial : dimensions.hvradial}</td>
               </tr>
               <tr>
                 <td>HV - OD:</td>
-                <td>{formState.coilDimensions?.hvod}</td>
+                <td>{windingSize("hv", "Od")}</td>
               </tr>
               <tr>
                 <td>HV - HV Gap:</td>
-                <td>{formState.coilDimensions?.hvhvgap}</td>
+                <td>{dimensions.hvhvgap}</td>
               </tr>
             </table>
           </FlexContainer>
@@ -297,7 +305,7 @@ const CoilDimensionsTabs = ({ formState, handleInputChange }) => {
             <table className="tableTabsGeneral">
               <tr>
                 <td>Active Part Size:</td>
-                <td>{formState.coilDimensions?.activePartSize}</td>
+                <td>{dimensions.activePartSize}</td>
               </tr>
             </table>
           </FlexContainer>
