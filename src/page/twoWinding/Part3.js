@@ -7,9 +7,12 @@ import {
   // TextTypo,
 } from "../../components";
 import CoilDimensionsTabs from "./CoilDimensionsTabs";
+import { coilDimensionsKey, editableCoilDimensions } from "../../utils/rectangularDimensions";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 
 const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) => {
+  const dimensionsKey = coilDimensionsKey(formState);
+  const dimensions = editableCoilDimensions(formState);
   const [isTabsVisible, setIsTabsVisible] = useState(false);
 
   const toggleTabsVisibility = () => {
@@ -33,8 +36,8 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
           <CustomInput
             label="Core-LV Clr"
             type="text"
-            value={formState.coilDimensions?.coreGap}
-            onChange={(e) => handleInputChange("coilDimensions.coreGap", e.target.value)}
+            value={dimensions.coreGap ?? ""}
+            onChange={(e) => handleInputChange(`${dimensionsKey}.coreGap`, e.target.value)}
              bgColor="var(--app-input-accent-bg)"
              onMouseEnter={() => handleHover("coreToLvClrComment")}
              onMouseLeave={() => handleMouseLeave()}
@@ -43,8 +46,8 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
           <CustomInput
             label="LV-HV Clr"
             type="text"
-            value={formState.coilDimensions?.lvhvgap}
-            onChange={(e) => handleInputChange("coilDimensions.lvhvgap", e.target.value)}
+            value={dimensions.lvhvgap ?? ""}
+            onChange={(e) => handleInputChange(`${dimensionsKey}.lvhvgap`, e.target.value)}
              bgColor="var(--app-input-accent-bg)"
              onMouseEnter={() => handleHover("lvToHvClrComment")}
              onMouseLeave={() => handleMouseLeave()}
@@ -53,8 +56,8 @@ const Part3 = ({ formState, handleInputChange, handleHover, handleMouseLeave }) 
           <CustomInput
             label="HV-HV Gap"
             type="text"
-            value={formState.coilDimensions?.hvhvgap}
-            onChange={(e) => handleInputChange("coilDimensions.hvhvgap", e.target.value)}
+            value={dimensions.hvhvgap ?? ""}
+            onChange={(e) => handleInputChange(`${dimensionsKey}.hvhvgap`, e.target.value)}
              bgColor="var(--app-input-accent-bg)"
              onMouseEnter={() => handleHover("hvToHvClrComment")}
              onMouseLeave={() => handleMouseLeave()}

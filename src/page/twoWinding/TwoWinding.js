@@ -9,7 +9,7 @@ import {
 } from "../../components";
 import Part1 from "./Part1";
 import { applyLvLayerInput } from "../../utils/twoWindingPayload";
-import { applyCoreDimensionInputs, isRectangular } from "../../utils/rectangularDimensions";
+import { applyCoreDimensionInputs, isRectangular, coilDimensionsKey, resetCoilDimensions } from "../../utils/rectangularDimensions";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
 import { useActions } from "../../app/use-Actions";
@@ -552,12 +552,7 @@ const TwoWinding = () => {
           };
 
           current.tankLoss = "";
-          current.coilDimensions = {
-            ...initialState.twoWindings.data.coilDimensions,
-            coreGap: prevState.coilDimensions.coreGap,
-            lvhvgap: prevState.coilDimensions.lvhvgap,
-            hvhvgap: prevState.coilDimensions.hvhvgap,
-          };
+          current[coilDimensionsKey(prevState)] = resetCoilDimensions(prevState, initialState.twoWindings.data);
 
           //console.log("newState:", newState, fieldPath);
           return newState;
@@ -573,7 +568,7 @@ const TwoWinding = () => {
           current.innerWindings = initialState.twoWindings.data.innerWindings;
           current.outerWindings = initialState.twoWindings.data.outerWindings;
           current.tankLoss = "";
-          current.coilDimensions = initialState.twoWindings.data.coilDimensions;
+          current[coilDimensionsKey(prevState)] = resetCoilDimensions(prevState, initialState.twoWindings.data, false);
           current.core = {
             ...initialState.twoWindings.data.core,
             coreMaterial: prevState.core.coreMaterial,
@@ -610,12 +605,7 @@ const TwoWinding = () => {
             coreMaterial: prevState.core.coreMaterial,
 
           };
-          current.coilDimensions = {
-            ...initialState.twoWindings.data.coilDimensions,
-            coreGap: prevState.coilDimensions.coreGap,
-            lvhvgap: prevState.coilDimensions.lvhvgap,
-            hvhvgap: prevState.coilDimensions.hvhvgap,
-          };
+          current[coilDimensionsKey(prevState)] = resetCoilDimensions(prevState, initialState.twoWindings.data);
           return newState;
         });
       } else if (
