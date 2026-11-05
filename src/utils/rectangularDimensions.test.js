@@ -59,3 +59,16 @@ test("reset clears derived rectangular geometry and preserves clearances when re
   expect(resetCoilDimensions(state, {})).toEqual({ coreGap: 4, lvhvgap: 12, hvhvgap: 20 });
   expect(resetCoilDimensions(state, {}, false)).toEqual({});
 });
+
+test("new rectangular payload never copies circular geometry into the rectangular request", () => {
+  const result = applyCoreDimensionInputs({ ...response,
+    coilDimensions: { coreDia: "", lvid: "", lvod: "", hvid: "", hvod: "", hvradial: "", coreGap: "", lvhvgap: "", hvhvgap: "" } });
+  expect(result.rectCoilDimensions).toEqual({ coreGap: null, lvhvgap: null, hvhvgap: null });
+});
+test("repairs previously saved rectangular payloads containing circular-only keys", () => {
+  const result = applyCoreDimensionInputs({ ...response, rectCoilDimensions: {
+    coreDia: "", lvid: "", lvod: "", hvid: "", hvod: "", hvradial: "", coreGap: null,
+    lvhvgap: null, hvhvgap: null, coreWidth: 80, coreDepth: 160, hvOdDepth: 260 } });
+  expect(result.rectCoilDimensions).toEqual({ coreGap: null, lvhvgap: null, hvhvgap: null,
+    coreWidth: 80, coreDepth: 160, hvOdDepth: 260 });
+});

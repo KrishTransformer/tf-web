@@ -7,7 +7,12 @@ export function editableCoilDimensions(data) {
   if (!isRectangular(data)) return data.coilDimensions || {};
   // Migrate older saved designs only when the rectangular object is absent.
   const source = data.rectCoilDimensions ?? data.coilDimensions ?? {};
-  const result = { ...source };
+  const fields = ["coreWidth", "coreDepth", "coreGap", "lvIdWidth", "lvIdDepth", "lvradial",
+    "lvOdWidth", "lvOdDepth", "lvhvgap", "hvIdWidth", "hvIdDepth", "hvRadial",
+    "hvOdWidth", "hvOdDepth", "hvhvgap", "centerDist", "activePartSize"];
+  const result = data.rectCoilDimensions
+    ? Object.fromEntries(Object.entries(source).filter(([key]) => fields.includes(key)))
+    : Object.prototype.hasOwnProperty.call(source, "coreGap") ? { coreGap: source.coreGap } : {};
   for (const [key, alias] of [["lvhvgap", "lVHVGap"], ["hvhvgap", "hVHVGap"]]) {
     result[key] = Object.prototype.hasOwnProperty.call(source, key) ? source[key] : source[alias];
     delete result[alias];
